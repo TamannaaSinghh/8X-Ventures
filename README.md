@@ -451,10 +451,10 @@ are interaction affordances the artboard does not specify:
 
 ## Scope and open items
 
-- **The homepage, `/about` and `/portfolio` are built.** `/team`, `/media`,
+- **The homepage, `/about`, `/portfolio` and `/team` are built.** `/media`,
   `/contact` and the legal routes render `PagePlaceholder` with the correct
-  headings and metadata, so no navigation link 404s. Designs for the remaining
-  pages exist in the source file (artboard pages 4–5) and can be built next.
+  headings and metadata, so no navigation link 404s. The design for `/media`
+  exists in the source file (artboard page 5) and can be built next.
 
   `/about` is traced from artboard page 2 (1920 × 4761) as five stages —
   hero 773, circuit 887, philosophy 729, journey 1006, closing 714 — with every
@@ -591,6 +591,46 @@ are interaction affordances the artboard does not specify:
   corridor in under the copy that the artboard keeps on the dark left wall, so a
   scrim holds the contrast there; at `lg` and up the composition does it unaided
   and the scrim is not drawn.
+
+  `/team` is traced from artboard page 4 (1920 × 5947) as five stages — hero
+  713, partners 1361, team 1679, mentors 1091, closing 528 — over the shared
+  footer (`globals.css`, `TEAM PAGE`). Same rules as the other inner pages: the
+  prototype's 0.9 type scale, its 6.25% margins, and its card grid of four
+  columns 392 wide with 37 between them. The built page is **5949px against the
+  artboard's 5947**, with every band landing on its own boundary (713 / 2074 /
+  3753 / 4844).
+
+  Two of the backgrounds needed measuring rather than eyeballing. The partners
+  and closing bands share one gradient plate, placed at two very different
+  crops — and on the partners band it is not used as-is: sampled against the
+  source file it is the plate multiplied by `#1C396D` with a small lift on top
+  (R +2.7, G +11.2, B +15.5), which three layers reproduce exactly. On the
+  closing band the same measurement comes back ×1.00 on every channel, so there
+  it is placed untouched. The mentors' line-art is screen-blended, which drops
+  its black ground out against the navy.
+
+  The **mentor list** is the artboard's device: five bands, one lit, a rule
+  beside it with a lit segment. Like `/about`'s philosophy list it steps as the
+  section crosses the viewport (`MentorRail`), all five stay rendered and
+  readable, and `prefers-reduced-motion` rests it on the artboard's third.
+
+  **The people are 8X's own**, from 8xventures.co/team — four partners and board
+  advisors, then five in the team, with their roles as the site states them. The
+  artboard fills its team grid with eight cards by repeating four placeholder
+  names ("Akash Patel", "Karan Wadhwani"); those are gone. The partners' colour
+  portraits are the artboard's own cut-outs; the team's come from the live site,
+  where they are published greyscale on white, so their backgrounds were keyed
+  out to sit on the cards. That is why the two rows differ in colour — colour
+  originals for those five would fix it.
+
+  Every card reveals the person's **bio and LinkedIn on hover and on keyboard
+  focus** — 8X's own words from their site, and their personal profile links.
+  The panel is kept in flow at zero opacity rather than mounted, so the link
+  inside stays tabbable and tabbing to it is what opens the panel, exactly as
+  the homepage team cards work.
+
+  The mentors eyebrow reads **"OUR JOURNEY"**, the prototype's wording, at 8X's
+  request; the PDF export says "MENTORS" there.
 
 - **Content to confirm with 8X:**
   - **Founder journey stage names.** The artboard renders only the active node

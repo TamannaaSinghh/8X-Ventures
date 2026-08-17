@@ -891,6 +891,315 @@
 }
 
 /* ==========================================================================
+   TEAM PAGE — traced from artboard page 4 (1920 x 5947) and the Figma
+   prototype of the same frame.
+
+   Bands, in page coordinates:
+     hero      0    – 713    white, the engine running past its foot
+     partners  714  – 2075   deep blue gradient
+     team      2076 – 3755   white
+     mentors   3756 – 4847   #023363 with the infinity line-art
+     cta       4848 – 5376   bright blue gradient
+     footer    5376 – 5947   the shared footer
+
+   As on `/about` and `/portfolio`, the type is the prototype's 0.9x scale and
+   the margins are its 6.25%; the card grid is four columns of 392 with 37
+   between them, which is what the prototype measures.
+   ========================================================================== */
+
+.tm-stage {
+  position: relative;
+  padding: 4rem var(--spacing-gutter);
+}
+
+/* --- portrait cards --- */
+.tm-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26px;
+  /* the artboard's card: brightest at the top right, deepest at the foot */
+  background: linear-gradient(212deg, #1c8fd6 0%, #0a6cb4 46%, #00457f 100%);
+  aspect-ratio: 392 / 544;
+  container-type: inline-size;
+}
+
+.tm-card-sm {
+  aspect-ratio: 392 / 523;
+  background: linear-gradient(212deg, #2196dc 0%, #0d78bd 48%, #004e8c 100%);
+}
+
+.tm-card-head {
+  position: relative;
+  z-index: 2;
+  padding: 5.2cqw 7cqw 0;
+}
+
+.tm-card-name {
+  font-size: 8.27cqw; /* 32.4px on a 392 card */
+  line-height: 1.2;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.tm-card-role {
+  margin-top: 0.35em;
+  font-size: 4.13cqw; /* 16.2px */
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.tm-card-sm .tm-card-name {
+  font-size: 6.89cqw; /* 27px */
+  font-weight: 400;
+}
+
+.tm-card-sm .tm-card-role {
+  font-size: 3.67cqw; /* 14.4px */
+}
+
+.tm-card-photo {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 82%;
+}
+
+/* The bio panel, on the same terms as the homepage team cards: revealed on
+   hover *and* on keyboard focus, and kept in flow at zero opacity rather than
+   `display:none`, so the LinkedIn link inside stays focusable — tabbing to it
+   fires `:focus-within`, which is what reveals the panel. */
+.tm-card-bio {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 3;
+  padding: 7cqw 7cqw 8cqw;
+  background: linear-gradient(to top, rgba(2, 26, 58, 0.97) 70%, rgba(2, 26, 58, 0));
+  opacity: 0;
+  translate: 0 16%;
+  transition:
+    opacity 0.45s var(--ease-out-soft),
+    translate 0.45s var(--ease-out-expo);
+}
+
+.tm-card-bio p {
+  font-size: clamp(0.8125rem, 4.3cqw, 1.125rem);
+  line-height: 1.42;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.tm-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 4cqw;
+  padding: 2cqw 4cqw;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 9999px;
+  font-size: clamp(0.75rem, 3.8cqw, 1rem);
+  font-weight: 600;
+  color: #ffffff;
+  transition: background-color 0.3s var(--ease-out-soft);
+}
+
+.tm-card-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.tm-card:hover .tm-card-bio,
+.tm-card:focus-within .tm-card-bio {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* --- the mentor list and its rule --- */
+.tm-rail-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 2.2%;
+}
+
+.tm-rail {
+  position: relative;
+  width: 5px;
+  border-radius: 3px;
+  background: #064477;
+}
+
+.tm-rail-thumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: calc(100% / var(--rail-count));
+  top: calc(100% * var(--rail-index) / var(--rail-count));
+  border-radius: 3px;
+  background: #ffffff;
+  transition: top 0.5s var(--ease-out-expo);
+}
+
+.tm-mentor {
+  font-size: clamp(1.5rem, 2.698vw, 3.238rem); /* 51.8px @1920 */
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.tm-mt-closing-text {
+  font-size: clamp(1.0625rem, 1.40625vw, 1.6875rem); /* 27px @1920 */
+  line-height: 1.25;
+}
+
+.tm-cta-title {
+  font-size: var(--ab-display);
+}
+
+/* Backgrounds placed as the artboard places them, rather than cover-cropped:
+   one gradient plate, used twice at two very different crops. The artboard
+   stretches it on the partners band (2590 x 1383 out of a 3:2 source), so the
+   image is sized rather than fitted. */
+.tm-partners-bg,
+.tm-cta-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+}
+
+/* The artboard does not use the plate as-is here — it darkens it hard.
+   Sampled against the source file, the band is the image multiplied by
+   #1C396D with a small lift on top (R +2.7, G +11.2, B +15.5), which is what
+   these three layers reproduce. On the closing band the same plate is used
+   untouched, which the same measurement confirms (x1.00 on every channel). */
+.tm-partners-bg {
+  background: #1c396d;
+  isolation: isolate;
+}
+
+.tm-partners-bg img {
+  position: absolute;
+  left: -2.88%;
+  top: -1.1%;
+  width: 134.9%;
+  height: 101.6%;
+  max-width: none;
+  object-fit: fill;
+  mix-blend-mode: multiply;
+}
+
+.tm-partners-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #030b10;
+  mix-blend-mode: plus-lighter;
+}
+
+.tm-cta-bg img {
+  position: absolute;
+  left: -56.73%;
+  top: -266.7%;
+  width: 176.09%;
+  height: 426.9%;
+  max-width: none;
+  object-fit: fill;
+}
+
+@media (width >= 64rem) {
+  .tm-stage {
+    padding: 0;
+  }
+  .tm-hero {
+    aspect-ratio: 1920 / 713;
+  }
+  .tm-partners {
+    aspect-ratio: 1920 / 1361;
+  }
+  .tm-group {
+    aspect-ratio: 1920 / 1679;
+  }
+  .tm-mentor-band {
+    aspect-ratio: 1920 / 1091;
+  }
+  .tm-cta {
+    aspect-ratio: 1920 / 528;
+  }
+
+  .tm-stage .tm-at {
+    position: absolute;
+    margin: 0;
+  }
+
+  /* --- hero --- */
+  .tm-hero-title  { left: 6.25%; top: 43.86%; }
+  .tm-hero-body   { left: 6.25%; top: 77.49%; width: 36%; }
+  .tm-hero-engine { left: 47.41%; top: -1.79%; width: 56.08%; }
+
+  /* --- partners --- */
+  .tm-pt-eyebrow { left: 0; right: 0; top: 13.90%; }
+  .tm-pt-title   { left: 0; right: 0; top: 16.97%; }
+  .tm-pt-body    { left: 24%; right: 24%; top: 27.17%; }
+  .tm-pt-grid    { left: 6.25%; right: 6.25%; top: 42.05%; }
+
+  /* --- the team --- */
+  .tm-gp-eyebrow { left: 0; right: 0; top: 9.34%; }
+  .tm-gp-title   { left: 0; right: 0; top: 11.83%; }
+  .tm-gp-body    { left: 0; right: 0; top: 20.10%; }
+  .tm-gp-grid    { left: 6.25%; right: 6.25%; top: 26.68%; }
+
+  /* --- mentors --- */
+  .tm-mt-eyebrow { left: 6.25%; top: 14.10%; }
+  .tm-mt-title   { left: 6.25%; top: 18.22%; }
+  .tm-mt-list    { left: 6.25%; top: 41.02%; width: 46%; }
+  .tm-mt-closing { left: 6.25%; top: 79.72%; }
+  /* screen-blended so the plate's black ground drops out against the band */
+  .tm-mentors-art {
+    position: absolute;
+    left: 47.09%;
+    top: 8.63%;
+    width: 50.94%;
+    z-index: -5;
+    mix-blend-mode: screen;
+  }
+
+  /* --- cta --- */
+  .tm-cta-title { left: 0; right: 0; top: 16.55%; }
+  .tm-cta-link  { left: 0; right: 0; top: 68.94%; }
+
+  /* the grids: four columns, 37 apart, as the prototype measures */
+  .tm-pt-grid,
+  .tm-gp-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3.18vw 1.927vw;
+  }
+  .tm-pt-grid .tm-card,
+  .tm-gp-grid .tm-card {
+    width: calc((100% - 3 * 1.927vw) / 4);
+  }
+}
+
+/* Below the traced layout the cards flow two-up, then one. */
+@media (width < 64rem) {
+  .tm-pt-grid,
+  .tm-gp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+  .tm-rail-wrap {
+    gap: 0 1rem;
+  }
+  .tm-mentors-art {
+    display: none;
+  }
+}
+
+/* ==========================================================================
    PORTFOLIO PAGE — traced from artboard page 3 (1920 x 5155) and the Figma
    prototype of the same frame.
 
