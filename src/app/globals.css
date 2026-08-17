@@ -1,0 +1,1303 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   8X VENTURES — DESIGN TOKENS
+   Derived from "8x Website v5.0" Figma/Illustrator source.
+
+   Brand blues are tuned down the same hue ramp as the source #009EFF so that
+   every colour that carries text or bounds an interactive control meets
+   WCAG 2.1 AA (1.4.3 Contrast Minimum / 1.4.11 Non-text Contrast).
+   Measured ratios are noted per token.
+   ========================================================================== */
+
+@theme {
+  /* --- Brand palette — the source artboard's colours, verbatim ----------
+     Sampled from "8x Website v5.0". These are the design's own values and
+     several of them do NOT meet WCAG 1.4.3; the measured ratios are recorded
+     here so the cost is visible, and README lists the compliant swaps.
+
+       --brand        #009EFF  2.86:1 on white   (needs 4.5, or 3.0 large)
+       --brand-sky    #3FA9F5  2.56:1 on white
+       --brand-cyan   #2DB5E5  2.37:1 on white
+       --brand-rule   #32B0FE  2.45:1 on white   (non-text, needs 3.0)
+     Named rather than numbered, because the design's accents do not form a
+     monotonic ramp — the "cyan" is lighter than the primary.               */
+  --color-brand: #009eff; /* eyebrows, accent headings, footer headings */
+  --color-brand-sky: #3fa9f5; /* hero line 2, "the Frontier", card fills, arrows */
+  --color-brand-cyan: #2db5e5; /* nav "Reach Out" */
+  --color-brand-rule: #32b0fe; /* underline rules beneath text links */
+  --color-brand-divider: #49adf5; /* footer divider */
+  --color-brand-track: #bae8ff; /* carousel track, inactive */
+  --color-brand-track-active: #5cc0fe; /* carousel track, active segment */
+  --color-brand-pale: #cfeafd; /* portfolio preview cards */
+  --color-brand-tint: #e9f6fd; /* LP Day promo band */
+
+  /* --- Navy surfaces --------------------------------------------------- */
+  --color-navy-700: #0f3b7a;
+  --color-navy-800: #16387e; /* team section field */
+  --color-navy-900: #062247;
+
+  /* --- Neutral ink — also straight from the artboard -------------------- */
+  --color-ink-950: #000000;
+  --color-ink-900: #0a0a0a;
+  --color-ink-800: #1a1a1a;
+  --color-ink-700: #333333; /* 12.63:1 */
+  --color-ink-600: #4d4d4d; /*  8.45:1 */
+  --color-ink-500: #666666; /*  5.74:1 */
+  --color-ink-400: #6e6e6e; /*  5.10:1 */
+  --color-ink-300: #808080; /*  3.95:1 — below AA, design value */
+
+  /* --- Fluid type scale ------------------------------------------------
+     Each mid-term keeps a rem component so text still responds to the
+     user's browser font-size preference (WCAG 1.4.4 Resize Text).
+     Max values reproduce the 1920px source artboard 1:1.              --- */
+  --text-display: clamp(2.25rem, 1.425rem + 3.5vw, 5.625rem); /* → 90px @1920 */
+  --text-display-sm: clamp(1.875rem, 1.13rem + 2.85vw, 4.55rem); /* → 72.8px */
+  --text-lead: clamp(1.25rem, 0.75rem + 1.8vw, 2.906rem); /* → 46.5px */
+  --text-body-lg: clamp(1.0625rem, 0.51rem + 1.4vw, 2.1875rem); /* → 35px */
+  --text-eyebrow: clamp(0.875rem, 0.5rem + 1.15vw, 1.875rem); /* → 30px */
+  --text-nav: clamp(0.9375rem, 0.51rem + 0.95vw, 1.65rem); /* → 26.4px */
+  --text-sm-fluid: clamp(0.9375rem, 0.48rem + 0.9vw, 1.5625rem); /* → 25px */
+  --text-stat: clamp(3.25rem, 2.28rem + 12vw, 16.68rem); /* → 266.9px */
+
+  /* The inner pages' scale — `/about` and `/portfolio`. The Figma prototype
+     sets these 0.9x the PDF export throughout: measured 82 against the
+     export's 90 on the About hero headline, the journey heading and the
+     portfolio section heading; 27 against 30 on the eyebrows; 32 against 35 on
+     the copy. The export and the prototype agree exactly on the journey's year
+     numeral (403px of ink either way), which pins the prototype at 1:1 and
+     makes the 0.9 a real edit rather than a scaled screenshot. */
+  --ab-eyebrow: clamp(0.8125rem, 1.40625vw, 1.6875rem); /* → 27px @1920 */
+  --ab-body: clamp(1rem, 0.466rem + 1.28vw, 2rem); /* → 32px */
+  --ab-display: clamp(2.05rem, 1.298rem + 3.189vw, 5.125rem); /* → 82px */
+
+  /* The fixed bar's height, which tracks the logo's own breakpoints. Anything
+     that has to start below the bar rather than behind it reads this. */
+  --header-h: 68px;
+
+  /* --- Layout ---------------------------------------------------------- */
+  --spacing-gutter: clamp(1.25rem, 5vw, 6.25rem);
+
+  /* --- Motion ---------------------------------------------------------- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-soft: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* keep anchored sections clear of the fixed header */
+    scroll-padding-top: 7rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: var(--color-ink-800);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  /* A single, always-visible focus treatment. Never remove without replacing
+     (WCAG 2.4.7 Focus Visible, 2.4.11 Focus Not Obscured). */
+  /* Two-tone focus ring: a white band immediately around the control, then a
+     near-black one outside it. Whatever the control sits on — white, navy, a
+     photograph, the bright cyan of the closing panel — at least one of the two
+     bands clears 3:1 against it, so the indicator never disappears
+     (WCAG 1.4.11 Non-text Contrast, 2.4.7 Focus Visible).
+     This is an interaction affordance, not part of the artboard's palette. */
+  :focus-visible {
+    outline: 3px solid #062247;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px #ffffff;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: #0077c2;
+    color: #ffffff;
+  }
+}
+
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+
+@utility container-8x {
+  width: 100%;
+  max-width: 1920px;
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* Visually hidden but available to assistive tech */
+@utility sr-only-8x {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ==========================================================================
+   HERO — the 8X mark and its sector hotspots
+
+   The overlay lives inside the floating element, so the hotspots ride the
+   float and stay on the ribbon; the float is paused while a popup is open so
+   the panel is a still thing to read. Coordinates come from `sectors` in
+   `content/home.ts` as `--spot-x` / `--spot-y`.
+
+   Geometry is plain CSS rather than arbitrary Tailwind values: these rules are
+   unlayered and so beat `@layer utilities` whatever the source order, which is
+   what keeps `translate` here from being overwritten by a utility.
+   ========================================================================== */
+
+.hero-mark {
+  position: relative;
+  /* so the panel can size itself against the mark rather than the viewport */
+  container-type: inline-size;
+  animation: float-slow 9s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-mark[data-paused="true"] {
+  animation-play-state: paused;
+}
+
+/* Zero-height: every child is absolutely positioned against `.hero-mark`. */
+.hero-spots,
+.hero-spots > li {
+  position: static;
+}
+
+.hero-spot {
+  position: absolute;
+  left: var(--spot-x);
+  top: var(--spot-y);
+  translate: -50% -50%;
+  z-index: 10;
+  /* 44px of target around a 14px dot (WCAG 2.5.8, and 2.5.5 while we are here) */
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+}
+
+/* Two-tone, on the same reasoning as the focus ring: the ribbon runs from
+   near-white speculars to deep navy, so a white core inside a #0077C2 ring
+   inside a white halo keeps at least one edge of the marker legible wherever
+   it lands. */
+.hero-spot::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 2.5px #0077c2,
+    0 0 0 4px rgba(255, 255, 255, 0.95),
+    0 3px 10px rgba(4, 26, 58, 0.35);
+  opacity: 0.85;
+  transition:
+    opacity 0.3s var(--ease-out-soft),
+    scale 0.3s var(--ease-out-expo);
+}
+
+.hero-spot:hover::before,
+.hero-spot:focus-visible::before,
+[data-open="true"] .hero-spot::before {
+  opacity: 1;
+  scale: 1.25;
+}
+
+.hero-pop {
+  --pop-w: min(17rem, 78cqw);
+  position: absolute;
+  left: clamp(calc(var(--pop-w) / 2), var(--spot-x), calc(100% - var(--pop-w) / 2));
+  z-index: 20;
+  width: var(--pop-w);
+  padding: 0.85rem 1rem 0.95rem;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 0 rgba(4, 26, 58, 0.08),
+    0 18px 40px -18px rgba(4, 26, 58, 0.45);
+  opacity: 0;
+  /* `visibility` keeps a closed panel out of the accessibility tree as well as
+     out of the pointer's way; it is transitioned discretely so the fade still
+     runs. The button's `aria-describedby` still reaches the text — a directly
+     referenced element is read even when hidden. */
+  visibility: hidden;
+  transition:
+    opacity 0.35s var(--ease-out-soft),
+    translate 0.35s var(--ease-out-expo),
+    visibility 0s linear 0.35s;
+}
+
+/* Placed outward from the ribbon, and offset by 1.6rem to clear the dot. */
+.hero-pop[data-place="top"] {
+  bottom: calc(100% - var(--spot-y) + 1.6rem);
+  translate: -50% 0.4rem;
+}
+
+.hero-pop[data-place="bottom"] {
+  top: calc(var(--spot-y) + 1.6rem);
+  translate: -50% -0.4rem;
+}
+
+/* Below 40rem the mark is barely 220px tall, so a panel placed above a
+   high hotspot would run out past the top of the mark and collide with the
+   header. Everything drops below its hotspot instead, where there is room
+   between the mark and the headline. */
+@media (width < 40rem) {
+  .hero-pop[data-place="top"] {
+    top: calc(var(--spot-y) + 1.6rem);
+    bottom: auto;
+    translate: -50% -0.4rem;
+  }
+}
+
+/* The bridge: an invisible extension across the gap between dot and panel, so
+   the pointer never crosses dead ground on its way in (1.4.13 Hoverable). */
+.hero-pop::before {
+  content: "";
+  position: absolute;
+  inset: -1.8rem -0.5rem;
+  border-radius: inherit;
+}
+
+[data-open="true"] .hero-pop {
+  opacity: 1;
+  visibility: visible;
+  translate: -50% 0;
+  transition-delay: 0s;
+}
+
+/* ==========================================================================
+   VISION SECTION — "By the Year 2047"
+
+   This composition is traced pixel-for-pixel from the source artboard, so the
+   numbers live here as plain CSS rather than as arbitrary Tailwind values
+   (which are easy to typo and are silently dropped when the scanner misses
+   them). Every value is the artboard measurement expressed as a percentage of
+   the stage, which is why the layout holds at any viewport width.
+
+     stage             artboard region 1920 x 860   (PDF y 2700 - 3560)
+     "By the Year"     x 115, ink top 196           78.6px bold, #3FA9F5
+     "2047"            ink x 114-1763, y 309-844    ink box 1649 x 535
+     product render    solid body x 980-1709, y 24-458
+
+   The element offsets sit slightly above/left of the ink measurements because
+   `line-height: 1` puts the ink top ~0.109em below the box top, and the "2"
+   carries a left side bearing of ~37px at this size.
+   ========================================================================== */
+
+/* Everything on the stage is positioned as a percentage of it, so the whole
+   composition scales proportionally and holds at every viewport width — the
+   same relationship the artboard has. */
+.vision-stage {
+  position: relative;
+  aspect-ratio: 1920 / 860;
+}
+
+.vision-heading {
+  position: absolute;
+  top: 21.158%;
+  left: 5.729%;
+  margin: 0;
+}
+
+.vision-numeral {
+  position: absolute;
+  top: 19.971%;
+  left: 4.638%;
+  margin: 0;
+}
+
+.vision-render {
+  position: absolute;
+  top: -26.337%;
+  left: 46.354%;
+  width: 46.474%;
+}
+
+/* ==========================================================================
+   STATS SECTION — "Early signals. Serious scale."
+
+   Traced from the artboard the same way as the vision section: the blue field
+   is 1920 x 1067 (PDF y 3922-4989) and every element is placed as a percentage
+   of it, so the composition holds at any width.
+
+     headline   ink x 407-1513, y 165-244   90px bold, centred
+     ghost 70+  ink x 700-1249, y 328-507   same size as the figure, faded
+     figure     ink x 374-1477, y 541-757   266.9px bold
+     label      ink x 615-1304, y 798-846   55.7px
+     hand       visible x 0-448, y 736-1023 (runs off the left edge)
+
+   The artboard shows this as a still composition — no controls, no rotation.
+   ========================================================================== */
+
+/* --- Small screens: ordinary centred flow -------------------------------
+   The traced composition below is sized for the 1920 artboard; scaled to a
+   phone its stage is only ~215px tall while the type has readable minimums,
+   so the elements would collide. Narrow viewports stack instead. */
+.stats-stage {
+  position: relative;
+  padding: 4.5rem var(--spacing-gutter) 8rem;
+  text-align: center;
+}
+
+.stats-headline,
+.stats-ghost,
+.stats-figure,
+.stats-label {
+  margin: 0;
+}
+
+.stats-ghost {
+  margin-top: 2rem;
+  font-size: clamp(2.5rem, 14vw, 9rem);
+  letter-spacing: 0.1156em;
+  white-space: nowrap;
+}
+
+.stats-figure {
+  margin-top: -0.22em;
+  white-space: nowrap;
+}
+
+.stats-label {
+  margin-top: 1.5rem;
+}
+
+.stats-hand {
+  position: absolute;
+  bottom: 0;
+  left: -8%;
+  width: 52%;
+}
+
+/* --- The artboard composition ------------------------------------------- */
+@media (width >= 64rem) {
+  .stats-stage {
+    aspect-ratio: 1920 / 1067;
+    padding: 0;
+  }
+
+  /* Centred with the standalone `translate` property, not `transform`: the
+     scroll-reveal resets `transform` to `none` when an element becomes
+     visible, which would otherwise wipe the centring. They compose. */
+  .stats-headline,
+  .stats-ghost,
+  .stats-figure,
+  .stats-label {
+    position: absolute;
+    white-space: nowrap;
+    translate: -50% 0;
+    margin: 0;
+  }
+
+  .stats-headline {
+    top: 14.21%;
+    left: 50%;
+  }
+
+  /* The ghost is not simply the figure faded: it is set smaller (157px cap
+     height against the figure's 182) and tracked much wider — measured by
+     high-pass filtering the artboard to lift it off the graded background. */
+  .stats-ghost {
+    top: 28.586%;
+    /* Nudged right of the ink centre because the trailing letter-space is
+       part of the layout box that `translate: -50%` centres. */
+    left: 51.302%;
+    font-size: clamp(2.75rem, 1.979rem + 10.2vw, 14.22rem);
+  }
+
+  .stats-figure {
+    top: 46.44%;
+    left: 50%;
+  }
+
+  .stats-label {
+    top: 74.05%;
+    left: 49.974%;
+  }
+
+  /* The artboard mirrors this render; the asset file has been flipped to
+     match, so its content now starts flush with the canvas's left edge. */
+  .stats-hand {
+    top: 64.984%;
+    bottom: auto;
+    left: 0;
+    width: 26.543%;
+  }
+}
+
+/* ==========================================================================
+   TEAM SECTION — "Operators. Investors."
+
+   Traced from the artboard: the navy field is 1920 x 1699 (PDF y 8140–9839).
+
+   The card text is the same size on every card — the featured card is larger,
+   not scaled up. Measuring the exported PDF suggested otherwise (it renders the
+   card component's type smaller than the prototype does), so these numbers come
+   from the prototype itself: name ~33px, role ~12px at 1920 on all five.
+
+     slot lefts   6.406 / 23.021 / 39.740 / 61.562 / 78.385 %
+     side card    15.13% x 24.01%, top 42.20%
+     featured     20.21% x 30.37%, top 38.20%
+   ========================================================================== */
+
+.team-stage {
+  position: relative;
+  padding: 3.5rem var(--spacing-gutter) 4rem;
+}
+
+.team-strip {
+  position: relative;
+  margin-top: 2.5rem;
+  display: flex;
+  justify-content: center;
+  min-height: 26rem;
+}
+
+/* Only the featured card is shown on narrow screens. This lives here rather
+   than as a `max-lg:hidden` utility because these rules are unlayered and so
+   win over Tailwind's `@layer utilities` regardless of source order. */
+@media (width < 64rem) {
+  .team-card:not([data-featured="true"]) {
+    display: none;
+  }
+}
+
+.team-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  /* Lets the bio scale with the card, so it stays readable on the small side
+     cards and grows on the featured one. */
+  container-type: inline-size;
+  /* Only the slot animates here. Size is deliberately NOT transitioned on a
+     card that is losing the featured position: while both cards were animating
+     symmetrically the outgoing one stayed taller than the incoming one for the
+     first half of the swap, and its lower edge showed beneath. Snapping the
+     outgoing card to the small size keeps the incoming card fully covering. */
+  transition: left 0.7s var(--ease-out-expo);
+}
+
+.team-card[data-featured="true"] {
+  transition:
+    left 0.7s var(--ease-out-expo),
+    top 0.7s var(--ease-out-expo),
+    width 0.7s var(--ease-out-expo),
+    height 0.7s var(--ease-out-expo);
+}
+
+/* The bio panel: revealed on hover and on keyboard focus. Kept in flow and
+   merely transparent rather than `display:none`, so the LinkedIn link inside
+   stays focusable — tabbing to it fires :focus-within, which reveals it. */
+.team-bio {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 6cqw 6cqw 7cqw;
+  background: linear-gradient(to top, rgba(4, 26, 58, 0.97) 66%, rgba(4, 26, 58, 0));
+  opacity: 0;
+  translate: 0 18%;
+  transition:
+    opacity 0.45s var(--ease-out-soft),
+    translate 0.45s var(--ease-out-expo);
+}
+
+/* Sized against the card, not the viewport: 4.6cqw is ~13px on a side card and
+   ~18px on the featured one, so it reads at both sizes. */
+.team-bio p {
+  font-size: clamp(0.8125rem, 4.6cqw, 1.15rem);
+  line-height: 1.42;
+}
+
+.team-bio a {
+  font-size: clamp(0.75rem, 4cqw, 1rem);
+}
+
+.team-card:hover .team-bio,
+.team-card:focus-within .team-bio {
+  opacity: 1;
+  translate: 0 0;
+}
+
+@media (width >= 64rem) {
+  .team-stage {
+    aspect-ratio: 1920 / 1699;
+    padding: 0;
+  }
+
+  .team-eyebrow {
+    position: absolute;
+    top: 11.183%;
+    left: 0;
+    right: 0;
+    margin: 0;
+  }
+  .team-heading {
+    position: absolute;
+    top: 15.715%;
+    left: 0;
+    right: 0;
+    margin: 0;
+  }
+  .team-body {
+    position: absolute;
+    top: 29.782%;
+    left: 0;
+    right: 0;
+    margin: 0;
+  }
+  .team-controls {
+    position: absolute;
+    top: 73.69%;
+    left: 0;
+    right: 0;
+  }
+  .team-cta {
+    position: absolute;
+    top: 84.285%;
+    left: 0;
+    right: 0;
+  }
+
+  .team-strip {
+    position: static;
+    margin: 0;
+    display: block;
+  }
+
+  .team-card {
+    position: absolute;
+    left: var(--slot-left);
+    top: 42.201%;
+    width: 15.13%;
+    height: 24.01%;
+  }
+
+  /* Height measured to the card's rounded bottom edge (section y 1192), not to
+     where its blue fill stops — the lower third of the card is covered by the
+     portrait, so a fill-colour measurement reads 28px short and leaves the
+     artboard's own card peeking out from the background plate underneath. */
+  .team-card[data-featured="true"] {
+    top: 38.140%;
+    width: 20.208%;
+    height: 32.019%;
+    z-index: 10;
+  }
+}
+
+/* ==========================================================================
+   CLOSING SECTION — "Building something the world is not ready for yet?"
+
+   Traced from the artboard: the coloured band is 1920 x 1062 (PDF y 11252–12314).
+
+   The oversized "Good." and the robot arm are part of the background plate
+   rather than separate layers — see `rebuildctabg` in the notes. Only the
+   headline is live text, positioned where the artboard puts it:
+
+     line 1   ink x 492–1427, top 92    (centred)
+     line 2   ink x 419–1497, top 206
+     type     93.8px at 1920 = 4.884vw, line-height 1.215
+   ========================================================================== */
+
+.cta-stage {
+  position: relative;
+  aspect-ratio: 3 / 4;
+}
+
+.cta-heading {
+  position: absolute;
+  top: 6%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding-inline: var(--spacing-gutter);
+}
+
+@media (width >= 64rem) {
+  .cta-stage {
+    aspect-ratio: 1920 / 1062;
+  }
+
+  .cta-heading {
+    top: 6.26%;
+    padding-inline: 0;
+  }
+}
+
+/* ==========================================================================
+   FOOTER
+
+   Traced from the artboard: 1920 x 577 (PDF y 12314–12891).
+
+     logo        element 301 x 151 at x 87, y 76   (visible 233 x 85 at 121/109)
+     blurb       ink x 124, first line top 222, line pitch 30
+     socials     three 53px circles at x 120 / 226 / 331, top 335
+     columns     x 691 / 1113 / 1542, heading ink top 111
+                 links start 171, row pitch 46
+     rule        x 120–1799, y 485, #A5D7FA
+     copyright   centred, ink top 527
+   ========================================================================== */
+
+.footer-stage {
+  position: relative;
+  padding: 4rem var(--spacing-gutter) 3rem;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-socials {
+  display: flex;
+  align-items: center;
+}
+
+@media (width >= 64rem) {
+  .footer-stage {
+    aspect-ratio: 1920 / 577;
+    padding: 0;
+  }
+
+  .footer-logo,
+  .footer-blurb,
+  .footer-socials,
+  .footer-col,
+  .footer-rule,
+  .footer-copy {
+    position: absolute;
+    margin: 0;
+  }
+
+  .footer-logo {
+    left: 4.512%;
+    top: 13.197%;
+    width: 15.699%;
+  }
+
+  /* Narrow enough to break on the artboard's three lines. The artboard sets
+     this in Proxima Nova Light; rendered in Regular the copy runs ~6% wider,
+     so a container matched to the artboard's 420px ink width would carry an
+     extra word up onto line two. */
+  .footer-blurb {
+    left: 6.458%;
+    top: 37.27%;
+    width: 22.7%;
+  }
+
+  .footer-socials {
+    left: 6.25%;
+    top: 57.91%;
+    gap: 2.76vw;
+  }
+
+  .footer-col {
+    top: 18.02%;
+  }
+  .footer-col-1 {
+    left: 35.99%;
+  }
+  .footer-col-2 {
+    left: 57.97%;
+  }
+  .footer-col-3 {
+    left: 80.31%;
+  }
+
+  /* heading ink 111 -> first link ink 171 is 60px; the heading's own line box
+     accounts for 30 of it */
+  .footer-links {
+    margin-top: 30px;
+    gap: 16px;
+  }
+
+  .footer-rule {
+    left: 6.25%;
+    top: 84.06%;
+    width: 87.45%;
+  }
+
+  .footer-copy {
+    left: 0;
+    right: 0;
+    top: 90.42%;
+  }
+}
+
+/* ==========================================================================
+   ABOUT PAGE — traced from artboard page 2 (1920 x 4761)
+
+   Section bands, in page coordinates:
+     hero        0    – 836    white
+     circuit     836  – 1723   photographic
+     philosophy  1723 – 2452   white
+     journey     2452 – 3458   dark navy
+     cta         3458 – 4172   bright blue
+
+   Each becomes a stage with that aspect ratio, and every element is placed as
+   a percentage of it. Below 1024px the stages unwind into ordinary flow.
+   ========================================================================== */
+
+.ab-stage {
+  position: relative;
+  padding: 4rem var(--spacing-gutter) 4rem;
+}
+
+@media (width >= 64rem) {
+  .ab-stage {
+    padding: 0;
+  }
+  /* 701, not the PDF export's 836. The export and the prototype disagree about
+     this frame, and the prototype is the reference: measured against it at 1:1
+     (its circuit band runs the full 1920, so the prototype is unscaled) the
+     hero's type is 0.91x the export's — 27 / 82 / 32 rather than 30 / 90 / 35 —
+     the head is larger and higher, and the two links sit further apart. Those
+     sizes are set below rather than with utilities so they stay together with
+     the geometry they were measured with. */
+  .ab-hero {
+    aspect-ratio: 1920 / 773;
+  }
+  .ab-circuit {
+    aspect-ratio: 1920 / 887;
+  }
+  .ab-philosophy {
+    aspect-ratio: 1920 / 729;
+  }
+  .ab-journey {
+    aspect-ratio: 1920 / 1006;
+  }
+  .ab-cta {
+    aspect-ratio: 1920 / 714;
+  }
+
+  /* Descendant, not child: the journey's three placed elements sit inside the
+     group that carries the timeline's role and key handling, and that group
+     covers the stage exactly, so their percentages still read off the stage. */
+  .ab-stage .ab-at {
+    position: absolute;
+    margin: 0;
+  }
+
+  /* --- hero (the prototype's 1920 x 701 block, opened up by 72px under the
+         header: the artboard clears its own navigation by 133px before the
+         eyebrow, and the block keeps that distance here) --- */
+  .ab-hero-eyebrow { left: 6.25%; top: 25.39%; }
+  .ab-hero-title   { left: 6.25%; top: 34.15%; }
+  /* 49.5% keeps the artboard's break — "…with the power" fits, "to" does not */
+  .ab-hero-body    { left: 6.25%; top: 66.86%; width: 49.5%; }
+  .ab-hero-links   { left: 6.41%; top: 85.54%; }
+  /* the crown lands level with the eyebrow; the jaw runs on into the band below */
+  .ab-hero-head    { left: 45.36%; top: 7.37%; width: 56.45%; }
+
+  /* the link's own size comes from the shared component, so it is the one
+     thing here that still needs overriding */
+  .ab-hero-links a   { font-size: var(--ab-body); }
+
+  /* --- circuit --- */
+  .ab-who-eyebrow { left: 7.81%; top: 32.9%; }
+  .ab-who-title   { left: 7.81%; top: 38.3%; }
+
+  /* --- philosophy --- */
+  .ab-phi-chip    { left: 1.81%; top: -3.15%; width: 40%; }
+  .ab-phi-eyebrow { left: 42.66%; top: 22.4%; }
+  .ab-phi-title   { left: 42.66%; top: 26.3%; }
+  .ab-phi-list    { left: 42.71%; top: 47.0%; width: 54%; }
+
+  /* --- journey (traced from the prototype: band 1920 x 1006) ---
+
+     The prototype and the export share this band's background and its year
+     numeral exactly, and differ everywhere else: the type is the page's 0.9
+     scale, the copy block sits ~48px lower and ~9px right, and the rail moved
+     right to x 870. Ink targets, band-relative:
+
+       eyebrow  top 166, centred            heading  top 230, centred
+       year     top 579, ink x 346          rail     x 870
+       kicker   top 520, ink x 925          subtitle top 561
+       body     top 643, ink x 932, pitch 41
+
+     Both heading lines are centred on the page (their ink centres land on
+     960), so they are placed with left/right rather than a measured left. */
+  .ab-jr-group   { inset: 0; }
+  .ab-jr-eyebrow { left: 0; right: 0; top: 15.34%; }
+  .ab-jr-title   { left: 0; right: 0; top: 20.78%; }
+  .ab-jr-year    { left: 17.72%; top: 54.64%; }
+  /* 31.8% is the measure that keeps the artboard's four lines: "…need
+     dedicated" fits on the first, "and" is pushed off the third. */
+  .ab-jr-copy    { left: 48.18%; top: 51.12%; width: 31.8%; }
+
+  /* The rail. 44px buttons around a 34 x 21 chevron, and an 11px gap either
+     side of the track, put the chevrons' ink on the prototype's 409–430 and
+     835–855 and the track on its 448–807. */
+  .ab-jr-rail { left: 44.17%; top: 39.51%; height: 46.62%; }
+
+  .ab-jr-track {
+    position: relative;
+    flex: 1;
+    width: 2px;
+    /* not centred between the chevrons — the artboard hangs the track 18px
+       under the top one and leaves 28px above the bottom one */
+    margin-block: 7px 15px;
+    background: var(--color-brand-sky);
+  }
+
+  /* The lit segment: one entry's worth of the track, moving as the timeline
+     steps. The artboard can only show a still frame — it parks the segment in
+     the middle of the rail — so it is drawn here as what it depicts, a
+     position indicator: 1/n tall, n being the number of years. */
+  .ab-jr-thumb {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: calc(100% / var(--jr-count));
+    top: calc(100% * var(--jr-index) / var(--jr-count));
+    background: #ffffff;
+    transition: top 0.55s var(--ease-out-expo);
+  }
+
+  /* --- cta --- */
+  .ab-cta-title { left: 7.71%; top: 20.8%; width: 48%; }
+  .ab-cta-links { left: 8.23%; top: 73.4%; }
+}
+
+/* The bar grows with the logo: h-9 / h-12 / h-14 / h-[70px] inside py-4 (py-5
+   from lg), so its height steps at the same breakpoints. */
+@media (width >= 40rem) {
+  :root { --header-h: 80px; }
+}
+@media (width >= 64rem) {
+  :root { --header-h: 96px; }
+}
+@media (width >= 80rem) {
+  :root { --header-h: 110px; }
+}
+
+/* ==========================================================================
+   PORTFOLIO PAGE — traced from artboard page 3 (1920 x 5155) and the Figma
+   prototype of the same frame.
+
+   Bands, in page coordinates:
+     hero    195  – 1450   photographic
+     list    1450 – 3694   white
+     cta     3694 – 4517   #023363 with the aurora photo
+     footer  4517 – 5155   the shared footer
+
+   Where the prototype and the export disagree, the prototype wins — as on
+   `/about`. It moves the hero copy and the card grid out to the 6.25% margin
+   the newer design uses, and sets the hero headline, the section heading and
+   the closing lines at 0.9x the export (140 -> 126, 90 -> 82, 67 -> 60). The
+   pills and the cards keep the export's geometry and type: measured against
+   the prototype, the pill row and the card names come back unchanged.
+   ========================================================================== */
+
+.pf-stage {
+  position: relative;
+  padding: 4rem var(--spacing-gutter);
+}
+
+/* The artboard opens the photograph *below* the navigation rather than behind
+   it — its header is a white band 195 tall. The bar here is fixed and
+   transparent until you scroll, so the hero is pushed down by its height and
+   the white page shows through above it, as in the design. */
+.pf-hero-section {
+  margin-top: var(--header-h);
+}
+
+.pf-hero-title {
+  font-size: clamp(2.75rem, 6.5625vw, 7.875rem); /* 126px @1920 */
+  line-height: 1.215;
+}
+
+.pf-cta-title {
+  font-size: clamp(1.75rem, 3.125vw, 3.75rem); /* 60px @1920 */
+  line-height: 1.25; /* the artboard's 84px pitch, scaled with the type */
+}
+
+/* Below the traced layout the hero photograph is cropped much narrower, which
+   brings its bright corridor in under the copy — the artboard keeps that copy
+   on the dark left wall. A scrim holds the contrast there; at lg and up the
+   composition does it on its own and the scrim is not drawn. */
+.pf-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  background: linear-gradient(
+    100deg,
+    rgba(6, 33, 67, 0.66) 0%,
+    rgba(6, 33, 67, 0.52) 55%,
+    rgba(6, 33, 67, 0.12) 92%,
+    rgba(6, 33, 67, 0) 100%
+  );
+}
+
+@media (width >= 64rem) {
+  .pf-hero-scrim {
+    display: none;
+  }
+}
+
+/* Isolated so the multiply resolves against this box's own colour and stops
+   there, rather than reaching the section behind it. */
+.pf-cta-photo {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  isolation: isolate;
+  background: #6d8aa3;
+}
+
+/* --- filter pills (the artboard's own: 57.8 tall, 46 apart, 25px labels) --- */
+.pf-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* the artboard's 46px between pills, held against the page not the row */
+  gap: 0.9rem 2.396vw;
+}
+
+.pf-pill {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  /* 57.8 tall in the artboard: 1.2 line plus 0.556em either side */
+  padding: 0.556em 1.72em;
+  border: 1.44px solid var(--color-brand-sky);
+  border-radius: 9999px;
+  font-size: clamp(0.9375rem, 1.302vw, 1.5625rem); /* 25px @1920 */
+  line-height: 1.2;
+  color: var(--color-brand-sky);
+  background: transparent;
+  transition:
+    background-color 0.35s var(--ease-out-soft),
+    color 0.35s var(--ease-out-soft);
+}
+
+.pf-pill:hover {
+  background: color-mix(in srgb, var(--color-brand-sky) 12%, transparent);
+}
+
+.pf-pill[data-active] {
+  background: var(--color-brand-sky);
+  color: #ffffff;
+}
+
+.pf-pill[data-coming] {
+  border-color: #999999;
+  color: #999999;
+  cursor: not-allowed;
+}
+
+.pf-pill[data-coming]:hover {
+  background: transparent;
+}
+
+/* --- the card grid --- */
+.pf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 2rem;
+}
+
+.pf-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--color-brand-sky);
+  /* so the card's own type can be set against its width rather than the
+     viewport, exactly as the team cards are */
+  container-type: inline-size;
+}
+
+.pf-card-photo {
+  position: relative;
+  /* 536.7 x 331 in the artboard */
+  aspect-ratio: 536 / 331;
+}
+
+.pf-card-body {
+  /* 38 of the artboard's 548-wide card */
+  padding: 6.85cqw 7.08cqw 9.3cqw;
+  color: #ffffff;
+}
+
+.pf-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3.1cqw;
+}
+
+.pf-card-tags span {
+  display: grid;
+  place-items: center;
+  min-width: 16.4cqw;
+  padding: 1.4cqw 2.4cqw;
+  border: 0.78px solid rgba(255, 255, 255, 0.9);
+  border-radius: 9999px;
+  font-size: clamp(0.75rem, 2.26cqw, 0.7575rem); /* 12.12px @1920 */
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.pf-card-name {
+  margin-top: 3.4cqw;
+  font-size: clamp(1.375rem, 8.4cqw, 2.8125rem); /* 45px @1920 */
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.pf-card-raised {
+  margin-top: 2.9cqw;
+  font-size: clamp(1.125rem, 6.68cqw, 2.2375rem); /* 35.8px @1920 */
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.pf-card-raised span {
+  font-size: 0.83em; /* 29.7 against 35.8 */
+}
+
+.pf-card-summary,
+.pf-card-stage {
+  font-size: clamp(0.875rem, 4.62cqw, 1.5469rem); /* 24.75px @1920 */
+  line-height: 1.2;
+  font-weight: 300;
+}
+
+.pf-card-summary {
+  margin-top: 2.4cqw;
+}
+
+.pf-card-stage {
+  margin-top: 5.6cqw;
+}
+
+.pf-card-stage strong {
+  font-weight: 700;
+}
+
+@media (width >= 64rem) {
+  .pf-stage {
+    padding: 0;
+  }
+  .pf-hero {
+    aspect-ratio: 1920 / 1255;
+  }
+  .pf-list {
+    aspect-ratio: 1920 / 2244;
+  }
+  .pf-cta {
+    aspect-ratio: 1920 / 823;
+  }
+
+  .pf-stage .pf-at {
+    position: absolute;
+    margin: 0;
+  }
+
+  /* --- hero (band-relative ink: title 265, body 808) --- */
+  .pf-hero-title { left: 6.25%; top: 19.36%; }
+    /* 29.2% keeps the artboard's break: "…creating new" then "capabilities…" */
+  .pf-hero-body  { left: 6.25%; top: 64.47%; width: 29.2%; }
+
+  /* --- list (no eyebrow: the export sets one, the prototype does not) --- */
+  /* left, not centred: the prototype's heading holds the export's left edge
+     after the type was reduced, so it sits left of the page's middle */
+  .pf-list-title   { left: 9.22%; top: 8.69%; }
+  .pf-filters      { left: 0; right: 0; top: 16.61%; }
+  /* three columns, 35 apart across the row and 55.7 between rows */
+  .pf-grid {
+    left: 6.25%;
+    right: 6.25%;
+    top: 23.85%;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.901vw 1.823vw;
+  }
+
+  /* --- cta (band-relative ink: lines 202, link 547) --- */
+  .pf-cta-title { left: 0; right: 0; top: 22.6%; }
+  .pf-cta-link  { left: 0; right: 0; top: 64.8%; }
+}
+
+/* The year numeral's fill, sampled down the artboard's own glyphs rather than
+   guessed: it does not fade evenly, it holds a mid blue for the top half and
+   then drops away into the background, so the stops steepen. They are given as
+   fractions of the text box; the ink itself occupies 18%–88% of it, which is
+   where the sampled colours land. Outside the traced layout it is the same
+   fill, just over a shorter box. */
+.ab-jr-year p {
+  background-image: linear-gradient(
+    to bottom,
+    #2faaf8 0%,
+    #248fd8 18%,
+    #0572b7 45%,
+    #015389 59%,
+    #012c4f 73%,
+    #021e45 88%
+  );
+}
+
+/* ==========================================================================
+   SCROLL REVEAL
+   Elements start hidden only once JS has confirmed it can animate them,
+   so the page is fully readable with JS disabled or when motion is reduced.
+   ========================================================================== */
+
+[data-reveal] {
+  opacity: 1;
+}
+
+html.js-reveal [data-reveal] {
+  opacity: 0;
+  transform: translateY(2rem);
+  transition:
+    opacity 0.75s var(--ease-out-soft),
+    transform 0.75s var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+html.js-reveal [data-reveal="scale"] {
+  transform: translateY(1.5rem) scale(0.97);
+}
+
+html.js-reveal [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ==========================================================================
+   KEYFRAMES
+   ========================================================================== */
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -1.75rem, 0) rotate(-1.2deg);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -1rem, 0) scale(1.03);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-45%);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(45%);
+    opacity: 0;
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 9s ease-in-out infinite;
+}
+.animate-drift {
+  animation: drift 12s ease-in-out infinite;
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2.6s var(--ease-out-soft) infinite;
+}
+.animate-scroll-cue {
+  animation: scroll-cue 2s var(--ease-out-soft) infinite;
+}
+.animate-word-in {
+  animation: word-in 0.45s var(--ease-out-expo) both;
+}
+
+/* ==========================================================================
+   REDUCED MOTION — WCAG 2.3.3 Animation from Interactions
+   Everything decorative stops; nothing that conveys meaning is removed.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html.js-reveal [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   FORCED COLORS / HIGH CONTRAST
+   ========================================================================== */
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight;
+  }
+
+  .fc-border {
+    border: 1px solid CanvasText;
+  }
+}
