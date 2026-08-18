@@ -1,7 +1,8 @@
 # 8X Ventures — Website
 
-Next.js rebuild of the **8x Website v5.0** design. The homepage is complete;
-the remaining routes exist as placeholders so navigation resolves.
+Next.js rebuild of the **8x Website v5.0** design. The homepage, `/about`,
+`/portfolio`, `/team` and `/media` are built; the remaining routes exist as
+placeholders so navigation resolves.
 
 ```bash
 npm install
@@ -25,10 +26,11 @@ src/
 │   ├── globals.css             design tokens, base styles, motion, reduced-motion
 │   ├── not-found.tsx
 │   └── about|team|portfolio|media|contact|disclosures|privacy|terms/
-│                               placeholder routes (see "Scope")
+│                               inner pages + placeholder routes (see "Scope")
 ├── components/
 │   ├── layout/                 SiteHeader, SiteFooter, PagePlaceholder
 │   ├── home/                   one component per homepage section
+│   ├── media/                  MediaPage — the whole /media frame
 │   └── ui/                     Reveal, UnderlineLink, Eyebrow, CountUp,
 │                               CarouselControls, RotatingWord
 ├── content/
@@ -410,6 +412,12 @@ below 3:1 on white, so **no** use of them as text passes AA at any size.
 | white | `#3FA9F5` | 2.55:1 | 3:1 | 3 | portfolio card name, "Raised" |
 | `#2DB5E5` | white | 2.37:1 | 3:1 | 3 | nav "Reach Out" |
 | `#009EFF` | `#E9F6FD` | 2.47:1 | 3:1 | 1 | LP Day promo eyebrow |
+| `#009EFF` | `#F0F7FF` | 2.60:1 | 3:1 | 1 | `/media` LP Day eyebrow |
+
+`/media` adds one case the table above does not cover: the insight cards'
+kickers are `#009EFF` at **18px bold**, which is 0.66px short of the 18.66px
+that would make them "large text", so they need 4.5:1 rather than 3:1 and reach
+2.86:1. Same swap as the rest — `#0077C2`.
 
 **Over photography and gradients** — axe reports these as *incomplete* rather
 than failing, because it cannot sample an image. Measured directly by hiding
@@ -451,10 +459,53 @@ are interaction affordances the artboard does not specify:
 
 ## Scope and open items
 
-- **The homepage, `/about`, `/portfolio` and `/team` are built.** `/media`,
+- **The homepage, `/about`, `/portfolio`, `/team` and `/media` are built.**
   `/contact` and the legal routes render `PagePlaceholder` with the correct
-  headings and metadata, so no navigation link 404s. The design for `/media`
-  exists in the source file (artboard page 5) and can be built next.
+  headings and metadata, so no navigation link 404s.
+
+  `/media` has no artboard page — it exists only in the Figma prototype, as the
+  frame `media` (1920 × 5037), and is traced from it. Unlike `/about` and
+  `/portfolio` it is built as a **vertical flow** rather than an absolutely
+  positioned stage: the frame stacks, so `clamp()` spacing with a pure-vw middle
+  term (artboard px ÷ 19.2) lands every band on the artboard at 1920 and lets a
+  block grow taller on a narrow viewport without colliding with anything.
+  Measured against a 1920 render, the six band boundaries come back at 0 / 811 /
+  1739 / 2904 / 3994 / 4485 against the frame's 0 / 811 / 1739 / 2904 / 3995 /
+  4483 — within 2px throughout.
+
+  Its type is the inner pages' scale: **82** display and **32** copy, solved
+  from ink widths against the two Proxima faces (79–81 and 30–31 measured, both
+  short of the advance by the side bearings). `--md-eyebrow` 24, the insight
+  card names 24 and their kickers 18 are new.
+
+  They are `--md-*` rather than `--ab-*` for one reason: the `--ab-*` mid-terms
+  carry a rem component, which holds the type **above** the artboard's
+  proportion as the viewport narrows — at 1366 an `--ab-display` headline is
+  64px where the frame's is 58. `/about` and `/portfolio` absorb that; this
+  frame cannot, because the hero headline and the mark share a line, and at
+  1366 and below the headline ran into it. The `--md-*` mid-terms are pure vw,
+  so the type tracks the layout exactly at every width, and `.md-hero-copy` caps
+  the column at 785 of the shell's 1680 — the mark's own left edge — so the
+  headline wraps rather than collides even if the type is scaled up. Measured
+  at 1920 / 1440 / 1280 / 1024, the band boundaries land within 2 / 2 / 8 / 21px
+  of the frame scaled to that width. The LP Day band is the homepage's
+  band verbatim, so its copy is read from `content/home.ts`; only the promo
+  strip below it is absent from this frame.
+
+  Three assets came out of the prototype rather than the source file, captured
+  at 100% zoom with Figma's own chrome hidden: `media-hero-infinity.png`
+  (970 × 532 at x905, y268), `media-book.png` (495 × 780 at x205, y872), and
+  `media-cta-bg.jpg`. The last is not a screenshot — the frame's closing band
+  carries live text over the gradient, so the text was masked out and a degree-5
+  polynomial fitted per channel to the remaining field, then re-grained at the
+  original's residual sigma (8.0). The insight cards' plates are the frame's
+  own: flat fills, not stills, so they are a CSS gradient sampled off its
+  corners (`#175884` → `#2C88BC`) with a play button over them. Add `image` to a
+  row in `content/media.ts` when a real still exists.
+
+  The closing band is **not** the homepage's: 1920 × 488 rather than 1920 ×
+  1062, no robot arm, and "Good." is live bold text on the second line instead
+  of art baked into the plate.
 
   `/about` is traced from artboard page 2 (1920 × 4761) as five stages —
   hero 773, circuit 887, philosophy 729, journey 1006, closing 714 — with every

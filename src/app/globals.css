@@ -71,6 +71,24 @@
   --ab-body: clamp(1rem, 0.466rem + 1.28vw, 2rem); /* → 32px */
   --ab-display: clamp(2.05rem, 1.298rem + 3.189vw, 5.125rem); /* → 82px */
 
+  /* `/media` is on that same scale — the frame's display measures 82 and its
+     copy 32, solved from ink widths against the two Proxima faces — and adds
+     three sizes of its own: the section eyebrow, the insight card names and
+     their kickers. Solved the same way: "INSIGHTS" 113px of ink at 0.06em
+     tracking, "8X Ventures - Taking a Giant Leap" 366, "MEDIA FEATURE" 143.
+     These match `--ab-display` / `--ab-body` at 1920 but not below it: the
+     `--ab-*` mid-terms carry a rem component, which holds the type *above* the
+     artboard's proportion as the viewport narrows. `/about` and `/portfolio`
+     can absorb that; this frame cannot, because its hero headline and its
+     artwork share a line — at 1366 the `--ab-display` headline is 64px where
+     the frame's is 58, and it runs into the mark. So the mid-terms here are
+     pure vw (artboard px / 19.2) and the type tracks the layout exactly. */
+  --md-display: clamp(2.05rem, 4.2708vw, 5.125rem); /* → 82px @1920 */
+  --md-body: clamp(1rem, 1.6667vw, 2rem); /* → 32px */
+  --md-eyebrow: clamp(0.75rem, 1.25vw, 1.5rem); /* → 24px */
+  --md-card-title: clamp(0.9375rem, 1.25vw, 1.5rem); /* → 24px */
+  --md-card-kicker: clamp(0.625rem, 0.9375vw, 1.125rem); /* → 18px */
+
   /* The fixed bar's height, which tracks the logo's own breakpoints. Anything
      that has to start below the bar rather than behind it reads this. */
   --header-h: 68px;
@@ -1462,6 +1480,381 @@
     #012c4f 73%,
     #021e45 88%
   );
+}
+
+/* ==========================================================================
+   MEDIA PAGE — traced from the Figma prototype frame `media` (1920 x 5037).
+
+   Bands, in frame coordinates:
+     hero      0    –  811   white
+     book      811  – 1739   #F6F7F9
+     lp day   1739  – 2904   #F0F7FF
+     insights 2904  – 3995   white
+     closing  3995  – 4483   the gradient plate
+     footer   4483  – 5037   the shared footer
+
+   The frame keeps the inner pages' type scale, so `--ab-display` (82) and
+   `--ab-body` (32) carry the display and the copy here as they do on
+   `/about` and `/portfolio`; `--md-*` covers the three sizes this frame
+   adds. Every measurement below is the frame's own, given as `clamp()` with
+   a pure-vw middle term (artboard px / 19.2) so the bands land on the
+   artboard at 1920 and compress from there. Unlike `/portfolio` the layout
+   is a plain vertical flow rather than an absolutely positioned trace: the
+   frame stacks, and flow means the type's own `clamp()` floors can push a
+   block taller on a narrow viewport without anything colliding.
+   ========================================================================== */
+
+/* The frame's gutter is 120 at 1920, where `container-8x` sets 100. */
+.md-shell {
+  width: 100%;
+  max-width: 1920px;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 6.25vw, 7.5rem);
+}
+
+/* --- shared type ------------------------------------------------------- */
+
+/* 97px of pitch on 82px type, measured cap-top to cap-top on every pair of
+   display lines in the frame — hero, book, LP Day, insights and closing. */
+.md-display {
+  font-size: var(--md-display);
+  line-height: 1.183;
+  font-weight: 700;
+  letter-spacing: normal;
+}
+
+/* 38 on 32, measured on the hero's and LP Day's two-line paragraphs. */
+.md-copy {
+  font-size: var(--md-body);
+  line-height: 1.1875;
+  font-weight: 400;
+}
+
+.md-eyebrow {
+  font-size: var(--md-eyebrow);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-brand);
+}
+
+/* --- hero (band 811; copy top 368, foot 117) ---------------------------- */
+
+.md-hero {
+  position: relative;
+  background: #ffffff;
+  padding-block: clamp(7rem, 19.167vw, 23rem) clamp(2.5rem, 6.094vw, 7.32rem);
+}
+
+.md-hero-body {
+  margin-top: clamp(1.25rem, 2.917vw, 3.5rem);
+  max-width: 40ch;
+}
+
+.md-hero-art {
+  margin-top: clamp(2rem, 5vw, 4rem);
+  width: 100%;
+}
+
+@media (width >= 64rem) {
+  /* The mark starts at x905, so the copy column stops at 785 of the shell's
+     1680 — a hard stop rather than a hope. It is also the paragraph's measure:
+     the frame's first line is 708 of ink and its second 713, but the two
+     together are 823, so the break falls after "and" exactly as the frame
+     sets it. The longest headline line, "Deep-Tech Frontier", is 688. */
+  .md-hero-copy {
+    max-width: 46.726%;
+  }
+
+  .md-hero-body {
+    max-width: 100%;
+  }
+
+  /* x 905-1875, y 268-800 — it runs 75 past the right gutter, so it is
+     placed against the band rather than the shell. */
+  .md-hero-art {
+    position: absolute;
+    margin: 0;
+    top: clamp(0px, 13.958vw, 268px);
+    left: 47.135%;
+    width: 50.521%;
+  }
+}
+
+/* --- book (band 928; art top 61, copy top 131, foot 156) ---------------- */
+
+/* The cover is the taller of the two columns — 780 against the copy's 650 —
+   so the band's foot is measured from it: art 61..841 in a band of 928. */
+.md-book {
+  background: #f6f7f9;
+  padding-block: clamp(3rem, 3.177vw, 3.82rem) clamp(3rem, 4.531vw, 5.44rem);
+}
+
+.md-book-grid {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4rem);
+}
+
+/* Stacked, the cover would otherwise run the full column width. */
+.md-book-art {
+  max-width: 26rem;
+  margin-inline: auto;
+}
+
+/* The cover sits at x 205-700 and the copy column at 900-1800. */
+@media (width >= 64rem) {
+  .md-book-grid {
+    grid-template-columns: 780fr 900fr;
+    gap: 0;
+    align-items: start;
+  }
+
+  .md-book-art {
+    max-width: none;
+    margin-inline: 10.897% 0;
+    width: 63.462%;
+  }
+
+  .md-book-copy {
+    padding-top: 3.63vw;
+  }
+
+  /* 797 of ink on the widest line of the first paragraph, which wants 823 of
+     the copy column's 900; 846 leaves headroom and still pushes "audacious"
+     onto the second line as the frame does. */
+  .md-book-copy p {
+    max-width: 94%;
+  }
+}
+
+.md-book-copy > * + * {
+  margin-top: clamp(1.5rem, 3.75vw, 4.5rem);
+}
+
+.md-book-copy > p + p {
+  margin-top: clamp(1.25rem, 3.49vw, 4.19rem);
+}
+
+.md-book-copy > .md-book-cta {
+  margin-top: clamp(1.75rem, 3.281vw, 3.94rem);
+}
+
+/* --- LP Day (band 1165; head top 174, foot 154) ------------------------- */
+
+.md-lpday {
+  background: #f0f7ff;
+  padding-block: clamp(4rem, 9.063vw, 10.88rem) clamp(4rem, 8.021vw, 9.63rem);
+}
+
+.md-lpday-title {
+  margin-top: clamp(0.5rem, 0.938vw, 1.13rem);
+}
+
+.md-lpday-body {
+  margin-top: clamp(1rem, 1.771vw, 2.13rem);
+  margin-inline: auto;
+  max-width: 46ch;
+}
+
+.md-lp-cards {
+  margin-top: clamp(2.5rem, 4.688vw, 5.63rem);
+  display: grid;
+  gap: clamp(1.75rem, 5.417vw, 6.5rem);
+}
+
+@media (width >= 64rem) {
+  /* 974 of the shell's 1680 — the frame breaks the line after "ecosystem". */
+  .md-lpday-body {
+    max-width: 58%;
+  }
+
+  .md-lp-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* 788 x 493 — a 788 x 353 still over a 140 bar. */
+.md-lp-card {
+  display: block;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px -24px rgba(0, 40, 90, 0.35);
+  transition:
+    transform 0.5s var(--ease-out-expo),
+    box-shadow 0.5s var(--ease-out-expo);
+}
+
+.md-lp-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 60px -26px rgba(0, 40, 90, 0.45);
+}
+
+.md-lp-still {
+  position: relative;
+  aspect-ratio: 788 / 353;
+  overflow: hidden;
+}
+
+.md-lp-year {
+  position: absolute;
+  left: 8.12%;
+  bottom: 15%;
+  font-size: clamp(1.25rem, 1.875vw, 2.25rem); /* → 36px @1920 */
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.md-lp-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: clamp(4.5rem, 7.292vw, 8.75rem);
+  padding-inline: 9.14% 5.71%;
+}
+
+/* --- insights (band 1091; head top 111, foot 109) ----------------------- */
+
+.md-insights {
+  background: #ffffff;
+  padding-block: clamp(3.5rem, 5.781vw, 6.94rem) clamp(3.5rem, 5.677vw, 6.81rem);
+}
+
+.md-ins-title {
+  margin-top: clamp(0.5rem, 1.094vw, 1.31rem);
+}
+
+.md-ins-body {
+  margin-top: clamp(1rem, 2.656vw, 3.19rem);
+}
+
+.md-ins-cards {
+  margin-top: clamp(2.5rem, 5.573vw, 6.69rem);
+  display: grid;
+  gap: clamp(1.5rem, 2.24vw, 2.69rem);
+}
+
+@media (width >= 48rem) {
+  .md-ins-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 532 x 431 — a 532 x 267 plate over a body padded 20 / 36 / 38. */
+.md-ins-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px -24px rgba(0, 40, 90, 0.35);
+  transition:
+    transform 0.5s var(--ease-out-expo),
+    box-shadow 0.5s var(--ease-out-expo);
+}
+
+.md-ins-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 60px -26px rgba(0, 40, 90, 0.45);
+}
+
+/* The frame fills these with a flat plate rather than a still. Sampled off
+   its own corners: #175884 at the top left through #2C88BC at the foot. */
+.md-ins-plate {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 532 / 267;
+  background-image: linear-gradient(135deg, #175884 0%, #1f6a97 46%, #2c88bc 100%);
+}
+
+.md-ins-play {
+  display: grid;
+  place-items: center;
+  width: 16.54%; /* 88 of 532 */
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: #ffffff;
+  transition: transform 0.5s var(--ease-out-expo);
+}
+
+.md-ins-card:hover .md-ins-play {
+  transform: scale(1.08);
+}
+
+.md-ins-play svg {
+  width: 30%;
+  height: auto;
+  color: var(--color-brand-sky);
+}
+
+.md-ins-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 3.76% 6.77% 7.14%;
+}
+
+/* The frame's own text box is narrower than the card's padding box — 430 of
+   the card's 532 — which is what puts "like in India?" on the second line. */
+.md-ins-name {
+  max-width: 92%;
+  font-size: var(--md-card-title);
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--color-ink-900);
+}
+
+/* The frame holds every card to 431 and hangs the kicker off the foot, so it
+   is pushed down rather than spaced down: 24 clear of a two-line name, and
+   whatever a one-line name leaves over. */
+.md-ins-kicker {
+  margin-top: auto;
+  padding-top: clamp(0.75rem, 1.25vw, 1.5rem);
+  font-size: var(--md-card-kicker);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-brand);
+}
+
+/* --- closing (band 488; heading top 97, foot 83) ------------------------ */
+
+.md-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-block: clamp(3.5rem, 5.036vw, 6.04rem) clamp(3rem, 3.438vw, 4.13rem);
+}
+
+/* 98 of pitch on 82px type, set in the regular face with "Good." bold. */
+.md-cta-title {
+  font-size: var(--md-display);
+  line-height: 1.195;
+  font-weight: 400;
+  color: #ffffff;
+}
+
+.md-cta-link {
+  margin-top: clamp(1.5rem, 3.385vw, 4.06rem);
+}
+
+/* `UnderlineLink` sets its label at `--text-body-lg` (35) and its rule to the
+   label's own width. This frame sets both links at the copy size and runs the
+   rule 38 wider at either end — measured 255 of rule under 184 of ink on
+   "Get the Book". Scoped here so the component is untouched elsewhere. */
+.md-book-cta a,
+.md-cta-link a {
+  font-size: var(--md-body);
+}
+
+.md-book-cta a > span > span:first-child,
+.md-cta-link a > span > span:first-child {
+  margin-inline: 1.19em;
 }
 
 /* ==========================================================================
