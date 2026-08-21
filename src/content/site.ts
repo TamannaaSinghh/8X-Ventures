@@ -19,6 +19,10 @@ export const siteConfig = {
     "8X Ventures backs deep-tech founders building the technological foundations of the next economy — semiconductors, robotics, powertrains, manufacturing, sensors and industrial systems.",
   url: "https://www.8xventures.co",
   locale: "en-IN",
+  /** Where 8X asks founders to send a deck. */
+  pitchEmail: "pitch@8xventures.co",
+  /** The official lock-up, from the client's Drive, used as the social card. */
+  ogImage: "/images/og-8x-ventures.png",
 } as const;
 
 export const primaryNav: NavItem[] = [
@@ -60,21 +64,54 @@ export const footerColumns: { heading: string; links: NavItem[] }[] = [
   },
 ];
 
-export const socialLinks = [
+/**
+ * 8X's three offices, as their own website copy deck and their live contact
+ * page state them. The footer links point at these anchors.
+ */
+export const offices = [
   {
-    label: "8X Ventures on Facebook",
-    short: "Facebook",
-    href: "https://www.facebook.com/8xventures",
+    id: "chennai",
+    city: "Chennai",
+    country: "India",
+    label: "IIT Madras Research Park",
+    address: "D403, IIT Madras Research Park, Taramani, Chennai",
   },
   {
-    label: "8X Ventures on Instagram",
-    short: "Instagram",
-    href: "https://www.instagram.com/8xventures",
+    id: "noida",
+    city: "Noida",
+    country: "India",
+    label: "India’s First Private DeepTech Hub",
+    address: "C 44, 2nd Floor, C Block, Sector 2, Noida, Uttar Pradesh 201301",
+  },
+  {
+    id: "dubai",
+    city: "Dubai",
+    country: "United Arab Emirates",
+    label: "Business Bay",
+    address: "Vision Tower, Al Khaleej Al Tejari 1st, Business Bay, Dubai",
+  },
+] as const;
+
+/**
+ * 8X's actual accounts, taken from the footer of 8xventures.co: X (still
+ * posting as @8xVentures), LinkedIn and YouTube. The build previously linked
+ * Facebook and Instagram profiles that 8X does not run.
+ */
+export const socialLinks = [
+  {
+    label: "8X Ventures on X",
+    short: "X",
+    href: "https://twitter.com/8xVentures",
   },
   {
     label: "8X Ventures on LinkedIn",
     short: "LinkedIn",
-    href: "https://www.linkedin.com/company/80893520",
+    href: "https://www.linkedin.com/company/80893520/",
+  },
+  {
+    label: "8X Ventures on YouTube",
+    short: "YouTube",
+    href: "https://www.youtube.com/channel/UCrbRcoW-B5RqbCORkCqIQ4w",
   },
 ] as const;
 

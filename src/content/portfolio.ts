@@ -45,9 +45,15 @@ export const portfolioFilters: readonly PortfolioFilter[] = [
 ];
 
 /**
- * The card's lower half. The summary is each company's own description; the
- * stage lines are the artboard's, which sets the same two on every card, so
- * those are PLACEHOLDER copy awaiting 8X's own — see the README.
+ * The card's lower half.
+ *
+ * `summary` is the company's own website descriptor, carried over from
+ * `content/home.ts`. `stageLabel` and `stageNote` are the two lines the
+ * artboard sets identically on every card ("Invested at: Seed Stage" /
+ * "Scaled from product validation to commercial deployment."); those
+ * placeholders are gone. Each card now states where the company was founded
+ * and what it builds, from its own brief in the client's Drive and from 8X's
+ * portfolio brochure.
  */
 export type PortfolioCard = PortfolioCompany & {
   /** The card's summary line, above the stage. */
@@ -56,15 +62,68 @@ export type PortfolioCard = PortfolioCompany & {
   stageNote: string;
 };
 
-const PLACEHOLDER_STAGE_LABEL = "Invested at: Seed Stage";
-const PLACEHOLDER_STAGE_NOTE = "Scaled from product validation to commercial deployment.";
+/** Founding year, home city and the one-line "what they build", per company. */
+const DETAILS: Record<string, { founded: string; note: string }> = {
+  pantherun: {
+    founded: "Founded 2019 · Bengaluru",
+    note: "Real-time, hardware-assisted encryption for defence, telecom, industrial and IoT systems.",
+  },
+  "tiea-connectors": {
+    founded: "Founded 2020 · Bengaluru",
+    note: "Connectors, harnesses and interconnect assemblies for EV, aerospace and defence programmes.",
+  },
+  "solinas-integrity": {
+    founded: "Founded 2018 · Chennai",
+    note: "Robotic inspection and cleaning systems for pipelines, sewers and septic infrastructure.",
+  },
+  "xyma-analytics": {
+    founded: "Founded 2019 · Chennai",
+    note: "Waveguide ultrasonic sensors and analytics for monitoring high-temperature industrial assets.",
+  },
+  "lightspeed-photonics": {
+    founded: "Founded 2021 · Hyderabad",
+    note: "Near-chip optical interconnects that move data at high bandwidth and far lower power.",
+  },
+  sanchiconnect: {
+    founded: "Founded 2022 · Noida",
+    note: "Accelerator programmes and SaaS tools linking founders to investors, corporates and labs.",
+  },
+  neuralzome: {
+    founded: "Founded 2023 · Bengaluru",
+    note: "Autonomous mowing, weeding and soil-sensing robots, run from a single dashboard.",
+  },
+  "trishul-space": {
+    founded: "Founded 2022 · New Delhi",
+    note: "Indigenous liquid rocket engines, including the Harpy-1 staged-combustion programme.",
+  },
+  enerzi: {
+    founded: "Founded 2007 · Belagavi",
+    note: "Microwave-plasma reactors for clean hydrogen, alongside industrial microwave heating systems.",
+  },
+  "kcat-enzymatic": {
+    founded: "Founded 2018 · Bengaluru",
+    note: "Custom biocatalysts that let chemical and pharmaceutical makers run cleaner, higher-yield processes.",
+  },
+  armory: {
+    founded: "Founded 2024 · Gurugram",
+    note: "Counter-drone detection, jamming and interception systems, designed and built in India.",
+  },
+  thermistance: {
+    founded: "Founded 2020 · Pune",
+    note: "Heat pipes, vapour chambers and loop heat pipes for EVs, satellites, data centres and defence.",
+  },
+};
 
-export const portfolioCards: readonly PortfolioCard[] = portfolio.map((company) => ({
-  ...company,
-  summary: company.description,
-  stageLabel: PLACEHOLDER_STAGE_LABEL,
-  stageNote: PLACEHOLDER_STAGE_NOTE,
-}));
+export const portfolioCards: readonly PortfolioCard[] = portfolio.map((company) => {
+  const detail = DETAILS[company.id];
+  if (!detail) throw new Error(`No portfolio card detail for "${company.id}"`);
+  return {
+    ...company,
+    summary: company.description,
+    stageLabel: detail.founded,
+    stageNote: detail.note,
+  };
+});
 
 export const portfolioCta = {
   lead: "Building in deep-tech?",

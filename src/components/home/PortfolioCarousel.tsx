@@ -81,14 +81,17 @@ export function PortfolioCarousel() {
                     }}
                   >
                     {/* Photo */}
-                    <div className="relative aspect-[47/30] w-full bg-brand-pale">
+                    {/* The client supplied logos rather than photography, so
+                        the panel is a white plate with the mark held inside
+                        it — same box, same aspect, `contain` not `cover`. */}
+                    <div className="relative aspect-[47/30] w-full bg-white">
                       {active ? (
                         <Image
                           src={company.image}
                           alt={company.imageAlt}
                           fill
                           sizes="(max-width: 640px) 88vw, 470px"
-                          className="object-cover"
+                          className="object-contain p-[9%]"
                         />
                       ) : null}
                     </div>
@@ -123,8 +126,8 @@ export function PortfolioCarousel() {
                       </h3>
 
                       <p className="mt-2 text-[clamp(1.1rem,2vw,1.6rem)]">
-                        <span className="font-bold">{company.raised}</span>{" "}
-                        <span className="font-normal">Raised</span>
+                        <span className="font-bold">{company.metric.value}</span>{" "}
+                        <span className="font-normal">{company.metric.label}</span>
                       </p>
 
                       {company.quote && (

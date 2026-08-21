@@ -12,12 +12,16 @@ export const hero = {
   },
   subhead:
     "8X Ventures invests in companies building the technological foundations of the next economy.",
-  cta: { label: "Lets Explore", href: "#manifesto" },
+  cta: { label: "Let’s Explore", href: "#manifesto" },
 } as const;
 
 export type Sector = {
   name: string;
-  /** Shown in the hero popup. PLACEHOLDER — awaiting 8X's own copy. */
+  /**
+   * Shown in the hero popup. Written from 8X's own sector language in the
+   * website copy deck and from what the portfolio actually does in each
+   * sector — one sentence, 12–15 words, to fit the panel.
+   */
   description: string;
   /**
    * Where the popup's hotspot sits on `/images/hero-infinity.png`, as a
@@ -45,7 +49,7 @@ export const sectors: readonly Sector[] = [
   {
     name: "Semiconductors",
     description:
-      "Chips, packaging and design tools that decide what every other technology can do.",
+      "Chip-level security, photonics and interconnects that decide what every other technology can do.",
     x: 17,
     y: 55,
     place: "top",
@@ -53,7 +57,7 @@ export const sectors: readonly Sector[] = [
   {
     name: "Robotics",
     description:
-      "Machines that see, decide and act — on factory floors, in fields and in warehouses.",
+      "Machines that see, decide and act — in fields, in pipelines and on factory floors.",
     x: 27,
     y: 30,
     place: "top",
@@ -61,7 +65,7 @@ export const sectors: readonly Sector[] = [
   {
     name: "Powertrains",
     description:
-      "Batteries, motors and drivetrains moving vehicles and heavy industry off fossil fuels.",
+      "Clean hydrogen, thermal systems and materials moving industry off fossil fuels.",
     x: 36,
     y: 72,
     place: "bottom",
@@ -69,7 +73,7 @@ export const sectors: readonly Sector[] = [
   {
     name: "Manufacturing",
     description:
-      "New ways to make things: additive processes, novel materials and connected production.",
+      "Indigenous components, connectors and processes that India currently has to import.",
     x: 50,
     y: 48,
     place: "bottom",
@@ -77,7 +81,7 @@ export const sectors: readonly Sector[] = [
   {
     name: "Sensors",
     description:
-      "The instruments that turn the physical world into data precise enough to act on.",
+      "Instruments that read heat, corrosion and flow where conventional sensing fails.",
     x: 68,
     y: 31,
     place: "top",
@@ -85,7 +89,7 @@ export const sectors: readonly Sector[] = [
   {
     name: "Industrial Systems",
     description:
-      "Software and hardware tying plants, grids and supply chains into one system.",
+      "Software and hardware tying plants, assets and supply chains into one system.",
     x: 78,
     y: 72,
     place: "bottom",
@@ -146,11 +150,16 @@ export type Stat = {
 
 export const statsHeadline = "Early signals. Serious scale.";
 
+/**
+ * The three figures 8X publishes under "Proof" in its website copy deck.
+ * The homepage section renders `stats[0]` as the live figure and `stats[1]`
+ * ghosted behind it, exactly as the artboard composes them; `stats[2]` is
+ * the third published figure, carried here so the set stays whole.
+ */
 export const stats: Stat[] = [
   { value: 400, prefix: "₹", suffix: "+Cr", label: "Portfolio revenue generated" },
-  { value: 70, suffix: "+", label: "Deep-tech companies evaluated" },
-  { value: 18, suffix: "+", label: "Companies invested in" },
-  { value: 80, suffix: "Y+", label: "Collective operating experience" },
+  { value: 70, suffix: "+", label: "Patents across portfolio companies" },
+  { value: 2000, prefix: "₹", suffix: "+Cr", label: "Portfolio order book" },
 ];
 
 /* --- Portfolio ----------------------------------------------------------- */
@@ -158,14 +167,25 @@ export const stats: Stat[] = [
 export type PortfolioCompany = {
   id: string;
   name: string;
+  /** The short sector label on the card's first pill. */
   sector: string;
-  /** The fund shown on the card. */
+  /** The fund shown on the card's second pill. */
   vehicle: string;
   /** Every fund the company sits in — what the portfolio filters read. */
   vehicles?: string[];
-  raised: string;
+  /**
+   * The card's figure line: a bold value with a lighter word beside it — the
+   * slot the artboard fills with "$4M Raised". 8X does not publish a raise
+   * amount per company, so this carries the company's current stage, which
+   * their own portfolio brochure states.
+   */
+  metric: { value: string; label: string };
+  /** 8X's own one-line website descriptor for the company. */
   description: string;
+  /** Optional pull quote. None are set — see the note above `portfolio`. */
   quote?: { text: string; attribution: string };
+  /** The company's own site. Not on the card in v5.0; kept for later use. */
+  website: string;
   image: string;
   /** Empty string renders the tinted placeholder panel used in the design. */
   imageAlt: string;
@@ -174,35 +194,42 @@ export type PortfolioCompany = {
 export const portfolioHeadline = { lead: "Founders at", accent: "the Frontier" } as const;
 
 /**
- * The six companies 8X lists on 8xventures.co/portfolio (behind its "Load
- * More"), with their own sector and fund labels and their own descriptions,
- * condensed to the two lines the card is drawn for. The artboard fills its
- * grid by repeating three placeholder cards ("Armory"); these are the real
- * ones.
+ * 8X's portfolio — all twelve companies, from the per-company briefs in the
+ * client's Drive ("Portfolio companies' details") and their own portfolio
+ * brochure. Each `description` is the brief's own "Website descriptor"; each
+ * `metric`, and the founding line in `content/portfolio.ts`, is the
+ * brochure's.
  *
- * `vehicle` is the fund shown on the card; `vehicles` is everything the
- * company sits in, which is what the filters read — Solinas is in two.
+ * `image` is the company's logo from the Drive's "Logos of Portfolio
+ * Companies" folder. It is the only company-specific artwork the client has
+ * supplied — the briefs send anyone wanting photography to each company's own
+ * site — so the card's picture panel now holds the logo on a white plate
+ * instead of the single stock photograph that stood in for every company.
  *
- * All of them carry **Fund I**, per 8X. The live site labels most of these
- * "Second Fund", but the design's Fund II pill reads "Coming Soon" and is
- * greyed out, so nothing is tagged to it.
+ * **No quotes.** The entries here used to carry invented founder quotes
+ * attributed to real, named companies; those are gone. 8X's copy deck does
+ * have three real founder quotes, but publishes them unattributed and in a
+ * homepage section the v5.0 design does not contain, so there is nowhere
+ * honest to put them yet.
+ *
+ * **Fund attribution needs 8X to confirm.** The artboard's pills are "Fund I"
+ * and "Fund II - Coming Soon" (greyed out), so every card is tagged Fund I as
+ * the build already did, with Solinas also in the SPV portfolio. 8X's own
+ * material shows Fund II is in fact investing, so both the pill and the
+ * per-company tags should be reviewed before launch.
  */
 export const portfolio: PortfolioCompany[] = [
   {
-    id: "neuralzome",
-    name: "Neuralzome",
-    sector: "Robotics",
+    id: "pantherun",
+    name: "Pantherun Technologies",
+    sector: "Cybersecurity",
     vehicle: "Fund I",
     vehicles: ["Fund I"],
-    raised: "$4M",
-    description:
-      "Autonomous AI agents for off-road robotics, built to think, learn and adapt.",
-    quote: {
-      text: "They understood the technology before they understood the market.",
-      attribution: "Founder, Neuralzome",
-    },
-    image: "/images/portfolio-team.jpg",
-    imageAlt: "The Neuralzome team collaborating in their engineering studio.",
+    metric: { value: "Series A", label: "stage" },
+    description: "High-speed data protection and encryption technology.",
+    website: "https://pantherun.com/",
+    image: "/images/portfolio/pantherun.png",
+    imageAlt: "Pantherun Technologies logo.",
   },
   {
     id: "tiea-connectors",
@@ -210,74 +237,143 @@ export const portfolio: PortfolioCompany[] = [
     sector: "Electronics",
     vehicle: "Fund I",
     vehicles: ["Fund I"],
-    raised: "$4M",
-    description:
-      "Design, development and manufacturing of connectors and contact solutions.",
-    quote: {
-      text: "8X backed the hard problem, not the easy pitch.",
-      attribution: "Founder, TIEA Connectors",
-    },
-    image: "/images/portfolio-team.jpg",
-    imageAlt: "The TIEA Connectors team in discussion at their facility.",
-  },
-  {
-    id: "trishul-space",
-    name: "Trishul Space",
-    sector: "Spacetech",
-    vehicle: "Fund I",
-    vehicles: ["Fund I"],
-    raised: "$4M",
-    description:
-      "An IIT Delhi-incubated startup pioneering the development of liquid rocket engines.",
-    quote: {
-      text: "Conviction capital, at the stage where it actually mattered.",
-      attribution: "Founder, Trishul Space",
-    },
-    image: "/images/portfolio-team.jpg",
-    imageAlt: "The Trishul Space team reviewing mission plans together.",
-  },
-  {
-    id: "enerzi",
-    name: "Enerzi",
-    sector: "Clean Energy",
-    vehicle: "Fund I",
-    vehicles: ["Fund I"],
-    raised: "$4M",
-    description:
-      "Green hydrogen from plasma technology, with advanced industrial microwave systems.",
-    image: "/images/portfolio-team.jpg",
-    imageAlt: "The Enerzi team at work in their production facility.",
-  },
-  {
-    id: "sanchiconnect",
-    name: "SanchiConnect",
-    sector: "SaaS",
-    vehicle: "Fund I",
-    vehicles: ["Fund I"],
-    raised: "$4M",
-    description:
-      "Software for startups, incubators and innovation teams scaling deep-tech.",
-    image: "/images/portfolio-team.jpg",
-    imageAlt: "The SanchiConnect team around a shared workspace.",
+    metric: { value: "Series A", label: "stage" },
+    description: "Indigenous electrical and electronic connectors for demanding applications.",
+    website: "https://www.tieaconnectors.com/",
+    image: "/images/portfolio/tiea.png",
+    imageAlt: "TIEA Connectors logo.",
   },
   {
     id: "solinas-integrity",
     name: "Solinas Integrity",
-    sector: "Cleantech",
+    sector: "WaterTech",
     vehicle: "SPV Portfolio",
     vehicles: ["SPV Portfolio", "Fund I"],
-    raised: "$4M",
+    metric: { value: "Series A+", label: "stage" },
+    description: "Robotics and intelligence for water and sanitation infrastructure.",
+    website: "https://solinas.in/",
+    image: "/images/portfolio/solinas.png",
+    imageAlt: "Solinas Integrity logo.",
+  },
+  {
+    id: "xyma-analytics",
+    name: "XYMA Analytics",
+    sector: "Industrial IoT",
+    vehicle: "Fund I",
+    vehicles: ["Fund I"],
+    metric: { value: "Series A", label: "stage" },
+    description: "Ultrasonic sensing and Industrial IoT for extreme industrial environments.",
+    website: "https://xyma.in/",
+    image: "/images/portfolio/xyma.png",
+    imageAlt: "XYMA Analytics logo.",
+  },
+  {
+    id: "lightspeed-photonics",
+    name: "LightSpeed Photonics",
+    sector: "Photonics",
+    vehicle: "Fund I",
+    vehicles: ["Fund I"],
+    metric: { value: "Series A", label: "stage" },
+    description: "Optical interconnects for high-performance and AI computing.",
+    website: "https://lightspeedphotonics.com/",
+    image: "/images/portfolio/lightspeed.png",
+    imageAlt: "LightSpeed Photonics logo.",
+  },
+  {
+    id: "sanchiconnect",
+    name: "SanchiConnect",
+    sector: "Ecosystem",
+    vehicle: "Fund I",
+    vehicles: ["Fund I"],
+    metric: { value: "Pre-Series A", label: "stage" },
     description:
-      "Robotic solutions for water leakage and for ending manual scavenging in sanitation.",
-    image: "/images/portfolio-team.jpg",
-    imageAlt: "The Solinas Integrity team with one of their robots.",
+      "A deep-tech enablement network connecting startups, capital and innovation ecosystems.",
+    website: "https://sanchiconnect.com/",
+    image: "/images/portfolio/sanchiconnect.png",
+    imageAlt: "SanchiConnect logo.",
+  },
+  {
+    id: "neuralzome",
+    name: "Neuralzome Cybernetics",
+    sector: "Robotics",
+    vehicle: "Fund I",
+    vehicles: ["Fund I"],
+    metric: { value: "Pre-Seed", label: "stage" },
+    description: "Teachable autonomy for agriculture and off-road operations.",
+    website: "https://www.neuralzome.com/",
+    image: "/images/portfolio/neuralzome.png",
+    imageAlt: "Neuralzome Cybernetics logo.",
+  },
+  {
+    id: "trishul-space",
+    name: "Trishul Space",
+    sector: "SpaceTech",
+    vehicle: "Fund I",
+    vehicles: ["Fund I"],
+    metric: { value: "Pre-Seed", label: "stage" },
+    description: "Advanced liquid propulsion for next-generation launch vehicles.",
+    website: "https://trishulspace.com/",
+    image: "/images/portfolio/trishul.png",
+    imageAlt: "Trishul Space logo.",
+  },
+  {
+    id: "enerzi",
+    name: "Enerzi",
+    sector: "ClimateTech",
+    vehicle: "Fund I",
+    vehicles: ["Fund I"],
+    metric: { value: "Seed", label: "stage" },
+    description: "Microwave and plasma systems for cleaner industrial processes.",
+    website: "https://enerzi.co/",
+    image: "/images/portfolio/enerzi.png",
+    imageAlt: "Enerzi Microwave Systems logo.",
+  },
+  {
+    id: "kcat-enzymatic",
+    name: "Kcat Enzymatic",
+    sector: "BioTech",
+    vehicle: "Fund I",
+    vehicles: ["Fund I"],
+    metric: { value: "Pre-Series A", label: "stage" },
+    description: "AI-enabled enzyme engineering for sustainable chemical manufacturing.",
+    website: "https://kcat.co.in/",
+    image: "/images/portfolio/kcat.png",
+    imageAlt: "Kcat Enzymatic logo.",
+  },
+  {
+    id: "armory",
+    name: "Armory",
+    sector: "DefenceTech",
+    vehicle: "Fund I",
+    vehicles: ["Fund I"],
+    metric: { value: "Pre-Series A", label: "stage" },
+    description: "Counter-drone systems designed to defend Bharat.",
+    website: "https://www.armory.in/",
+    image: "/images/portfolio/armory.png",
+    imageAlt: "Armory logo.",
+  },
+  {
+    id: "thermistance",
+    name: "Thermistance Technologies",
+    sector: "Thermal Tech",
+    vehicle: "Fund I",
+    vehicles: ["Fund I"],
+    metric: { value: "Seed", label: "stage" },
+    description:
+      "Passive cooling systems for high-performance electronics and industrial equipment.",
+    website: "https://thermistance.com/",
+    image: "/images/portfolio/thermistance.png",
+    imageAlt: "Thermistance Technologies logo.",
   },
 ];
 
 /* --- Founder journey ------------------------------------------------------
-   The source design renders only the active node ("Technology Validation").
-   The remaining six stage names are a working set — confirm with the
-   8X team before launch.
+   The artboard renders only the active node ("Technology Validation"). The
+   arc has seven, and its geometry depends on that count, so seven is what
+   this is: 8X's own five — "technology validation, customer access, capital
+   strategy, governance, and long-term scale", from the Founder Proposition
+   in their website copy deck — opened by the two steps their own approach
+   copy names before an investment, Discovery and Research.
    ------------------------------------------------------------------------ */
 
 export type JourneyStage = {
@@ -298,43 +394,50 @@ export const journey: JourneyStage[] = [
   {
     id: "discovery",
     title: "Discovery",
-    description: "We partner with founders through all stages of their growth journey.",
+    description:
+      "The founders we partner with are rare. We look for them before consensus forms.",
     icon: "search",
   },
   {
-    id: "deep-research",
-    title: "Deep Research",
-    description: "We partner with founders through all stages of their growth journey.",
+    id: "research",
+    title: "Research",
+    description:
+      "We study the science, the market and the moat before we commit to anything.",
     icon: "beaker",
-  },
-  {
-    id: "prototype",
-    title: "Prototype",
-    description: "We partner with founders through all stages of their growth journey.",
-    icon: "chip",
   },
   {
     id: "technology-validation",
     title: "Technology Validation",
-    description: "We partner with founders through all stages of their growth journey.",
-    icon: "brain",
+    description:
+      "We test what the technology really does, and what it will take to make it work at scale.",
+    icon: "chip",
   },
   {
-    id: "pilot-deployment",
-    title: "Pilot Deployment",
-    description: "We partner with founders through all stages of their growth journey.",
+    id: "customer-access",
+    title: "Customer Access",
+    description:
+      "We open doors — to customers, corporates, research institutions and the wider ecosystem.",
     icon: "factory",
   },
   {
-    id: "commercial-scale",
-    title: "Commercial Scale",
-    description: "We partner with founders through all stages of their growth journey.",
+    id: "capital-strategy",
+    title: "Capital Strategy",
+    description:
+      "We help plan the rounds ahead, not only the one immediately in front of you.",
     icon: "chart",
   },
   {
-    id: "institution",
-    title: "Institution Building",
-    description: "We partner with founders through all stages of their growth journey.",
+    id: "governance",
+    title: "Governance",
+    description:
+      "Board discipline, compliance and reporting built for institutional scale from the start.",
+    icon: "brain",
+  },
+  {
+    id: "long-term-scale",
+    title: "Long-Term Scale",
+    description:
+      "We are not investors passing through. We partner for the long arc of the company.",
     icon: "globe",
   },
 ];
@@ -415,14 +518,14 @@ export const lpDay = {
       href: "/media/lp-day-2025",
       image: "/images/lpday-2025.jpg",
       imageAlt:
-        "Two investors in conversation across a low table at LP Day 2025.",
+        "Members of the 8X Ventures team beside the Annual Investors Meet banner at LP Day 2025, IIT Madras Research Park.",
     },
     {
       year: "2026",
       href: "/media/lp-day-2026",
       image: "/images/lpday-2026.jpg",
       imageAlt:
-        "Founders and mentors mid-discussion around a table at LP Day 2026.",
+        "The full LP Day 2026 gathering — investors, founders and mentors — photographed together on the lawn.",
     },
   ],
   promo: {

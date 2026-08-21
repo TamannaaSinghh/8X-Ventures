@@ -42,11 +42,22 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: `${siteConfig.name} — ${siteConfig.tagline}`,
     description: siteConfig.description,
+    /* The official lock-up from the client's Drive, set on a 1200 x 630
+       plate so link previews get the real mark rather than a crop. */
+    images: [
+      {
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.name} logo`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.name} — ${siteConfig.tagline}`,
     description: siteConfig.description,
+    images: [siteConfig.ogImage],
   },
   robots: { index: true, follow: true },
 };

@@ -624,12 +624,46 @@ are interaction affordances the artboard does not specify:
   politely. "Coming Soon" is `aria-disabled` rather than `disabled`, so it stays
   focusable and can be found and read.
 
-  The grid runs **six cards, two rows of three**, as the artboard does. The
-  artboard fills its six by repeating three placeholder cards ("Armory"); these
-  are the six real companies from 8xventures.co/portfolio — the three the page
-  shows plus the three behind its "Load More" — with 8X's own sector labels and
-  their own descriptions, condensed to the two lines the card is drawn for
-  (`portfolio` in `content/home.ts`, which the homepage carousel reads too).
+  The grid runs the **whole portfolio — twelve companies, four rows of three**,
+  from the per-company briefs in the client's Drive ("Portfolio companies'
+  details") and their own portfolio brochure (`portfolio` in `content/home.ts`,
+  which the homepage carousel reads too, extended in `content/portfolio.ts`
+  with the two lines the card carries that the carousel does not). "Armory",
+  which the artboard repeats three times and which read as placeholder copy, is
+  in fact a real company; it is now one card among the twelve.
+
+  **The list band's height follows its content.** The artboard draws six cards,
+  8X has twelve, and the filters change the count again at runtime, so this is
+  the one stage that cannot be a fixed aspect ratio. It is built out of the
+  artboard's own measurements instead — the grid's ink starts at y535 and the
+  band closes 114 below the last row — with the grid itself left in flow
+  between them and both figures given in vw, since the stage runs the full
+  width here. At six cards that resolves to **exactly 2244**, the artboard's
+  own band; past six it grows by a row at a time. Nothing else about the grid
+  moved: same three columns, same 35/55.7 gaps, same card.
+
+  **The card's picture panel holds the company's logo.** Every card used to
+  show the same stock photograph, which is not something to ship against
+  twelve named companies. The client's Drive supplies logos and no
+  photography — the briefs send anyone wanting stills to each company's own
+  site — so the panel keeps its box, its 536/331 aspect and the card's blue,
+  and the mark sits inside it at `object-contain`. A white plate was tried and
+  reverted: against the white page behind the grid it read as a gap rather
+  than as part of the card.
+
+  **The figure line is the company's stage, not a raise.** The artboard sets
+  "$4M Raised" identically on every card. 8X does not publish a raise figure
+  per company, and their own brochure's "Invested at" and "Current Valuation"
+  numbers are investor-facing, so the slot carries the stage the brochure
+  states — Series A, Seed, Pre-Seed and so on — as a bold value with a light
+  word beside it, exactly the shape the artboard draws. The stage lines below
+  it are likewise real now: where the company was founded and what it builds.
+
+  **No founder quotes.** The entries used to carry invented quotes attributed
+  to real, named companies. Those are gone. 8X's copy deck has three genuine
+  founder quotes but publishes them unattributed, in a homepage section the
+  v5.0 design does not contain, so there is nowhere honest to put them yet.
+  `quote` stays on the type for when there is.
 
   **Funds.** Every card carries **Fund I**, per 8X; Solinas Integrity also sits
   in the SPV portfolio, which is what its card shows and what the SPV filter
@@ -683,30 +717,82 @@ are interaction affordances the artboard does not specify:
   The mentors eyebrow reads **"OUR JOURNEY"**, the prototype's wording, at 8X's
   request; the PDF export says "MENTORS" there.
 
-- **Content to confirm with 8X:**
-  - **Founder journey stage names.** The artboard renders only the active node
-    ("Technology Validation"). The other six in `content/home.ts` are a working
-    set and need sign-off.
-  - **Portfolio details.** The design uses "Armory / $4M" as placeholder copy on
-    repeated cards. Real company names were taken from the portfolio artboard
-    and the live site; the raise amounts, descriptions and quotes are
-    placeholders.
-  - **Statistics.** `₹400+Cr` and `70+` come from the design; `18+` and `80Y+`
-    from the current live site. All need confirming.
-  - **Office addresses, social URLs and the contact email** are not in the
-    design; the footer links currently point at plausible destinations.
-  - **Sector descriptions** in the hero hotspots (`sectors[].description` in
-    `content/home.ts`) are placeholder copy written to fit the panel — one
-    sentence, 12–15 words. They are 8X's positioning to state, not ours, so
-    they need replacing or signing off before launch.
-  - **Portfolio card figures.** Each card's summary is now the company's own
-    description from 8xventures.co. What is still the artboard's placeholder,
-    identical on every card, is **"$4M Raised"**, **"Invested at: Seed Stage"**
-    and "Scaled from product validation to commercial deployment."
-    (`content/portfolio.ts`). These are attached to real, named companies now,
-    so they should be corrected or removed before the site goes anywhere near
-    production — a wrong raise figure against a real company is worse than a
-    blank one.
+- **Where the content comes from.** Everything below the design itself was
+  taken from the client's Drive folder `8XVentures`, in this order of
+  precedence: **the v5.0 artboard wins wherever it and a document disagree**,
+  because it is the newest thing in the folder. The documents fill what the
+  artboard leaves blank.
 
-- **Images** are the design's stock/placeholder photography. Swap in licensed
-  assets before launch and revisit the `alt` text in `content/home.ts`.
+  | Source | What it supplied |
+  |---|---|
+  | `8X Ventures Website Copy.pdf` | the Proof figures, the Founder Proposition, the office list, the sitemap |
+  | `Portfolio companies' details/` (12 Google Docs) | each company's category, site and "Website descriptor" |
+  | `8X Ventures - Portfolio Brochure.pdf` | founding year, home city and stage per company |
+  | `8x Existing Content .docx` | the full office addresses, the journey entries, the team roles |
+  | `Logos of Portfolio Companies/` | the twelve card logos (`public/images/portfolio`) |
+  | `LP Day highlights/2025`, `/2026` | the two LP Day stills |
+  | `8X Logo - og.png` | the social card (`public/images/og-8x-ventures.png`) |
+  | 8xventures.co | the three real social accounts, and the team roster and roles |
+
+  **`8X Ventures - Annual Report (FY 25-26).pdf` was deliberately not used.**
+  It is marked "Private and Confidential — Do not distribute" and its contents
+  are per-company revenue, valuations, order books and fundraise status. None
+  of it belongs on a public site. The same reasoning keeps the brochure's
+  "Invested at" and "Current Valuation" figures off the cards.
+
+- **Still to confirm with 8X:**
+  - **Fund attribution.** Every card is tagged **Fund I**, with Solinas
+    Integrity also in the SPV portfolio, because the artboard's fourth pill
+    reads "Fund II - Coming Soon" and is greyed out. 8X's own material shows
+    Fund II is in fact investing, so both the pill and the per-company tags
+    need a decision. This is the one field in the portfolio data that is not
+    sourced.
+  - **The six sector names on the 8X mark.** They are the artboard's —
+    Semiconductors, Robotics, Powertrains, Manufacturing, Sensors, Industrial
+    Systems — and the hotspot coordinates are tuned to six. 8X's copy deck
+    names a different and slightly longer set (Future Computing, BioTech,
+    CleanTech, Industry 4.0, Cybersecurity, SpaceTech, Enterprise DeepTech).
+    The design was followed. The descriptions under them are now written from
+    8X's own sector language and from what the portfolio actually does in each
+    one, but they are still 8X's positioning to sign off.
+  - **The founder journey's seven stages.** The arc's geometry depends on
+    there being seven, and 8X's Founder Proposition names five — technology
+    validation, customer access, capital strategy, governance, long-term
+    scale. Those five are stages 3–7; Discovery and Research, which their own
+    approach copy names, open the arc.
+  - **LP Day 2026.** The still is from the client's own `LP Day
+    highlights/2026` folder, but that set photographs what looks like an ISRO
+    Space Applications Centre event rather than an 8X investor meet, and
+    carries no 8X branding. Worth a look before launch. The 2025 still is
+    unambiguous — it is the Annual Investors Meet at IIT Madras Research Park,
+    banner and all.
+
+- **Assets that arrived with nowhere to go.** These are in the repo, unused,
+  because the v5.0 design has no slot for them:
+  - `public/images/mentors/` — six mentor portraits (Ankit Agarwal, Bony
+    Niranjan Dalal, Deepak Chitnis, Dr Ashok Jhunjhunwala, Suresh Nanda,
+    Virendra Somwanshi). `/team`'s mentor band is the artboard's list of five
+    *expertise* bands, not people, so adding faces would be a design decision.
+  - `public/images/team/colour/` — colour cut-outs of Rashi Jain, Shreya
+    Kothari and Priya Sathish, keyed off their white studio grounds the same
+    way the other portraits were. The live cards stay greyscale: the Drive
+    covers only two of the five people in the team row, and a row that is half
+    colour and half greyscale looks like a mistake rather than a choice. Drop
+    these in once colour originals exist for Saurabh Gunwant and Vikeesh
+    Kesavan too.
+  - The Drive's `Photos of Team Members` also holds **Akash Patel, Madhukar
+    Kota, Priya Sathish and Twinkal Janbandhu**, who are not on the site.
+    8xventures.co/team does not list them and nothing in the folder gives
+    their roles, so they were left out rather than captioned with a guess.
+  - `public/images/logo-white.png` — the official white lock-up. Both the
+    header and the footer sit on white, so there is no dark surface for it
+    yet; it is here so there is no second trip to the Drive when one appears.
+  - `Founders' testimonials/` is ten video files. `/media`'s insight cards
+    carry a play button over a flat plate, so there is a plausible home for
+    them, but no still, title or attribution came with them.
+
+- **The stock photography is still the design's.** The hero, about, portfolio
+  and team backgrounds are Shutterstock comps extracted from the artboard (the
+  same files sit in the Drive's `NEW PICS`). Licence them before launch, and
+  revisit the `alt` text in `content/home.ts` when real photographs replace
+  them.

@@ -9,15 +9,17 @@ import {
 } from "@/content/site";
 import { cn } from "@/lib/cn";
 
+/* Keyed by `short` in `socialLinks` — X, LinkedIn and YouTube, the three
+   accounts 8X actually runs. */
 const socialIcons: Record<string, React.ReactNode> = {
-  Facebook: (
-    <path d="M13.5 21v-7.5h2.5l.4-3h-2.9V8.6c0-.87.24-1.46 1.49-1.46h1.59V4.46A21 21 0 0 0 14.27 4c-2.3 0-3.87 1.4-3.87 3.98V10.5H8v3h2.4V21z" />
-  ),
-  Instagram: (
-    <path d="M12 4.62c2.4 0 2.69.01 3.64.05.88.04 1.35.19 1.67.31.42.16.72.36 1.03.67.31.31.51.61.67 1.03.12.32.27.79.31 1.67.04.95.05 1.24.05 3.65s-.01 2.7-.05 3.65c-.04.88-.19 1.35-.31 1.67-.16.42-.36.72-.67 1.03-.31.31-.61.51-1.03.67-.32.12-.79.27-1.67.31-.95.04-1.24.05-3.64.05s-2.69-.01-3.64-.05c-.88-.04-1.35-.19-1.67-.31a2.78 2.78 0 0 1-1.03-.67 2.78 2.78 0 0 1-.67-1.03c-.12-.32-.27-.79-.31-1.67-.04-.95-.05-1.24-.05-3.65s.01-2.7.05-3.65c.04-.88.19-1.35.31-1.67.16-.42.36-.72.67-1.03.31-.31.61-.51 1.03-.67.32-.12.79-.27 1.67-.31.95-.04 1.24-.05 3.64-.05m0-1.62c-2.44 0-2.75.01-3.71.05-.96.05-1.61.2-2.19.42-.6.23-1.1.54-1.61 1.05-.5.5-.82 1.01-1.05 1.6-.22.58-.37 1.24-.42 2.2C3 9.28 3 9.58 3 12.02s.01 2.75.05 3.71c.05.96.2 1.62.42 2.2.23.59.54 1.1 1.05 1.6.5.5 1.01.82 1.61 1.05.58.22 1.23.37 2.19.42.96.04 1.27.05 3.71.05s2.75-.01 3.71-.05c.96-.05 1.61-.2 2.19-.42.6-.23 1.1-.55 1.61-1.05.5-.5.82-1.01 1.05-1.6.22-.58.37-1.24.42-2.2.04-.96.05-1.27.05-3.71s-.01-2.74-.05-3.7c-.05-.96-.2-1.62-.42-2.2a4.4 4.4 0 0 0-1.05-1.6 4.4 4.4 0 0 0-1.61-1.05c-.58-.22-1.23-.37-2.19-.42C14.75 3.01 14.44 3 12 3m0 4.38a4.62 4.62 0 1 0 0 9.24 4.62 4.62 0 0 0 0-9.24m0 7.62a3 3 0 1 1 0-6 3 3 0 0 1 0 6m5.88-7.8a1.08 1.08 0 1 1-2.16 0 1.08 1.08 0 0 1 2.16 0" />
+  X: (
+    <path d="M17.3 3.75h2.82l-6.16 7.04L21.2 20.4h-5.66l-4.44-5.8-5.07 5.8H3.2l6.59-7.53L3 3.75h5.8l4.01 5.3zm-.99 14.97h1.56L7.75 5.34H6.08z" />
   ),
   LinkedIn: (
     <path d="M6.94 8.5H4.06V20h2.88zM5.5 3.6a1.67 1.67 0 1 0 0 3.34 1.67 1.67 0 0 0 0-3.34M20 13.44c0-2.9-1.55-4.25-3.62-4.25a3.12 3.12 0 0 0-2.84 1.56h-.04V8.5H10.7V20h2.88v-5.69c0-1.5.29-2.95 2.15-2.95 1.83 0 1.86 1.71 1.86 3.05V20H20z" />
+  ),
+  YouTube: (
+    <path d="M21.13 7.66a2.39 2.39 0 0 0-1.68-1.7C17.96 5.56 12 5.56 12 5.56s-5.96 0-7.45.4a2.39 2.39 0 0 0-1.68 1.7A25.1 25.1 0 0 0 2.47 12c0 1.47.13 2.93.4 4.34a2.39 2.39 0 0 0 1.68 1.7c1.49.4 7.45.4 7.45.4s5.96 0 7.45-.4a2.39 2.39 0 0 0 1.68-1.7c.27-1.41.4-2.87.4-4.34s-.13-2.93-.4-4.34M10.05 14.85V9.15L15.03 12z" />
   ),
 };
 
@@ -62,12 +64,19 @@ export function SiteFooter() {
                 href={social.href}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="fc-border grid aspect-square w-[clamp(2.75rem,2.76vw,3.3125rem)] place-items-center rounded-full border border-ink-900/20 text-ink-800 transition-[transform,background-color,border-color] duration-300 hover:-translate-y-0.5 hover:border-brand hover:bg-brand-tint hover:text-brand"
+                className="fc-border grid aspect-square w-[clamp(2.75rem,2.76vw,3.3125rem)] place-items-center rounded-full border border-ink-900/20 text-ink-800 transition-[transform,background-color,border-color] duration-300 hover:-translate-y-0.5 hover:border-brand-deep hover:bg-brand-tint hover:text-brand-deep active:translate-y-0 active:scale-95"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="w-[62%]">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className="w-[62%]"
+                >
                   {socialIcons[social.short]}
                 </svg>
-                <span className="sr-only-8x">{social.label} (opens in a new tab)</span>
+                <span className="sr-only-8x">
+                  {social.label} (opens in a new tab)
+                </span>
               </a>
             </li>
           ))}
@@ -95,13 +104,32 @@ export function SiteFooter() {
                   <Link
                     href={link.href}
                     className={cn(
-                      "group inline-flex leading-[1.2] font-light text-ink-700 transition-colors duration-300 hover:text-brand",
+                      /* `brand` is 2.86:1 on white; `brand-deep` clears 4.5:1
+                         (WCAG 1.4.3), which body-size link text needs. */
+                      "group inline-flex items-center gap-[0.35em] leading-[1.2] font-light text-ink-700 transition-colors duration-300 hover:text-brand-deep",
                       BODY_SIZE,
                     )}
                   >
                     <span className="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-[position:0_100%] bg-no-repeat transition-[background-size] duration-400 ease-[var(--ease-out-expo)] group-hover:bg-[length:100%_1px]">
                       {link.label}
                     </span>
+                    {/* Space is reserved at rest, so the column does not
+                        reflow when the arrow arrives. */}
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                      focusable="false"
+                      className="h-[0.7em] w-[0.7em] shrink-0 -translate-x-1 opacity-0 transition-[opacity,transform] duration-400 ease-[var(--ease-out-expo)] group-focus-visible:translate-x-0 group-focus-visible:opacity-100 group-hover:translate-x-0 group-hover:opacity-100"
+                    >
+                      <path
+                        d="M5 12h14M13 6l6 6-6 6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </Link>
                 </li>
               ))}

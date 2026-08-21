@@ -52,13 +52,16 @@ export function PortfolioGrid() {
       <div className="pf-at pf-grid">
         {cards.map((card) => (
           <article key={card.id} className="pf-card">
+            {/* The client supplied logos rather than photography, so the
+                panel is a white plate with the mark held inside it — same
+                box, same aspect, `contain` instead of `cover`. */}
             <div className="pf-card-photo">
               <Image
                 src={card.image}
                 alt=""
                 fill
                 sizes="(max-width: 1024px) 92vw, 28vw"
-                className="object-cover object-[50%_35.5%]"
+                className="object-contain p-[9%]"
               />
             </div>
 
@@ -71,8 +74,8 @@ export function PortfolioGrid() {
               <h3 className="pf-card-name">{card.name}</h3>
 
               <p className="pf-card-raised">
-                <strong>{card.raised}</strong>
-                <span> Raised</span>
+                <strong>{card.metric.value}</strong>
+                <span> {card.metric.label}</span>
               </p>
 
               <p className="pf-card-summary">{card.summary}</p>

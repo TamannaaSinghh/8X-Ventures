@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { MotionToggle } from "@/components/ui/MotionToggle";
 import { Reveal } from "@/components/ui/Reveal";
 import { RotatingWord } from "@/components/ui/RotatingWord";
 import { manifesto, sectorsInline, sectorsInlineStart } from "@/content/home";
@@ -31,7 +32,8 @@ export function ManifestoBanner() {
             id="manifesto-heading"
             className="mx-auto max-w-[24ch] text-[length:var(--text-display)] leading-[1.1] font-bold tracking-normal text-balance text-white"
           >
-            {manifesto.line1} <span className="lg:block">{manifesto.line2}</span>
+            {manifesto.line1}{" "}
+            <span className="lg:block">{manifesto.line2}</span>
           </h2>
         </Reveal>
 
@@ -53,26 +55,23 @@ export function ManifestoBanner() {
             <span className="sr-only-8x">{manifesto.supportScreenReader}</span>
           </p>
         </Reveal>
-
-        {/* The word changes on its own, so it needs a way to stop
-            (WCAG 2.2.2 Pause, Stop, Hide). Hidden when the user has already
-            asked for reduced motion, since nothing is moving. */}
-        {!reduced && (
-          <Reveal delay={220} className="mt-8 flex justify-center lg:mt-10">
-            <button
-              type="button"
-              onClick={() => setPaused((p) => !p)}
-              aria-pressed={paused}
-              className="fc-border inline-flex items-center gap-2.5 rounded-full border border-white/45 px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-300 hover:bg-white/12"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4" fill="currentColor">
-                {paused ? <path d="M8 5v14l11-7z" /> : <path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z" />}
-              </svg>
-              {paused ? "Play sector animation" : "Pause sector animation"}
-            </button>
-          </Reveal>
-        )}
       </div>
+
+      {/* The word changes on its own, so it needs a way to stop
+          (WCAG 2.2.2 Pause, Stop, Hide). Parked in the section's bottom-right
+          corner so it stays out of the statement it belongs to. Hidden when
+          the user has already asked for reduced motion, since nothing moves. */}
+      {!reduced && (
+        <div className="container-8x pointer-events-none absolute inset-x-0 bottom-6 flex justify-end lg:bottom-8">
+          <MotionToggle
+            paused={paused}
+            onToggle={() => setPaused((p) => !p)}
+            label="sector animation"
+            tone="dark"
+            className="pointer-events-auto"
+          />
+        </div>
+      )}
     </section>
   );
 }

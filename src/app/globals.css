@@ -31,6 +31,11 @@
   --color-brand-track-active: #5cc0fe; /* carousel track, active segment */
   --color-brand-pale: #cfeafd; /* portfolio preview cards */
   --color-brand-tint: #e9f6fd; /* LP Day promo band */
+  /* The one accent that is safe as text. Chosen to clear 4.5:1 (WCAG 1.4.3)
+     on every surface it lands on — white 5.79, brand-tint 5.26, and the
+     filter pill's own hover fill 5.12 — so hover states never trade contrast
+     for colour. Every swatch above it is decorative only. */
+  --color-brand-deep: #0069ad;
 
   /* --- Navy surfaces --------------------------------------------------- */
   --color-navy-700: #0f3b7a;
@@ -242,7 +247,11 @@
 .hero-pop {
   --pop-w: min(17rem, 78cqw);
   position: absolute;
-  left: clamp(calc(var(--pop-w) / 2), var(--spot-x), calc(100% - var(--pop-w) / 2));
+  left: clamp(
+    calc(var(--pop-w) / 2),
+    var(--spot-x),
+    calc(100% - var(--pop-w) / 2)
+  );
   z-index: 20;
   width: var(--pop-w);
   padding: 0.85rem 1rem 0.95rem;
@@ -462,6 +471,85 @@
   }
 }
 
+/* --- The pinned scroll stage ---------------------------------------------
+   The section is given spare height and its panel sticks to the top, so the
+   composition holds still while the page scrolls past it and the figure counts
+   with the scroll. The last stretch of the run holds the finished number, so
+   the result is read before the next section arrives.
+
+   This is native `position: sticky` — no scroll handler intercepts anything,
+   so the scrollbar, Page Down, Home/End and the keyboard all still move the
+   page at their usual rate, and the section can always be scrolled past. The
+   only thing JavaScript does is publish `--p` and write the digits.
+
+   Gated on scripting (`js-reveal`), on `prefers-reduced-motion` and on the
+   width where the traced composition applies. Without any of the three the
+   section is its ordinary height with the final figure already in place. */
+.stats-scroll {
+  position: relative;
+}
+
+.stats-progress {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) and (width >= 64rem) {
+  html.js-reveal .stats-scroll {
+    height: var(--stats-run, 260vh);
+  }
+
+  html.js-reveal .stats-pin {
+    position: sticky;
+    top: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  /* The field is cut to the stage's exact 1920x1067 ratio, so the stage is
+     what gets cover-fitted to the pinned viewport — never the background on
+     its own. Sizing the two independently is what stretches the gradient and
+     slides its light off the type it was graded around. Growing by width
+     keeps the artboard's internal proportions exact and trims the edges,
+     which the composition already expects: the hand is drawn running off the
+     left edge. */
+  html.js-reveal .stats-pin .stats-stage {
+    width: max(100%, calc(100svh * 1920 / 1067));
+  }
+
+  /* Scroll-linked flourishes. Each falls back to its finished state when
+     `--p` is absent, so the still composition is what shows if the driver
+     never runs. */
+  html.js-reveal .stats-hand {
+    translate: calc((var(--p, 1) - 1) * 45%) 0;
+  }
+
+  html.js-reveal .stats-ghost {
+    translate: -50% calc((1 - var(--p, 1)) * 0.35em);
+    opacity: calc(0.35 + var(--p, 1) * 0.65);
+  }
+
+  html.js-reveal .stats-label {
+    translate: -50% calc((1 - var(--p, 1)) * 0.6em);
+  }
+
+  /* How much of the run is left. Pinning without this reads as a stuck page;
+     with it, the section visibly has a length. */
+  html.js-reveal .stats-progress {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: block;
+    height: 3px;
+    background: #ffffff;
+    opacity: 0.5;
+    transform-origin: left center;
+    scale: var(--p, 1) 1;
+  }
+}
+
 /* ==========================================================================
    TEAM SECTION — "Operators. Investors."
 
@@ -531,7 +619,11 @@
   position: absolute;
   inset: auto 0 0 0;
   padding: 6cqw 6cqw 7cqw;
-  background: linear-gradient(to top, rgba(4, 26, 58, 0.97) 66%, rgba(4, 26, 58, 0));
+  background: linear-gradient(
+    to top,
+    rgba(4, 26, 58, 0.97) 66%,
+    rgba(4, 26, 58, 0)
+  );
   opacity: 0;
   translate: 0 18%;
   transition:
@@ -615,7 +707,7 @@
      portrait, so a fill-colour measurement reads 28px short and leaves the
      artboard's own card peeking out from the background plate underneath. */
   .team-card[data-featured="true"] {
-    top: 38.140%;
+    top: 38.14%;
     width: 20.208%;
     height: 32.019%;
     z-index: 10;
@@ -818,27 +910,66 @@
   /* --- hero (the prototype's 1920 x 701 block, opened up by 72px under the
          header: the artboard clears its own navigation by 133px before the
          eyebrow, and the block keeps that distance here) --- */
-  .ab-hero-eyebrow { left: 6.25%; top: 25.39%; }
-  .ab-hero-title   { left: 6.25%; top: 34.15%; }
+  .ab-hero-eyebrow {
+    left: 6.25%;
+    top: 25.39%;
+  }
+  .ab-hero-title {
+    left: 6.25%;
+    top: 34.15%;
+  }
   /* 49.5% keeps the artboard's break — "…with the power" fits, "to" does not */
-  .ab-hero-body    { left: 6.25%; top: 66.86%; width: 49.5%; }
-  .ab-hero-links   { left: 6.41%; top: 85.54%; }
+  .ab-hero-body {
+    left: 6.25%;
+    top: 66.86%;
+    width: 49.5%;
+  }
+  .ab-hero-links {
+    left: 6.41%;
+    top: 85.54%;
+  }
   /* the crown lands level with the eyebrow; the jaw runs on into the band below */
-  .ab-hero-head    { left: 45.36%; top: 7.37%; width: 56.45%; }
+  .ab-hero-head {
+    left: 45.36%;
+    top: 7.37%;
+    width: 56.45%;
+  }
 
   /* the link's own size comes from the shared component, so it is the one
      thing here that still needs overriding */
-  .ab-hero-links a   { font-size: var(--ab-body); }
+  .ab-hero-links a {
+    font-size: var(--ab-body);
+  }
 
   /* --- circuit --- */
-  .ab-who-eyebrow { left: 7.81%; top: 32.9%; }
-  .ab-who-title   { left: 7.81%; top: 38.3%; }
+  .ab-who-eyebrow {
+    left: 7.81%;
+    top: 32.9%;
+  }
+  .ab-who-title {
+    left: 7.81%;
+    top: 38.3%;
+  }
 
   /* --- philosophy --- */
-  .ab-phi-chip    { left: 1.81%; top: -3.15%; width: 40%; }
-  .ab-phi-eyebrow { left: 42.66%; top: 22.4%; }
-  .ab-phi-title   { left: 42.66%; top: 26.3%; }
-  .ab-phi-list    { left: 42.71%; top: 47.0%; width: 54%; }
+  .ab-phi-chip {
+    left: 1.81%;
+    top: -3.15%;
+    width: 40%;
+  }
+  .ab-phi-eyebrow {
+    left: 42.66%;
+    top: 22.4%;
+  }
+  .ab-phi-title {
+    left: 42.66%;
+    top: 26.3%;
+  }
+  .ab-phi-list {
+    left: 42.71%;
+    top: 47%;
+    width: 54%;
+  }
 
   /* --- journey (traced from the prototype: band 1920 x 1006) ---
 
@@ -854,18 +985,39 @@
 
      Both heading lines are centred on the page (their ink centres land on
      960), so they are placed with left/right rather than a measured left. */
-  .ab-jr-group   { inset: 0; }
-  .ab-jr-eyebrow { left: 0; right: 0; top: 15.34%; }
-  .ab-jr-title   { left: 0; right: 0; top: 20.78%; }
-  .ab-jr-year    { left: 17.72%; top: 54.64%; }
+  .ab-jr-group {
+    inset: 0;
+  }
+  .ab-jr-eyebrow {
+    left: 0;
+    right: 0;
+    top: 15.34%;
+  }
+  .ab-jr-title {
+    left: 0;
+    right: 0;
+    top: 20.78%;
+  }
+  .ab-jr-year {
+    left: 17.72%;
+    top: 54.64%;
+  }
   /* 31.8% is the measure that keeps the artboard's four lines: "…need
      dedicated" fits on the first, "and" is pushed off the third. */
-  .ab-jr-copy    { left: 48.18%; top: 51.12%; width: 31.8%; }
+  .ab-jr-copy {
+    left: 48.18%;
+    top: 51.12%;
+    width: 31.8%;
+  }
 
   /* The rail. 44px buttons around a 34 x 21 chevron, and an 11px gap either
      side of the track, put the chevrons' ink on the prototype's 409–430 and
      835–855 and the track on its 448–807. */
-  .ab-jr-rail { left: 44.17%; top: 39.51%; height: 46.62%; }
+  .ab-jr-rail {
+    left: 44.17%;
+    top: 39.51%;
+    height: 46.62%;
+  }
 
   .ab-jr-track {
     position: relative;
@@ -892,20 +1044,33 @@
   }
 
   /* --- cta --- */
-  .ab-cta-title { left: 7.71%; top: 20.8%; width: 48%; }
-  .ab-cta-links { left: 8.23%; top: 73.4%; }
+  .ab-cta-title {
+    left: 7.71%;
+    top: 20.8%;
+    width: 48%;
+  }
+  .ab-cta-links {
+    left: 8.23%;
+    top: 73.4%;
+  }
 }
 
 /* The bar grows with the logo: h-9 / h-12 / h-14 / h-[70px] inside py-4 (py-5
    from lg), so its height steps at the same breakpoints. */
 @media (width >= 40rem) {
-  :root { --header-h: 80px; }
+  :root {
+    --header-h: 80px;
+  }
 }
 @media (width >= 64rem) {
-  :root { --header-h: 96px; }
+  :root {
+    --header-h: 96px;
+  }
 }
 @media (width >= 80rem) {
-  :root { --header-h: 110px; }
+  :root {
+    --header-h: 110px;
+  }
 }
 
 /* ==========================================================================
@@ -993,7 +1158,11 @@
   inset: auto 0 0 0;
   z-index: 3;
   padding: 7cqw 7cqw 8cqw;
-  background: linear-gradient(to top, rgba(2, 26, 58, 0.97) 70%, rgba(2, 26, 58, 0));
+  background: linear-gradient(
+    to top,
+    rgba(2, 26, 58, 0.97) 70%,
+    rgba(2, 26, 58, 0)
+  );
   opacity: 0;
   translate: 0 16%;
   transition:
@@ -1151,27 +1320,83 @@
   }
 
   /* --- hero --- */
-  .tm-hero-title  { left: 6.25%; top: 43.86%; }
-  .tm-hero-body   { left: 6.25%; top: 77.49%; width: 36%; }
-  .tm-hero-engine { left: 47.41%; top: -1.79%; width: 56.08%; }
+  .tm-hero-title {
+    left: 6.25%;
+    top: 43.86%;
+  }
+  .tm-hero-body {
+    left: 6.25%;
+    top: 77.49%;
+    width: 36%;
+  }
+  .tm-hero-engine {
+    left: 47.41%;
+    top: -1.79%;
+    width: 56.08%;
+  }
 
   /* --- partners --- */
-  .tm-pt-eyebrow { left: 0; right: 0; top: 13.90%; }
-  .tm-pt-title   { left: 0; right: 0; top: 16.97%; }
-  .tm-pt-body    { left: 24%; right: 24%; top: 27.17%; }
-  .tm-pt-grid    { left: 6.25%; right: 6.25%; top: 42.05%; }
+  .tm-pt-eyebrow {
+    left: 0;
+    right: 0;
+    top: 13.9%;
+  }
+  .tm-pt-title {
+    left: 0;
+    right: 0;
+    top: 16.97%;
+  }
+  .tm-pt-body {
+    left: 24%;
+    right: 24%;
+    top: 27.17%;
+  }
+  .tm-pt-grid {
+    left: 6.25%;
+    right: 6.25%;
+    top: 42.05%;
+  }
 
   /* --- the team --- */
-  .tm-gp-eyebrow { left: 0; right: 0; top: 9.34%; }
-  .tm-gp-title   { left: 0; right: 0; top: 11.83%; }
-  .tm-gp-body    { left: 0; right: 0; top: 20.10%; }
-  .tm-gp-grid    { left: 6.25%; right: 6.25%; top: 26.68%; }
+  .tm-gp-eyebrow {
+    left: 0;
+    right: 0;
+    top: 9.34%;
+  }
+  .tm-gp-title {
+    left: 0;
+    right: 0;
+    top: 11.83%;
+  }
+  .tm-gp-body {
+    left: 0;
+    right: 0;
+    top: 20.1%;
+  }
+  .tm-gp-grid {
+    left: 6.25%;
+    right: 6.25%;
+    top: 26.68%;
+  }
 
   /* --- mentors --- */
-  .tm-mt-eyebrow { left: 6.25%; top: 14.10%; }
-  .tm-mt-title   { left: 6.25%; top: 18.22%; }
-  .tm-mt-list    { left: 6.25%; top: 41.02%; width: 46%; }
-  .tm-mt-closing { left: 6.25%; top: 79.72%; }
+  .tm-mt-eyebrow {
+    left: 6.25%;
+    top: 14.1%;
+  }
+  .tm-mt-title {
+    left: 6.25%;
+    top: 18.22%;
+  }
+  .tm-mt-list {
+    left: 6.25%;
+    top: 41.02%;
+    width: 46%;
+  }
+  .tm-mt-closing {
+    left: 6.25%;
+    top: 79.72%;
+  }
   /* screen-blended so the plate's black ground drops out against the band */
   .tm-mentors-art {
     position: absolute;
@@ -1183,8 +1408,16 @@
   }
 
   /* --- cta --- */
-  .tm-cta-title { left: 0; right: 0; top: 16.55%; }
-  .tm-cta-link  { left: 0; right: 0; top: 68.94%; }
+  .tm-cta-title {
+    left: 0;
+    right: 0;
+    top: 16.55%;
+  }
+  .tm-cta-link {
+    left: 0;
+    right: 0;
+    top: 68.94%;
+  }
 
   /* the grids: four columns, 37 apart, as the prototype measures */
   .tm-pt-grid,
@@ -1314,11 +1547,27 @@
   background: transparent;
   transition:
     background-color 0.35s var(--ease-out-soft),
-    color 0.35s var(--ease-out-soft);
+    border-color 0.35s var(--ease-out-soft),
+    color 0.35s var(--ease-out-soft),
+    transform 0.35s var(--ease-out-soft);
 }
 
+/* Hover lifts and deepens the pill; the press drops it back, so the control
+   answers both the pointer and the click. */
 .pf-pill:hover {
-  background: color-mix(in srgb, var(--color-brand-sky) 12%, transparent);
+  transform: translateY(-2px);
+  border-color: var(--color-brand-deep);
+  background: color-mix(in srgb, var(--color-brand-sky) 14%, transparent);
+  color: var(--color-brand-deep);
+}
+
+.pf-pill:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.pf-pill[data-active]:hover {
+  background: var(--color-brand-deep);
+  color: #ffffff;
 }
 
 .pf-pill[data-active] {
@@ -1332,8 +1581,12 @@
   cursor: not-allowed;
 }
 
-.pf-pill[data-coming]:hover {
+.pf-pill[data-coming]:hover,
+.pf-pill[data-coming]:active {
+  transform: none;
+  border-color: #999999;
   background: transparent;
+  color: #999999;
 }
 
 /* --- the card grid --- */
@@ -1358,6 +1611,10 @@
   position: relative;
   /* 536.7 x 331 in the artboard */
   aspect-ratio: 536 / 331;
+  /* The client supplied logos, not photography. The panel keeps the card's
+     own blue and the mark sits inside it on the logo file's own ground, so
+     the card still reads as one object — a white plate here would be
+     indistinguishable from the white page behind the grid. */
 }
 
 .pf-card-body {
@@ -1428,8 +1685,18 @@
   .pf-hero {
     aspect-ratio: 1920 / 1255;
   }
+  /* The list band is the one stage whose height has to follow its content:
+     the artboard draws six cards and 8X has twelve, and the filters change
+     the count again at runtime. So instead of a fixed 1920/2244 ratio the
+     band is built out of the artboard's own measurements — the grid's ink
+     starts at y535 and the band closes 114 below the last row — with the
+     grid itself left in flow between them. At six cards this resolves to
+     exactly 2244, i.e. the artboard; beyond six the band grows by a row.
+     Every measurement is in vw because the stage runs the full width here. */
   .pf-list {
-    aspect-ratio: 1920 / 2244;
+    padding-top: 27.865vw; /* 535 / 19.2 */
+    padding-bottom: 5.938vw; /* 114 / 19.2 */
+    padding-inline: 0;
   }
   .pf-cta {
     aspect-ratio: 1920 / 823;
@@ -1441,27 +1708,51 @@
   }
 
   /* --- hero (band-relative ink: title 265, body 808) --- */
-  .pf-hero-title { left: 6.25%; top: 19.36%; }
-    /* 29.2% keeps the artboard's break: "…creating new" then "capabilities…" */
-  .pf-hero-body  { left: 6.25%; top: 64.47%; width: 29.2%; }
+  .pf-hero-title {
+    left: 6.25%;
+    top: 19.36%;
+  }
+  /* 29.2% keeps the artboard's break: "…creating new" then "capabilities…" */
+  .pf-hero-body {
+    left: 6.25%;
+    top: 64.47%;
+    width: 29.2%;
+  }
 
   /* --- list (no eyebrow: the export sets one, the prototype does not) --- */
   /* left, not centred: the prototype's heading holds the export's left edge
      after the type was reduced, so it sits left of the page's middle */
-  .pf-list-title   { left: 9.22%; top: 8.69%; }
-  .pf-filters      { left: 0; right: 0; top: 16.61%; }
-  /* three columns, 35 apart across the row and 55.7 between rows */
-  .pf-grid {
-    left: 6.25%;
-    right: 6.25%;
-    top: 23.85%;
+  /* Tops are vw, not %, because the band no longer has a fixed height for a
+     percentage to resolve against. 195 and 372.7 in the artboard. */
+  .pf-list-title {
+    left: 9.22%;
+    top: 10.156vw;
+  }
+  .pf-filters {
+    left: 0;
+    right: 0;
+    top: 19.412vw;
+  }
+  /* three columns, 35 apart across the row and 55.7 between rows. This one
+     stays in flow so the band's height follows the number of rows. */
+  .pf-stage .pf-grid {
+    position: static;
+    margin-inline: 6.25%;
     grid-template-columns: repeat(3, 1fr);
     gap: 2.901vw 1.823vw;
   }
 
   /* --- cta (band-relative ink: lines 202, link 547) --- */
-  .pf-cta-title { left: 0; right: 0; top: 22.6%; }
-  .pf-cta-link  { left: 0; right: 0; top: 64.8%; }
+  .pf-cta-title {
+    left: 0;
+    right: 0;
+    top: 22.6%;
+  }
+  .pf-cta-link {
+    left: 0;
+    right: 0;
+    top: 64.8%;
+  }
 }
 
 /* The year numeral's fill, sampled down the artboard's own glyphs rather than
@@ -1768,7 +2059,12 @@
   display: grid;
   place-items: center;
   aspect-ratio: 532 / 267;
-  background-image: linear-gradient(135deg, #175884 0%, #1f6a97 46%, #2c88bc 100%);
+  background-image: linear-gradient(
+    135deg,
+    #175884 0%,
+    #1f6a97 46%,
+    #2c88bc 100%
+  );
 }
 
 .md-ins-play {
@@ -1935,6 +2231,17 @@ html.js-reveal [data-reveal].is-visible {
   }
 }
 
+@keyframes marquee-x {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    /* Exactly one copy of the list. With the copies laid end to end this
+       lands the track back on an identical frame, so the loop has no seam. */
+    transform: translate3d(-25%, 0, 0);
+  }
+}
+
 @keyframes scroll-cue {
   0% {
     transform: translateY(-45%);
@@ -1963,6 +2270,28 @@ html.js-reveal [data-reveal].is-visible {
 }
 .animate-word-in {
   animation: word-in 0.45s var(--ease-out-expo) both;
+}
+.animate-marquee-x {
+  animation: marquee-x var(--marquee-duration, 30s) linear infinite;
+}
+
+/* Softens both ends of the sector strip so names travel in and out of view
+   instead of being cut off against the viewport edge. */
+.marquee-fade {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 4rem,
+    #000 calc(100% - 4rem),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 4rem,
+    #000 calc(100% - 4rem),
+    transparent
+  );
 }
 
 /* ==========================================================================

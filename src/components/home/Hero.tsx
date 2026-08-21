@@ -1,8 +1,9 @@
 import Image from "next/image";
 import { HeroMark } from "@/components/home/HeroMark";
+import { SectorStrip } from "@/components/home/SectorStrip";
 import { Reveal } from "@/components/ui/Reveal";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
-import { hero, sectors } from "@/content/home";
+import { hero } from "@/content/home";
 
 export function Hero() {
   return (
@@ -56,30 +57,7 @@ export function Hero() {
         </Reveal>
       </div>
 
-      {/* --- Sector strip --- */}
-      <div className="border-t border-ink-900/10">
-        <Reveal delay={80} className="container-8x py-6 lg:py-8">
-          <h2 className="sr-only-8x">Sectors we invest in</h2>
-          <ul
-            role="list"
-            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-x-6 lg:justify-between lg:gap-x-2"
-          >
-            {sectors.map((sector, i) => (
-              <li key={sector.name} className="flex items-center gap-4 sm:gap-6">
-                {i > 0 && (
-                  <span
-                    aria-hidden="true"
-                    className="h-[6px] w-[6px] shrink-0 rounded-full bg-brand lg:h-2 lg:w-2"
-                  />
-                )}
-                <span className="text-[length:clamp(0.6875rem,0.55rem+0.6vw,1.9rem)] tracking-[0.09em] whitespace-nowrap text-ink-500 uppercase">
-                  {sector.name}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-      </div>
+      <SectorStrip />
     </section>
   );
 }

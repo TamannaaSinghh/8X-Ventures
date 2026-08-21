@@ -59,9 +59,9 @@ export function SiteHeader() {
       }
       if (e.key !== "Tab" || !panel) return;
 
-      const items = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-        (el) => el.offsetParent !== null,
-      );
+      const items = Array.from(
+        panel.querySelectorAll<HTMLElement>(FOCUSABLE),
+      ).filter((el) => el.offsetParent !== null);
       if (items.length === 0) return;
 
       const first = items[0];
@@ -99,7 +99,7 @@ export function SiteHeader() {
       <div className="container-8x flex items-center justify-between gap-6 py-4 lg:py-5">
         <Link
           href="/"
-          className="shrink-0 transition-transform duration-500 hover:scale-[1.03]"
+          className="shrink-0 transition-transform duration-500 hover:scale-[1.03] active:scale-[0.99]"
           aria-label={`${siteConfig.name} — home`}
         >
           <Image
@@ -124,7 +124,7 @@ export function SiteHeader() {
                     "group relative inline-block py-2 text-[length:var(--text-nav)] tracking-[0.04em] uppercase transition-colors duration-300",
                     item.emphasis
                       ? "font-bold text-brand-cyan"
-                      : "font-light text-ink-600 hover:text-ink-900",
+                      : "font-light text-ink-600 hover:text-brand-deep",
                     isCurrent(item.href) && !item.emphasis && "text-ink-900",
                   )}
                 >
@@ -134,8 +134,11 @@ export function SiteHeader() {
                   <span
                     aria-hidden="true"
                     className={cn(
-                      "absolute inset-x-0 -bottom-0.5 h-[2px] origin-left rounded-full bg-brand-rule transition-transform duration-400 ease-[var(--ease-out-expo)]",
-                      isCurrent(item.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                      "absolute inset-x-0 -bottom-0.5 h-[2px] origin-left rounded-full bg-brand-rule transition-[transform,height,background-color] duration-400 ease-[var(--ease-out-expo)]",
+                      "group-hover:h-[3px] group-hover:bg-brand-deep group-focus-visible:h-[3px] group-focus-visible:scale-x-100",
+                      isCurrent(item.href)
+                        ? "scale-x-100"
+                        : "scale-x-0 group-hover:scale-x-100",
                     )}
                   />
                 </Link>
@@ -153,7 +156,9 @@ export function SiteHeader() {
           aria-controls="mobile-menu"
           className="relative z-10 grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-800 transition-colors hover:bg-ink-900/5 lg:hidden"
         >
-          <span className="sr-only-8x">{open ? "Close menu" : "Open menu"}</span>
+          <span className="sr-only-8x">
+            {open ? "Close menu" : "Open menu"}
+          </span>
           <span aria-hidden="true" className="relative block h-4 w-6">
             <span
               className={cn(
@@ -192,13 +197,17 @@ export function SiteHeader() {
                   href={item.href}
                   aria-current={isCurrent(item.href) ? "page" : undefined}
                   className={cn(
-                    "block border-b border-ink-900/8 py-4 text-lg tracking-[0.04em] uppercase transition-colors",
-                    item.emphasis ? "font-bold text-brand-cyan" : "font-light text-ink-700",
+                    "block border-b border-ink-900/8 py-4 text-lg tracking-[0.04em] uppercase transition-[color,background-color,padding] duration-300 hover:bg-brand-tint hover:ps-3",
+                    item.emphasis
+                      ? "font-bold text-brand-cyan"
+                      : "font-light text-ink-700 hover:text-brand-deep",
                     isCurrent(item.href) && "text-ink-900",
                   )}
                 >
                   {item.label}
-                  {isCurrent(item.href) && <span className="sr-only-8x"> (current page)</span>}
+                  {isCurrent(item.href) && (
+                    <span className="sr-only-8x"> (current page)</span>
+                  )}
                 </Link>
               </li>
             ))}
