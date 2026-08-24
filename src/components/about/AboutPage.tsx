@@ -3,6 +3,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import { JourneyTimeline } from "@/components/about/JourneyTimeline";
 import { PhilosophyScroller } from "@/components/about/PhilosophyScroller";
+import { ParallaxBand } from "@/components/ui/ParallaxBand";
 import {
   aboutCta,
   aboutHero,
@@ -25,7 +26,11 @@ export function AboutPage() {
       {/* `overflow-x: clip` rather than `hidden`: the head deliberately spills
           down into the band below (which `hidden` would cut off), but its right
           edge runs past the artboard and must not widen the document. */}
-      <section aria-labelledby="about-heading" className="relative overflow-x-clip bg-white">
+      <section
+        aria-labelledby="about-heading"
+        data-tilt="scene"
+        className="relative overflow-x-clip bg-white"
+      >
         <div className="ab-stage ab-hero">
           <Reveal className="ab-at ab-hero-eyebrow">
             <p className={cn("font-bold tracking-normal text-brand uppercase", EYEBROW)}>
@@ -67,21 +72,14 @@ export function AboutPage() {
               height={1200}
               priority
               sizes="(max-width: 1024px) 46vw, 55vw"
-              className="h-auto w-full"
+              className="art-3d h-auto w-full"
             />
           </div>
         </div>
       </section>
 
       {/* ================= WHO WE ARE ================= */}
-      <section aria-labelledby="who-heading" className="on-dark relative isolate overflow-hidden">
-        <Image
-          src="/images/about-circuit.jpg"
-          alt=""
-          fill
-          sizes="100vw"
-          className="-z-10 object-cover"
-        />
+      <ParallaxBand src="/images/about-circuit.jpg" labelledBy="who-heading" className="on-dark">
         <div className="ab-stage ab-circuit">
           <Reveal className="ab-at ab-who-eyebrow">
             <p className={cn("font-bold tracking-normal text-brand uppercase", EYEBROW)}>
@@ -96,10 +94,14 @@ export function AboutPage() {
             {aboutWho.line1} <span className="block">{aboutWho.line2}</span>
           </Reveal>
         </div>
-      </section>
+      </ParallaxBand>
 
       {/* ================= PHILOSOPHY ================= */}
-      <section aria-labelledby="philosophy-heading" className="relative overflow-hidden bg-white">
+      <section
+        aria-labelledby="philosophy-heading"
+        data-tilt="scene"
+        className="relative overflow-hidden bg-white"
+      >
         <div className="ab-stage ab-philosophy">
           <Reveal
             variant="scale"
@@ -111,7 +113,7 @@ export function AboutPage() {
               width={1000}
               height={1000}
               sizes="(max-width: 1024px) 62vw, 40vw"
-              className="h-auto w-full"
+              className="art-3d h-auto w-full"
             />
           </Reveal>
 
@@ -161,6 +163,10 @@ export function AboutPage() {
             <span className="text-brand-sky">{aboutJourney.line2}</span>
           </Reveal>
 
+          {/* Not wrapped in a `Reveal`: the timeline's blocks are `.ab-at`,
+              positioned against the stage, and any wrapper carrying a
+              `translate` becomes their containing block instead. It reveals
+              its own blocks from the inside. */}
           <JourneyTimeline />
         </div>
       </section>

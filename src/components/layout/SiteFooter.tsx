@@ -7,6 +7,7 @@ import {
   siteConfig,
   socialLinks,
 } from "@/content/site";
+import { Reveal } from "@/components/ui/Reveal";
 import { cn } from "@/lib/cn";
 
 /* Keyed by `short` in `socialLinks` — X, LinkedIn and YouTube, the three
@@ -34,30 +35,35 @@ export function SiteFooter() {
     <footer className="bg-white">
       <div className="footer-stage">
         {/* --- Identity --- */}
-        <Link
-          href="/"
-          aria-label={`${siteConfig.name} — home`}
-          className="footer-logo block max-lg:w-[15.6rem]"
-        >
-          <Image
-            src="/images/logo-footer.png"
-            alt=""
-            width={1000}
-            height={500}
-            className="h-auto w-full"
-          />
-        </Link>
+        <Reveal className="footer-logo max-lg:w-[15.6rem]">
+          <Link href="/" aria-label={`${siteConfig.name} — home`} className="block">
+            <Image
+              src="/images/logo-footer.png"
+              alt=""
+              width={1000}
+              height={500}
+              className="h-auto w-full"
+            />
+          </Link>
+        </Reveal>
 
-        <p
+        <Reveal
+          as="p"
+          delay={80}
           className={cn(
             "footer-blurb leading-[1.2] font-light text-ink-300 max-lg:mt-8 max-lg:max-w-[34ch]",
             BODY_SIZE,
           )}
         >
           {footerBlurb}
-        </p>
+        </Reveal>
 
-        <ul role="list" className="footer-socials max-lg:mt-8 max-lg:gap-5">
+        <Reveal
+          as="ul"
+          role="list"
+          delay={160}
+          className="footer-socials max-lg:mt-8 max-lg:gap-5"
+        >
           {socialLinks.map((social) => (
             <li key={social.short}>
               <a
@@ -80,13 +86,15 @@ export function SiteFooter() {
               </a>
             </li>
           ))}
-        </ul>
+        </Reveal>
 
         {/* --- Link columns --- */}
         {footerColumns.map((column, i) => (
-          <nav
+          <Reveal
+            as="nav"
             key={column.heading}
             aria-labelledby={`footer-${column.heading}`}
+            delay={200 + i * 90}
             className={cn("footer-col", COL_CLASS[i], "max-lg:mt-12")}
           >
             <h2
@@ -134,14 +142,18 @@ export function SiteFooter() {
                 </li>
               ))}
             </ul>
-          </nav>
+          </Reveal>
         ))}
 
-        <div className="footer-rule h-px bg-[#A5D7FA] max-lg:mt-16" />
+        <Reveal className="footer-rule h-px bg-[#A5D7FA] max-lg:mt-16" />
 
-        <p className="footer-copy text-center text-[length:clamp(0.75rem,1.125vw,1.35rem)] leading-[1.2] font-light tracking-[0.2em] text-ink-950 uppercase max-lg:mt-8">
+        <Reveal
+          as="p"
+          delay={80}
+          className="footer-copy text-center text-[length:clamp(0.75rem,1.125vw,1.35rem)] leading-[1.2] font-light tracking-[0.2em] text-ink-950 uppercase max-lg:mt-8"
+        >
           © {siteConfig.name} {copyrightYear}
-        </p>
+        </Reveal>
       </div>
     </footer>
   );

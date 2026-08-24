@@ -1,5 +1,6 @@
 "use client";
 
+import { Reveal } from "@/components/ui/Reveal";
 import { aboutJourney } from "@/content/about";
 import { useCarousel } from "@/hooks/useCarousel";
 import { cn } from "@/lib/cn";
@@ -60,22 +61,29 @@ export function JourneyTimeline() {
       onKeyDown={onKeyDown}
       className="ab-at ab-jr-group"
     >
-      <div className="ab-at ab-jr-year max-lg:mt-12 max-lg:text-center">
+      <Reveal className="ab-at ab-jr-year max-lg:mt-12 max-lg:text-center">
         <p
           aria-hidden="true"
-          /* the fill itself is in globals.css, sampled off the artboard */
+          /* Flat, not the artboard's clipped gradient. That fill ran from a
+             bright blue down to near-black, and on this band — a dark
+             photograph — the foot of every numeral sank into its own
+             background. The top of the same gradient is what `brand-sky`
+             already is, so the year keeps its colour and loses the fade. */
           className={cn(
-            "bg-clip-text leading-none font-bold tracking-normal text-transparent transition-opacity duration-500 select-none",
+            "leading-none font-bold tracking-normal text-brand-sky transition-opacity duration-500 select-none",
             YEAR,
           )}
         >
           {entry.year}
         </p>
-      </div>
+      </Reveal>
 
       {/* the rail: chevrons step the timeline, the lit segment shows where in
           it you are */}
-      <div className="ab-at ab-jr-rail flex flex-col items-center justify-between max-lg:hidden">
+      <Reveal
+        delay={80}
+        className="ab-at ab-jr-rail flex flex-col items-center justify-between max-lg:hidden"
+      >
         <button type="button" onClick={prev} disabled={index === 0} className={btn}>
           <Chevron up />
           <span className="sr-only-8x">{`Show ${prevYear}`}</span>
@@ -100,9 +108,9 @@ export function JourneyTimeline() {
           <Chevron />
           <span className="sr-only-8x">{`Show ${nextYear}`}</span>
         </button>
-      </div>
+      </Reveal>
 
-      <div className="ab-at ab-jr-copy max-lg:mt-8">
+      <Reveal delay={160} className="ab-at ab-jr-copy max-lg:mt-8">
         <h3 className={cn("ab-jr-kicker leading-[1.2] font-bold text-brand-sky", EYEBROW)}>
           <span className="sr-only-8x">{entry.year}, </span>
           {entry.kicker}
@@ -144,7 +152,7 @@ export function JourneyTimeline() {
         <p aria-live="polite" className="sr-only-8x">
           {`${entry.year}. ${entry.kicker}. ${entry.title}. ${entry.body}`}
         </p>
-      </div>
+      </Reveal>
     </div>
   );
 }

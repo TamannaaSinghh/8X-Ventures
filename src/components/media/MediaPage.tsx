@@ -39,7 +39,7 @@ export function MediaPage() {
   return (
     <>
       {/* ================= HERO ================= */}
-      <section aria-labelledby="media-heading" className="md-hero">
+      <section aria-labelledby="media-heading" data-tilt="scene" className="md-hero">
         <div className="md-shell">
           <div className="md-hero-copy">
             <Reveal>
@@ -64,14 +64,14 @@ export function MediaPage() {
               height={mediaHero.art.height}
               priority
               sizes="(max-width: 1024px) 100vw, 51vw"
-              className="h-auto w-full"
+              className="art-3d h-auto w-full"
             />
           </Reveal>
         </div>
       </section>
 
       {/* ================= THE BOOK ================= */}
-      <section aria-labelledby="book-heading" className="md-book">
+      <section aria-labelledby="book-heading" data-tilt="scene" className="md-book">
         <div className="md-shell md-book-grid">
           <Reveal variant="scale" className="md-book-art">
             <Image
@@ -80,7 +80,7 @@ export function MediaPage() {
               width={mediaBook.cover.width}
               height={mediaBook.cover.height}
               sizes="(max-width: 1024px) 70vw, 26vw"
-              className="h-auto w-full"
+              className="art-3d h-auto w-full"
             />
           </Reveal>
 
@@ -116,8 +116,8 @@ export function MediaPage() {
 
           <ul role="list" className="md-lp-cards">
             {lpDay.editions.map((edition, i) => (
-              <Reveal as="li" key={edition.year} delay={i * 120}>
-                <Link href={edition.href} className="group md-lp-card">
+              <Reveal as="li" variant="card" key={edition.year} delay={i * 120}>
+                <Link href={edition.href} data-tilt="card" className="group md-lp-card">
                   <div className="md-lp-still">
                     <Image
                       src={edition.image}
@@ -165,8 +165,8 @@ export function MediaPage() {
 
           <ul role="list" className="md-ins-cards">
             {mediaInsights.items.map((item, i) => (
-              <Reveal as="li" key={item.title} delay={i * 120}>
-                <Link href={item.href} className="group md-ins-card">
+              <Reveal as="li" variant="card" key={item.title} delay={i * 120}>
+                <Link href={item.href} data-tilt="card" className="group md-ins-card">
                   <div aria-hidden="true" className="md-ins-plate">
                     <span className="md-ins-play">
                       <PlayGlyph />

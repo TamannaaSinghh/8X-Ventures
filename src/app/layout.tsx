@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { TiltRoot } from "@/components/ui/TiltRoot";
 import { siteConfig } from "@/content/site";
 import "./globals.css";
 
@@ -72,17 +73,34 @@ export const viewport: Viewport = {
 
 /**
  * Marks the document as script-capable before first paint so the scroll-reveal
- * start state only applies when we can actually animate it out again.
+ * and image-arrival start states only apply when we can actually clear them
+ * again — without scripting the page renders plainly and completely.
+ *
+ * The image half tags each picture the moment the browser has its pixels, so
+ * CSS can bring it in rather than letting it snap into a reserved box. `load`
+ * does not bubble, hence the capture listeners; `error` marks a broken picture
+ * too, so a missing file leaves a gap rather than an invisible one. The sweeps
+ * catch anything already decoded from cache before the listeners were attached.
  */
-const REVEAL_BOOTSTRAP = `try{if('IntersectionObserver' in window)document.documentElement.classList.add('js-reveal')}catch(e){}`;
+const BOOTSTRAP = `try{
+var d=document,r=d.documentElement;
+if('IntersectionObserver' in window)r.classList.add('js-reveal');
+r.classList.add('js-img');
+var mark=function(t){if(t&&t.tagName==='IMG')t.setAttribute('data-loaded','')};
+var sweep=function(){for(var l=d.images,i=0;i<l.length;i++)if(l[i].complete)mark(l[i])};
+d.addEventListener('load',function(v){mark(v.target)},true);
+d.addEventListener('error',function(v){mark(v.target)},true);
+d.addEventListener('DOMContentLoaded',sweep);
+window.addEventListener('load',sweep);
+}catch(x){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     // suppressHydrationWarning: the bootstrap script below adds `js-reveal`
-    // to <html> before React hydrates, which is an expected mismatch.
+    // and `js-img` to <html> before React hydrates, an expected mismatch.
     <html lang="en-IN" className={sans.variable} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: REVEAL_BOOTSTRAP }} />
+        <script dangerouslySetInnerHTML={{ __html: BOOTSTRAP }} />
       </head>
       <body className="min-h-dvh bg-white antialiased">
         <a
@@ -99,6 +117,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
 
         <SiteFooter />
+
+        {/* Delegated pointer depth for every `data-tilt` surface on the page.
+            Renders nothing; it only listens. */}
+        <TiltRoot />
       </body>
     </html>
   );

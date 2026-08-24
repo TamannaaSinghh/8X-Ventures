@@ -24,9 +24,27 @@ function LinkedInIcon() {
  * kept in flow rather than mounted, so the link inside stays tabbable and
  * tabbing to it is what opens the panel.
  */
-function PersonCard({ person, variant }: { person: Person; variant: "partner" | "team" }) {
+function PersonCard({
+  person,
+  variant,
+  index = 0,
+}: {
+  person: Person;
+  variant: "partner" | "team";
+  /** Position in its grid, so a row of cards arrives one after another. */
+  index?: number;
+}) {
   return (
-    <article className={cn("tm-card", variant === "team" && "tm-card-sm")}>
+    /* The card is the grid's own item, so it reveals as itself rather than
+       inside a wrapper that would break the grid. `variant="card"` rides
+       `translate`/`scale`, which leaves `transform` to the pointer lean. */
+    <Reveal
+      as="article"
+      variant="card"
+      delay={Math.min(index, 5) * 90}
+      data-tilt="card"
+      className={cn("tm-card", variant === "team" && "tm-card-sm")}
+    >
       <div className="tm-card-head">
         <h3 className="tm-card-name">{person.name}</h3>
         <p className="tm-card-role">{person.role}</p>
@@ -55,7 +73,7 @@ function PersonCard({ person, variant }: { person: Person; variant: "partner" | 
           <span className="sr-only-8x">{` profile for ${person.name} (opens in a new tab)`}</span>
         </a>
       </div>
-    </article>
+    </Reveal>
   );
 }
 
@@ -63,7 +81,11 @@ export function TeamPage() {
   return (
     <>
       {/* ================= HERO ================= */}
-      <section aria-labelledby="team-heading" className="tm-hero-section relative overflow-x-clip bg-white">
+      <section
+        aria-labelledby="team-heading"
+        data-tilt="scene"
+        className="tm-hero-section relative overflow-x-clip bg-white"
+      >
         <div className="tm-stage tm-hero">
           <Reveal as="h1" id="team-heading" className={cn("tm-at tm-hero-title text-ink-950", DISPLAY)}>
             {teamHero.line1} <span className="block text-brand-sky">{teamHero.line2}</span>
@@ -87,7 +109,7 @@ export function TeamPage() {
               height={1500}
               priority
               sizes="(max-width: 1024px) 52vw, 57vw"
-              className="h-auto w-full"
+              className="art-3d h-auto w-full"
             />
           </div>
         </div>
@@ -121,8 +143,8 @@ export function TeamPage() {
           </Reveal>
 
           <div className="tm-at tm-pt-grid">
-            {teamPartners.people.map((p) => (
-              <PersonCard key={p.id} person={p} variant="partner" />
+            {teamPartners.people.map((p, i) => (
+              <PersonCard key={p.id} person={p} variant="partner" index={i} />
             ))}
           </div>
         </div>
@@ -152,8 +174,8 @@ export function TeamPage() {
           </Reveal>
 
           <div className="tm-at tm-gp-grid">
-            {teamGroup.people.map((p) => (
-              <PersonCard key={p.id} person={p} variant="team" />
+            {teamGroup.people.map((p, i) => (
+              <PersonCard key={p.id} person={p} variant="team" index={i} />
             ))}
           </div>
         </div>
@@ -187,9 +209,9 @@ export function TeamPage() {
             {teamMentors.line1} <span className="block">{teamMentors.line2}</span>
           </Reveal>
 
-          <div className="tm-at tm-mt-list max-lg:mt-10">
+          <Reveal delay={120} className="tm-at tm-mt-list max-lg:mt-10">
             <MentorRail />
-          </div>
+          </Reveal>
 
           <Reveal className="tm-at tm-mt-closing max-lg:mt-10">
             <p className="tm-mt-closing-text font-bold text-white">

@@ -30,6 +30,14 @@ const NODES = NODE_X.map((x) => ({
 
 const ARC_PATH = `M 0 ${arcY(0).toFixed(1)} Q 960 ${(4 * 232 - 2 * arcY(0)) / 2} 1920 ${arcY(0).toFixed(1)}`;
 
+/** Shortest signed distance from `from` to `to` around a ring of `length`. */
+const ringOffset = (from: number, to: number, length: number) => {
+  let d = to - from;
+  if (d > length / 2) d -= length;
+  if (d < -length / 2) d += length;
+  return d;
+};
+
 /* --------------------------------------------------------------------------
    Stage icons
    -------------------------------------------------------------------------- */
@@ -102,12 +110,19 @@ function StageIcon({ icon, className }: { icon: JourneyStage["icon"]; className?
 /* -------------------------------------------------------------------------- */
 
 export function FounderJourney() {
-  const { index, goTo, next, prev, onKeyDown, offsetOf } = useCarousel({
+  const { index, previousIndex, goTo, next, prev, onKeyDown, offsetOf } = useCarousel({
     length: journey.length,
   });
 
   const active = journey[index];
   const centre = Math.floor(journey.length / 2);
+
+  /* The arc has one slot per stage, so advancing recycles the node that falls
+     off one end round to the other. Animating `left` across that wrap would
+     fly the node back over the whole arc, so it is repositioned without a
+     transition while every other node glides one slot. Every node shifts by
+     `-step` slots; the ones that do not are the ones that wrapped. */
+  const step = ringOffset(previousIndex, index, journey.length);
 
   return (
     <section aria-labelledby="journey-heading" className="relative overflow-hidden bg-white">
@@ -159,9 +174,12 @@ export function FounderJourney() {
             </svg>
 
             {journey.map((stage, i) => {
-              const pos = NODES[centre + offsetOf(i)];
+              const slot = centre + offsetOf(i);
+              const pos = NODES[slot];
               if (!pos) return null;
               const isActive = i === index;
+              const wrapped =
+                slot - (centre + ringOffset(previousIndex, i, journey.length)) !== -step;
 
               return (
                 <button
@@ -171,7 +189,9 @@ export function FounderJourney() {
                   aria-current={isActive ? "true" : undefined}
                   className={cn(
                     "absolute grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full",
-                    "transition-[left,top,width,background-color] duration-700 ease-[var(--ease-out-expo)]",
+                    wrapped
+                      ? "transition-none"
+                      : "transition-[left,top,width,background-color] duration-700 ease-[var(--ease-out-expo)]",
                     "[will-change:left,top]",
                     /* Width is a share of the strip; aspect-square keeps the
                        nodes circular regardless of the strip's aspect ratio. */
@@ -204,14 +224,14 @@ export function FounderJourney() {
           </div>
 
           {/* --- Active stage --- */}
-          <div className="mt-8 text-center lg:mt-2">
+          <Reveal delay={160} className="mt-8 text-center lg:mt-2">
             <h3 className="text-[length:var(--text-display-sm)] leading-tight font-bold tracking-normal text-balance text-brand">
               {active.title}
             </h3>
             <p className="mx-auto mt-5 max-w-[52ch] text-[length:var(--text-body-lg)] leading-[1.4] font-light text-pretty text-ink-900">
               {active.description}
             </p>
-          </div>
+          </Reveal>
 
           <CarouselControls
             className="mt-8 lg:mt-10"

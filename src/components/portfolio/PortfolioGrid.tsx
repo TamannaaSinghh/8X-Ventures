@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { Reveal } from "@/components/ui/Reveal";
 import { portfolioCards, portfolioFilters } from "@/content/portfolio";
 
 /**
@@ -27,7 +28,7 @@ export function PortfolioGrid() {
 
   return (
     <>
-      <div className="pf-at pf-filters" role="group" aria-label="Filter portfolio by fund">
+      <Reveal className="pf-at pf-filters" role="group" aria-label="Filter portfolio by fund">
         {portfolioFilters.map((f) => {
           const isActive = f.id === active;
           return (
@@ -47,11 +48,22 @@ export function PortfolioGrid() {
             </button>
           );
         })}
-      </div>
+      </Reveal>
 
       <div className="pf-at pf-grid">
-        {cards.map((card) => (
-          <article key={card.id} className="pf-card">
+        {cards.map((card, i) => (
+          /* The grid's own item, so the card still lays out as a grid child
+             rather than being wrapped in one. Stepped across the row and then
+             capped, so a long list does not take longer to arrive the further
+             down it goes. */
+          <Reveal
+            as="article"
+            variant="card"
+            delay={Math.min(i, 5) * 90}
+            key={card.id}
+            data-tilt="card"
+            className="pf-card"
+          >
             {/* The client supplied logos rather than photography, so the
                 panel is a white plate with the mark held inside it — same
                 box, same aspect, `contain` instead of `cover`. */}
@@ -85,7 +97,7 @@ export function PortfolioGrid() {
                 <span className="block font-light">{card.stageNote}</span>
               </p>
             </div>
-          </article>
+          </Reveal>
         ))}
       </div>
 

@@ -1,83 +1,80 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { teamMentors } from "@/content/team";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { cn } from "@/lib/cn";
+import { useLoopScroll } from "@/hooks/useLoopScroll";
 
 /**
- * The five mentor bands, with the highlight — and the lit segment of the rule
- * beside them — stepping from one to the next as the section crosses the
- * viewport. The artboard can only show a still frame and lights the third.
+ * Copies of the mentor list laid end to end down the track. `useLoopScroll`
+ * parks on the second, leaving a copy of runway either way before it wraps.
+ */
+const COPIES = 4;
+
+/** Blocks in the rail — enough to keep a thumb in view across the wrap. */
+const RAIL_BLOCKS = 3;
+
+/**
+ * The five mentor bands, on a scroll of their own.
  *
- * As with `/about`'s philosophy list, nothing is hidden: all five are always
- * rendered and readable, the highlight is emphasis only. Under
- * `prefers-reduced-motion` it rests on the artboard's default instead of
- * tracking the scroll.
+ * This used to read `window.scroll` and step the highlight as the section
+ * crossed the viewport, which tied its pace to the page's. It is now the
+ * reader's to move, the way `/about`'s philosophy list is: a window one line
+ * per mentor tall — so the band keeps the footprint the static list had — that
+ * they scroll themselves, looping without end in either direction.
+ *
+ * The emphasis comes from `marquee-fade-y`, a mask that floors at 0.28 rather
+ * than at transparent: whichever name is passing the centre is lit and the rest
+ * fall away either side. The rail's thumb follows the same scroll through
+ * `--loop-u`, travelling down as the names travel up.
+ *
+ * Nothing is hidden — every mentor is one turn away — and nothing moves unless
+ * the reader moves it, so there is no motion to opt out of.
  */
 export function MentorRail() {
-  const reduced = useReducedMotion();
-  const ref = useRef<HTMLOListElement>(null);
-  const [index, setIndex] = useState<number>(teamMentors.activeIndex);
+  const { viewportRef, progressRef } = useLoopScroll(COPIES);
 
-  useEffect(() => {
-    if (reduced) return;
-    const el = ref.current;
-    if (!el) return;
-
-    let frame = 0;
-    const onScroll = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        const r = el.getBoundingClientRect();
-        const travelled = window.innerHeight - r.top;
-        const span = window.innerHeight * 0.85 + r.height;
-        const p = Math.min(Math.max(travelled / span, 0), 0.9999);
-        setIndex(Math.floor(p * teamMentors.items.length));
-      });
-    };
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [reduced]);
-
-  const active = reduced ? teamMentors.activeIndex : index;
+  const thumbVars = {
+    "--rail-index": teamMentors.activeIndex,
+    "--rail-count": teamMentors.items.length,
+  } as React.CSSProperties;
 
   return (
-    <div className="tm-rail-wrap">
+    <div
+      ref={progressRef}
+      className="tm-rail-wrap"
+      style={{ "--tm-count": teamMentors.items.length } as React.CSSProperties}
+    >
       <span aria-hidden="true" className="tm-rail">
-        <span
-          className="tm-rail-thumb"
-          style={
-            {
-              "--rail-index": active,
-              "--rail-count": teamMentors.items.length,
-            } as React.CSSProperties
-          }
-        />
+        <span className="tm-rail-track">
+          {Array.from({ length: RAIL_BLOCKS }, (_, block) => (
+            <span key={block} className="tm-rail-block">
+              <span className="tm-rail-thumb" style={thumbVars} />
+            </span>
+          ))}
+        </span>
       </span>
 
-      <ol ref={ref} className="tm-mentors">
-        {teamMentors.items.map((item, i) => (
-          <li
-            key={item}
-            aria-current={i === active ? "step" : undefined}
-            className={cn(
-              "tm-mentor transition-[color] duration-500 ease-[var(--ease-out-soft)]",
-              i === active ? "text-white" : "text-white/32",
-            )}
+      <div
+        ref={viewportRef}
+        tabIndex={0}
+        role="group"
+        aria-label="Our journey — scroll through the mentor bands"
+        className="tm-mentors-window loop-scroll marquee-fade-y"
+      >
+        {Array.from({ length: COPIES }, (_, copy) => (
+          <ol
+            key={copy}
+            /* One copy carries the meaning; the rest are scenery. */
+            aria-hidden={copy > 0 ? "true" : undefined}
+            className="tm-mentors text-white"
           >
-            {item}
-          </li>
+            {teamMentors.items.map((item) => (
+              <li key={item} className="tm-mentor">
+                {item}
+              </li>
+            ))}
+          </ol>
         ))}
-      </ol>
+      </div>
     </div>
   );
 }

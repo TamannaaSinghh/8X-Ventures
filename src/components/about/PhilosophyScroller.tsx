@@ -1,73 +1,67 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { aboutPhilosophy } from "@/content/about";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { cn } from "@/lib/cn";
+import { useLoopScroll } from "@/hooks/useLoopScroll";
 
 /**
- * The three principles, with the highlight stepping from one to the next as the
- * section moves through the viewport — the artboard shows the middle one lit
- * and the two either side dimmed.
+ * Copies of the principles laid end to end down the track. `useLoopScroll`
+ * parks on the second, leaving a copy of runway either way before it wraps.
+ */
+const COPIES = 4;
+
+const LINE = "clamp(1.75rem, 4.42vw, 5.3rem)";
+
+const ITEM_CLASS =
+  "text-[length:var(--phi-line)] leading-[1.22] font-bold tracking-[0.005em] whitespace-nowrap uppercase";
+
+/**
+ * The three principles, on a scroll of their own.
  *
- * Nothing is hidden: all three lines are always rendered and readable, the
- * highlight is emphasis only. So there is no content behind the scroll, and
- * under `prefers-reduced-motion` the highlight simply rests on the artboard's
- * default rather than tracking the scroll.
+ * The list used to read `window.scroll` and step the highlight as the section
+ * crossed the viewport, which tied its pace to the page's. It is now the
+ * reader's to move: a three-line window they scroll themselves, looping without
+ * end in either direction — past the last principle is the first again.
+ *
+ * The emphasis comes from `marquee-fade-y`, a mask that floors at 0.28 rather
+ * than at transparent: whichever line is passing the centre is lit and its
+ * neighbours are dimmed, with no per-line state to keep in step with the
+ * scroll. Nothing is hidden — every principle is one turn away, and nothing
+ * moves unless the reader moves it, so there is no motion to opt out of.
  */
 export function PhilosophyScroller() {
-  const reduced = useReducedMotion();
-  const ref = useRef<HTMLOListElement>(null);
-  // annotated: `activeIndex` is a literal type through `as const`
-  const [index, setIndex] = useState<number>(aboutPhilosophy.activeIndex);
-
-  useEffect(() => {
-    if (reduced) return;
-    const el = ref.current;
-    if (!el) return;
-
-    let frame = 0;
-    const onScroll = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        const r = el.getBoundingClientRect();
-        // 0 when the list first meets the bottom of the viewport, 1 when it
-        // has travelled a full viewport height past it
-        const travelled = window.innerHeight - r.top;
-        const span = window.innerHeight * 0.85 + r.height;
-        const p = Math.min(Math.max(travelled / span, 0), 0.9999);
-        setIndex(Math.floor(p * aboutPhilosophy.items.length));
-      });
-    };
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [reduced]);
-
-  const active = reduced ? aboutPhilosophy.activeIndex : index;
+  const { viewportRef } = useLoopScroll(COPIES);
 
   return (
-    <ol ref={ref} className="relative border-l-[8px] border-brand-sky pl-[4.4%]">
-      {aboutPhilosophy.items.map((item, i) => (
-        <li
-          key={item}
-          aria-current={i === active ? "step" : undefined}
-          className={cn(
-            "text-[length:clamp(1.75rem,4.42vw,5.3rem)] leading-[1.22] font-bold tracking-[0.005em] whitespace-nowrap uppercase",
-            "transition-[color,opacity] duration-500 ease-[var(--ease-out-soft)]",
-            i === active ? "text-brand-sky" : "text-brand-sky/28",
-          )}
+    <div style={{ "--phi-line": LINE } as React.CSSProperties}>
+      {/* The rail belongs to the window, not to the track, so it stays put
+          while the principles travel past it. */}
+      <div className="border-l-[8px] border-brand-sky pl-[4.4%]">
+        {/* Three lines tall — the artboard's lit centre and its two
+            neighbours. Spelled out rather than composed, since Tailwind reads
+            class names straight from the source. */}
+        <div
+          ref={viewportRef}
+          tabIndex={0}
+          role="group"
+          aria-label="How we work — scroll through the principles"
+          className="loop-scroll marquee-fade-y h-[calc(var(--phi-line)*1.22*3)]"
         >
-          {item}
-        </li>
-      ))}
-    </ol>
+          {Array.from({ length: COPIES }, (_, copy) => (
+            <ol
+              key={copy}
+              /* One copy carries the meaning; the rest are scenery. */
+              aria-hidden={copy > 0 ? "true" : undefined}
+              className="text-brand-sky"
+            >
+              {aboutPhilosophy.items.map((item) => (
+                <li key={item} className={ITEM_CLASS}>
+                  {item}
+                </li>
+              ))}
+            </ol>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

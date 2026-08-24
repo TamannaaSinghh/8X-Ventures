@@ -12,7 +12,7 @@ function ArrowRight() {
       fill="none"
       aria-hidden="true"
       focusable="false"
-      className="h-6 w-6 shrink-0 text-brand transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:translate-x-1.5"
+      className="h-6 w-6 shrink-0 text-brand transition-transform duration-500 ease-[var(--ease-out-soft)] group-hover:translate-x-2"
     >
       <path
         d="M4 12h15m0 0-5.5-5.5M19 12l-5.5 5.5"
@@ -45,10 +45,15 @@ export function LpDaySection() {
         {/* --- Edition cards --- */}
         <ul role="list" className="mt-14 grid gap-8 lg:mt-20 lg:grid-cols-2 lg:gap-10">
           {lpDay.editions.map((edition, i) => (
-            <Reveal as="li" key={edition.year} delay={i * 120}>
+            <Reveal as="li" variant="card" key={edition.year} delay={i * 120}>
+              {/* Soft cubic rather than expo: expo covers most of its distance
+                  in the first quarter of the duration, which reads as a snap
+                  when the pointer crosses from one card to the other and both
+                  cards animate at once. */}
               <Link
                 href={edition.href}
-                className="group block overflow-hidden rounded-[18px] bg-white shadow-[0_18px_45px_-24px_rgba(0,40,90,0.35)] transition-[transform,box-shadow] duration-500 ease-[var(--ease-out-expo)] hover:-translate-y-1 hover:shadow-[0_28px_60px_-26px_rgba(0,40,90,0.45)]"
+                data-tilt="card"
+                className="group relative block overflow-hidden rounded-[18px] bg-white shadow-[0_18px_45px_-24px_rgba(0,40,90,0.35)] hover:-translate-y-1.5 hover:shadow-[0_28px_60px_-26px_rgba(0,40,90,0.45)] focus-visible:-translate-y-1.5 focus-visible:shadow-[0_28px_60px_-26px_rgba(0,40,90,0.45)]"
               >
                 <div className="relative aspect-[16/9] w-full overflow-hidden">
                   <Image
@@ -56,17 +61,27 @@ export function LpDaySection() {
                     alt={edition.imageAlt}
                     fill
                     sizes="(max-width: 1024px) 92vw, 46vw"
-                    className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
+                    className="transform-gpu object-cover transition-transform duration-700 ease-[var(--ease-out-soft)] [will-change:transform] group-hover:scale-[1.05] group-focus-visible:scale-[1.05]"
                   />
                   {/* Light wash under the year label, matching the artboard's
                       own vignette. Not enough to guarantee 4.5:1 on a bright
                       photograph — see README. */}
                   <div
                     aria-hidden="true"
-                    className="absolute inset-0"
+                    className="absolute inset-0 opacity-100 transition-opacity duration-500 ease-[var(--ease-out-soft)] group-hover:opacity-0"
                     style={{
                       backgroundImage:
                         "linear-gradient(to top, rgba(6,34,71,0.45) 0%, rgba(6,34,71,0.18) 18%, rgba(6,34,71,0) 40%)",
+                    }}
+                  />
+                  {/* Cross-fades with the wash above so the year label keeps
+                      its footing as the photograph brightens under the zoom. */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 opacity-0 transition-opacity duration-500 ease-[var(--ease-out-soft)] group-hover:opacity-100 group-focus-visible:opacity-100"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(to top, rgba(6,34,71,0.58) 0%, rgba(6,34,71,0.26) 22%, rgba(6,34,71,0) 46%)",
                     }}
                   />
                   <p className="absolute bottom-5 left-6 text-[clamp(1.5rem,2.1vw,2.5rem)] font-bold text-white">
@@ -75,7 +90,7 @@ export function LpDaySection() {
                 </div>
 
                 <div className="flex items-center justify-between gap-6 px-6 py-6 lg:px-8">
-                  <span className="text-[length:var(--text-body-lg)] font-light text-ink-400">
+                  <span className="text-[length:var(--text-body-lg)] font-light text-ink-400 transition-colors duration-500 ease-[var(--ease-out-soft)] group-hover:text-ink-900 group-focus-visible:text-ink-900">
                     {`Gallery & Highlights`}
                   </span>
                   <ArrowRight />

@@ -101,6 +101,9 @@ export function TeamCarousel() {
                   <Image
                     src={member.image}
                     alt=""
+                    /* Carries its own grayscale, which a keyframed arrival
+                       would override and then snap back on. */
+                    data-img-in="fade"
                     fill
                     sizes="(max-width: 1024px) 78vw, 21vw"
                     className={cn(

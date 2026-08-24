@@ -1,4 +1,5 @@
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { Reveal } from "@/components/ui/Reveal";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 
 /**
@@ -18,19 +19,27 @@ export function PagePlaceholder({
   return (
     <section aria-labelledby="page-heading" className="bg-white">
       <div className="container-8x flex min-h-[70vh] flex-col justify-center py-32 lg:py-44">
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h1
+        <Reveal>
+          <Eyebrow>{eyebrow}</Eyebrow>
+        </Reveal>
+        <Reveal
+          as="h1"
           id="page-heading"
+          delay={80}
           className="mt-4 max-w-[18ch] text-[length:var(--text-display)] leading-[1.08] font-bold tracking-normal text-balance text-ink-900"
         >
           {title}
-        </h1>
-        <p className="mt-8 max-w-[52ch] text-[length:var(--text-body-lg)] leading-[1.4] font-light text-pretty text-ink-500">
+        </Reveal>
+        <Reveal
+          as="p"
+          delay={160}
+          className="mt-8 max-w-[52ch] text-[length:var(--text-body-lg)] leading-[1.4] font-light text-pretty text-ink-500"
+        >
           {body}
-        </p>
-        <div className="mt-12">
+        </Reveal>
+        <Reveal delay={240} className="mt-12">
           <UnderlineLink href="/">Back to home</UnderlineLink>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

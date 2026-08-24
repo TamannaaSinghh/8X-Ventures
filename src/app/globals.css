@@ -104,6 +104,13 @@
   /* --- Motion ---------------------------------------------------------- */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  /* Gentler again than `soft`: an ease-out quad, which is the least
+     front-loaded of the three. Half way through its time it has covered 75% of
+     its distance, where `soft` has covered 88% and `expo` has covered 97%. For
+     something arriving on its own that difference is the whole character —
+     the lower the front-loading, the less it reads as a movement that has
+     already happened by the time you notice it. */
+  --ease-out-gentle: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* ==========================================================================
@@ -1206,6 +1213,9 @@
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0 2.2%;
+  /* 51.8px @1920. Held as a token because the looping window's height is
+     derived from it — see `.tm-mentors-window`. */
+  --tm-line: clamp(1.5rem, 2.698vw, 3.238rem);
 }
 
 .tm-rail {
@@ -1213,6 +1223,36 @@
   width: 5px;
   border-radius: 3px;
   background: #064477;
+  overflow: hidden;
+}
+
+/* The thumb's own loop. Three blocks, each the full height of the rail with
+   one thumb in it, so the track wraps on an identical frame exactly as the
+   list does — as one thumb leaves the bottom the next arrives at the top.
+
+   `--loop-u` is how far the reader has scrolled through one copy of the list,
+   0 to 1, published by `useLoopScroll`. Offsetting the track by a full rail
+   less that much sends the thumb down as the names travel up, the way a
+   scrollbar does, and keeps it on whichever name is passing the lit centre. */
+.tm-rail-track {
+  position: absolute;
+  top: calc(var(--loop-u, 0) * 100% - 100%);
+  left: 0;
+  width: 100%;
+  height: 300%;
+}
+
+.tm-rail-block {
+  position: relative;
+  display: block;
+  height: calc(100% / 3);
+}
+
+/* The window the names travel through: one line per mentor, so the band keeps
+   the footprint the static list had and the rail beside it still divides into
+   one thumb-height per name. */
+.tm-mentors-window {
+  height: calc(var(--tm-line) * 1.35 * var(--tm-count));
 }
 
 .tm-rail-thumb {
@@ -1227,7 +1267,7 @@
 }
 
 .tm-mentor {
-  font-size: clamp(1.5rem, 2.698vw, 3.238rem); /* 51.8px @1920 */
+  font-size: var(--tm-line);
   line-height: 1.35;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -1597,14 +1637,28 @@
 }
 
 .pf-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-radius: 22px;
   background: var(--color-brand-sky);
+  /* This card had no hover of its own while every other card on the site
+     lifts. Same language as the LP Day and media cards, on `translate` so the
+     pointer lean can sit on top of it. */
+  box-shadow: 0 18px 45px -24px rgba(0, 40, 90, 0.35);
+  transition:
+    translate 0.5s var(--ease-out-soft),
+    box-shadow 0.5s var(--ease-out-soft);
   /* so the card's own type can be set against its width rather than the
      viewport, exactly as the team cards are */
   container-type: inline-size;
+}
+
+.pf-card:hover,
+.pf-card:focus-within {
+  translate: 0 -6px;
+  box-shadow: 0 28px 60px -26px rgba(0, 40, 90, 0.45);
 }
 
 .pf-card-photo {
@@ -1761,18 +1815,6 @@
    fractions of the text box; the ink itself occupies 18%–88% of it, which is
    where the sampled colours land. Outside the traced layout it is the same
    fill, just over a shorter box. */
-.ab-jr-year p {
-  background-image: linear-gradient(
-    to bottom,
-    #2faaf8 0%,
-    #248fd8 18%,
-    #0572b7 45%,
-    #015389 59%,
-    #012c4f 73%,
-    #021e45 88%
-  );
-}
-
 /* ==========================================================================
    MEDIA PAGE — traced from the Figma prototype frame `media` (1920 x 5037).
 
@@ -1971,14 +2013,18 @@
   overflow: hidden;
   border-radius: 18px;
   background: #ffffff;
+  position: relative;
   box-shadow: 0 18px 45px -24px rgba(0, 40, 90, 0.35);
+  /* `translate` rather than `transform`, which the pointer lean owns — see
+     the DEPTH block. The two then compose instead of overwriting. */
   transition:
-    transform 0.5s var(--ease-out-expo),
-    box-shadow 0.5s var(--ease-out-expo);
+    translate 0.5s var(--ease-out-soft),
+    box-shadow 0.5s var(--ease-out-soft);
 }
 
-.md-lp-card:hover {
-  transform: translateY(-4px);
+.md-lp-card:hover,
+.md-lp-card:focus-visible {
+  translate: 0 -6px;
   box-shadow: 0 28px 60px -26px rgba(0, 40, 90, 0.45);
 }
 
@@ -2041,14 +2087,18 @@
   overflow: hidden;
   border-radius: 18px;
   background: #ffffff;
+  position: relative;
   box-shadow: 0 18px 45px -24px rgba(0, 40, 90, 0.35);
+  /* `translate` rather than `transform`, which the pointer lean owns — see
+     the DEPTH block. The two then compose instead of overwriting. */
   transition:
-    transform 0.5s var(--ease-out-expo),
-    box-shadow 0.5s var(--ease-out-expo);
+    translate 0.5s var(--ease-out-soft),
+    box-shadow 0.5s var(--ease-out-soft);
 }
 
-.md-ins-card:hover {
-  transform: translateY(-4px);
+.md-ins-card:hover,
+.md-ins-card:focus-visible {
+  translate: 0 -6px;
   box-shadow: 0 28px 60px -26px rgba(0, 40, 90, 0.45);
 }
 
@@ -2163,35 +2213,213 @@
   opacity: 1;
 }
 
+/* Both halves on the gentle quad. Expo — where this started — covers most of
+   its distance in the first quarter of its duration, which on an arriving block
+   reads as a pop and then a drift; each step down the curve moves more of the
+   travel into the part you actually watch.
+
+   The travel is short for the same reason: a long throw has to move fast to
+   arrive, and it is the speed that reads as harsh rather than the distance.
+   Opacity runs a little behind the movement so the block is still settling as
+   it finishes coming up, rather than arriving and then fading. */
+/* On `translate` and `scale`, the individual properties, rather than on
+   `transform`. `transform` is what the pointer lean owns (see the DEPTH
+   block), and a card wants both — to rise in on scroll and to lean under the
+   pointer afterwards. Kept apart, the two compose on one element; on
+   `transform` the later rule would simply erase the other. */
 html.js-reveal [data-reveal] {
   opacity: 0;
-  transform: translateY(2rem);
+  translate: 0 1rem;
   transition:
-    opacity 0.75s var(--ease-out-soft),
-    transform 0.75s var(--ease-out-expo);
+    opacity 1.15s var(--ease-out-gentle),
+    translate 1.05s var(--ease-out-gentle),
+    scale 1.05s var(--ease-out-gentle);
   transition-delay: var(--reveal-delay, 0ms);
 }
 
 html.js-reveal [data-reveal="scale"] {
-  transform: translateY(1.5rem) scale(0.97);
+  translate: 0 0.75rem;
+  scale: 0.99;
+}
+
+/* Cards arrive with a little more of both than a line of type does: they are
+   larger objects, and the same 1rem rise that carries a heading reads as
+   nothing at all under a whole card. */
+html.js-reveal [data-reveal="card"] {
+  translate: 0 1.5rem;
+  scale: 0.965;
 }
 
 html.js-reveal [data-reveal].is-visible {
   opacity: 1;
-  transform: none;
+  translate: 0 0;
+  scale: 1;
+}
+
+/* ==========================================================================
+   DEPTH — pointer-driven 3D on cards and artwork
+
+   `TiltRoot` publishes where the pointer sits on a `data-tilt` surface:
+   `--tilt-x`/`--tilt-y` from -1 to 1 off the centre, `--tilt-mag` how far out
+   that is, `--tilt-px`/`--tilt-py` the same as percentages. Nothing here runs
+   without it — every rule falls back to the flat, untilted state, which is
+   what reduced motion, coarse pointers and no scripting all get.
+
+   Tailwind v4 writes its translate and scale utilities to the individual
+   `translate` and `scale` properties, so `transform` is free for the lean and
+   a card's existing hover lift composes with it rather than being overwritten.
+   ========================================================================== */
+
+[data-tilt] {
+  --tilt-x: 0;
+  --tilt-y: 0;
+  --tilt-mag: 0;
+  --tilt-px: 50%;
+  --tilt-py: 50%;
+}
+
+/* This block owns the whole transition for a tilting card, rather than each
+   card declaring its own. It has to: an unlayered rule outranks Tailwind's
+   layered utilities whatever the order, so a `transition-*` class on the card
+   would simply be replaced by whatever is written here.
+
+   Owning it also fixes a lift that never animated. Tailwind v4 writes
+   `-translate-y-*` to the `translate` property, and the LP Day card paired it
+   with `transition-[transform,box-shadow]` — a list `translate` is not in. The
+   shadow eased over half a second while the 6px lift jumped. All three names
+   are listed here, so the lift eases on every card that opts in. */
+[data-tilt="card"] {
+  --tilt-deg: 5.5deg;
+  transform: perspective(1100px)
+    rotateX(calc(var(--tilt-y) * -1 * var(--tilt-deg)))
+    rotateY(calc(var(--tilt-x) * var(--tilt-deg)))
+    translateZ(calc(var(--tilt-mag) * 12px));
+  transition:
+    transform 0.75s var(--ease-out-soft),
+    translate 0.5s var(--ease-out-soft),
+    box-shadow 0.5s var(--ease-out-soft);
+}
+
+/* While the pointer is on it the lean has no easing — a transition there reads
+   as the card dragging along behind the cursor. The lift and the shadow keep
+   theirs, so arriving on the card is still a settle rather than a snap, and
+   the lean picks its easing back up on the way out. */
+[data-tilt="card"][data-tilting] {
+  transition:
+    transform 0s,
+    translate 0.5s var(--ease-out-soft),
+    box-shadow 0.5s var(--ease-out-soft);
+}
+
+/* The light the lean is read by. A rotation on a flat fill barely registers
+   as a rotation without a highlight that moves across it. */
+[data-tilt="card"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: calc(var(--tilt-mag) * 0.55);
+  background: radial-gradient(
+    38% 48% at var(--tilt-px) var(--tilt-py),
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  transition: opacity 0.75s var(--ease-out-soft);
+}
+
+/* A band that lends its pointer position to the artwork inside it. The band
+   itself never moves; the art does. The art is `pointer-events-none`, so the
+   band is what the pointer actually reaches. */
+[data-tilt="scene"] {
+  --tilt-deg: 3.5deg;
+}
+
+/* Set on the picture rather than its wrapper: the wrappers are often `Reveal`
+   blocks, and `transform` there is already spoken for by the arrival. */
+.art-3d {
+  transform: perspective(1400px)
+    rotateX(calc(var(--tilt-y, 0) * -1 * var(--tilt-deg, 3.5deg)))
+    rotateY(calc(var(--tilt-x, 0) * var(--tilt-deg, 3.5deg)))
+    translateZ(calc(var(--tilt-mag, 0) * 16px));
+  /* Unlike a card, the art keeps a little lag the whole time — it reads as
+     having some mass rather than being pinned to the cursor. */
+  transition: transform 0.45s var(--ease-out-soft);
+}
+
+/* ==========================================================================
+   IMAGE ARRIVAL
+
+   A picture in a reserved box snaps from empty to sharp the instant it decodes,
+   which is the harshest moment on the page. `data-loaded` is set by the
+   bootstrap in `layout.tsx` when the browser actually has the pixels, so each
+   one can come up out of focus instead.
+
+   Gated on `js-img`: without scripting the attribute is never set, so none of
+   this applies and every picture renders plainly.
+   ========================================================================== */
+
+html.js-img img:not([data-loaded]) {
+  opacity: 0;
+}
+
+/* Pictures already running an animation of their own are excluded: a keyframed
+   arrival would replace it outright and the ribbons would stop drifting. They,
+   and anything opting out by hand, get a plain fade — with `filter` kept in the
+   list so a picture that transitions its own (the grayscale team cards) still
+   does. */
+html.js-img img[data-loaded]:not([class*="animate-"]):not([data-img-in="fade"]) {
+  animation: img-in 0.9s var(--ease-out-soft);
+}
+
+html.js-img img[class*="animate-"],
+html.js-img img[data-img-in="fade"] {
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    filter 0.7s var(--ease-out-soft);
 }
 
 /* ==========================================================================
    KEYFRAMES
    ========================================================================== */
 
+/* No fill mode: once it has run, the blur and the scale are gone rather than
+   left sitting on the element as a `blur(0)` that still forces a layer. */
+@keyframes img-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+    filter: blur(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* The float the ribbons and the hero mark ride. It used to bob and roll on the
+   flat; with a perspective and a little rotation on the other two axes the
+   same travel reads as a piece turning in space, which is what these renders
+   are drawn as. The vertical distance and the roll are unchanged. */
 @keyframes float-slow {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform: perspective(1600px) translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg)
+      rotate(0deg);
+  }
+  25% {
+    transform: perspective(1600px) translate3d(0, -0.9rem, 0) rotateX(1.6deg)
+      rotateY(-3deg) rotate(-0.5deg);
   }
   50% {
-    transform: translate3d(0, -1.75rem, 0) rotate(-1.2deg);
+    transform: perspective(1600px) translate3d(0, -1.75rem, 0) rotateX(2.8deg)
+      rotateY(0deg) rotate(-1.2deg);
+  }
+  75% {
+    transform: perspective(1600px) translate3d(0, -0.9rem, 0) rotateX(1.6deg)
+      rotateY(3deg) rotate(-0.5deg);
   }
 }
 
@@ -2295,6 +2523,82 @@ html.js-reveal [data-reveal].is-visible {
 }
 
 /* ==========================================================================
+   PARALLAX BAND
+
+   `--par` is the band's position relative to the viewport, written each frame
+   by `ParallaxBand`: -1 coming in at the bottom, 0 centred, +1 leaving at the
+   top. `--par-mid` is how nearly centred it is: 0 at either end, 1 in the
+   middle. Absent — no JavaScript, or reduced motion — the fallbacks below hold
+   the band exactly as the artboard composes it.
+   ========================================================================== */
+
+.parallax-plate {
+  position: absolute;
+  /* Taller than the band by more than the plate travels, so the picture never
+     runs out from under its own frame: the plate stands 148% of the band and
+     moves 14% of that, which is 20.7% of the band against 24% of overhang. */
+  inset: -24% 0;
+  /* Scale first, then travel — so the swell adds coverage without touching the
+     distance moved. It runs the other way from `--par-mid`: widest as the band
+     arrives, back to nothing as it centres, so the picture settles onto the
+     artboard's own framing at the moment it is being looked at rather than
+     merely sliding through it. */
+  transform: translate3d(0, calc(var(--par, 0) * 14%), 0)
+    scale(calc(1 + (1 - var(--par-mid, 1)) * 0.06));
+  will-change: transform;
+}
+
+/* The copy moves against the picture rather than sitting still on it. A
+   seventh of the plate's travel and the other way: enough to read as a nearer
+   layer, small enough that the traced composition still lands where it was
+   measured while the band is the thing being looked at. */
+.parallax-fore {
+  position: relative;
+  transform: translate3d(0, calc(var(--par, 0) * -3%), 0);
+  will-change: transform;
+}
+
+/* A list the reader scrolls themselves, looping endlessly — see
+   `useLoopScroll`, which does the wrapping. The native scrollbar is hidden
+   because these lists have a rail of their own in the design, and the wrap
+   must land instantly, so no smooth scrolling here. `contain` keeps a flick
+   inside the list from carrying on into the page behind it. */
+.loop-scroll {
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scroll-behavior: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.loop-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* The philosophy list's own scroll. Unlike `marquee-fade`, this does double
+   duty: the mask floors at 0.28 rather than dropping straight to transparent,
+   so a line sits dimmed either side of the lit centre exactly as the artboard
+   shows, and the emphasis tracks the loop without any per-line state. */
+.marquee-fade-y {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.28) 20%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0.28) 80%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.28) 20%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0.28) 80%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+/* ==========================================================================
    REDUCED MOTION — WCAG 2.3.3 Animation from Interactions
    Everything decorative stops; nothing that conveys meaning is removed.
    ========================================================================== */
@@ -2315,7 +2619,8 @@ html.js-reveal [data-reveal].is-visible {
 
   html.js-reveal [data-reveal] {
     opacity: 1;
-    transform: none;
+    translate: none;
+    scale: none;
   }
 }
 

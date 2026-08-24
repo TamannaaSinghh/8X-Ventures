@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { Reveal } from "@/components/ui/Reveal";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import { offices, siteConfig } from "@/content/site";
 
@@ -21,19 +22,30 @@ export default function Page() {
   return (
     <section aria-labelledby="page-heading" className="bg-white">
       <div className="container-8x py-32 lg:py-44">
-        <Eyebrow>Reach Out</Eyebrow>
-        <h1
+        <Reveal>
+          <Eyebrow>Reach Out</Eyebrow>
+        </Reveal>
+        <Reveal
+          as="h1"
           id="page-heading"
+          delay={80}
           className="mt-4 max-w-[18ch] text-[length:var(--text-display)] leading-[1.08] font-bold tracking-normal text-balance text-ink-900"
         >
           Share Your Vision
-        </h1>
-        <p className="mt-8 max-w-[52ch] text-[length:var(--text-body-lg)] leading-[1.4] font-light text-pretty text-ink-500">
+        </Reveal>
+        <Reveal
+          as="p"
+          delay={160}
+          className="mt-8 max-w-[52ch] text-[length:var(--text-body-lg)] leading-[1.4] font-light text-pretty text-ink-500"
+        >
           Building in deep-tech? We would like to understand what you see before
           others do.
-        </p>
+        </Reveal>
 
-        <p className="mt-8 max-w-[52ch] text-[length:var(--text-body-lg)] leading-[1.4] font-light text-ink-500">
+        <Reveal
+          as="p"
+          delay={240}
+          className="mt-8 max-w-[52ch] text-[length:var(--text-body-lg)] leading-[1.4] font-light text-ink-500">
           To share your pitch deck, write to us at{" "}
           <a
             href={`mailto:${siteConfig.pitchEmail}`}
@@ -42,17 +54,26 @@ export default function Page() {
             {siteConfig.pitchEmail}
           </a>
           .
-        </p>
+        </Reveal>
 
-        <h2 className="mt-20 text-[length:var(--text-body-lg)] font-bold text-ink-900">
+        <Reveal
+          as="h2"
+          className="mt-20 text-[length:var(--text-body-lg)] font-bold text-ink-900"
+        >
           Offices
-        </h2>
+        </Reveal>
         <ul
           role="list"
           className="mt-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {offices.map((office) => (
-            <li key={office.id} id={office.id} className="scroll-mt-32">
+          {offices.map((office, i) => (
+            <Reveal
+              as="li"
+              key={office.id}
+              id={office.id}
+              delay={i * 110}
+              className="scroll-mt-32"
+            >
               <h3 className="text-[length:var(--text-body-lg)] font-bold text-ink-900">
                 {office.city}
               </h3>
@@ -65,13 +86,13 @@ export default function Page() {
               <address className="mt-2 max-w-[32ch] text-[length:var(--text-sm-fluid)] leading-[1.5] font-light text-ink-500 not-italic">
                 {office.address}
               </address>
-            </li>
+            </Reveal>
           ))}
         </ul>
 
-        <div className="mt-16">
+        <Reveal className="mt-16">
           <UnderlineLink href="/">Back to home</UnderlineLink>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

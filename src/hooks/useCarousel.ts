@@ -11,6 +11,13 @@ type Options = {
 
 export type Carousel = {
   index: number;
+  /**
+   * The index this carousel moved away from, updated in the same state change
+   * as `index`. Lets a view tell which slides wrapped around the ends of a
+   * looping ring — those want repositioning without a transition, since
+   * animating them would drag them back across the whole strip.
+   */
+  previousIndex: number;
   goTo: (i: number) => void;
   next: () => void;
   prev: () => void;
@@ -28,12 +35,18 @@ export type Carousel = {
  * this design is content the user chooses to browse.
  */
 export function useCarousel({ length, initialIndex = 0, loop = true }: Options): Carousel {
-  const [index, setIndex] = useState(initialIndex);
+  const [{ index, previousIndex }, setPosition] = useState({
+    index: initialIndex,
+    previousIndex: initialIndex,
+  });
 
   const goTo = useCallback(
     (i: number) => {
       if (length === 0) return;
-      setIndex(loop ? ((i % length) + length) % length : Math.min(Math.max(i, 0), length - 1));
+      const to = loop ? ((i % length) + length) % length : Math.min(Math.max(i, 0), length - 1);
+      setPosition((pos) =>
+        to === pos.index ? pos : { index: to, previousIndex: pos.index },
+      );
     },
     [length, loop],
   );
@@ -83,5 +96,5 @@ export function useCarousel({ length, initialIndex = 0, loop = true }: Options):
     [index, length, loop],
   );
 
-  return { index, goTo, next, prev, onKeyDown, offsetOf };
+  return { index, previousIndex, goTo, next, prev, onKeyDown, offsetOf };
 }
