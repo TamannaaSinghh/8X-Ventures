@@ -196,12 +196,6 @@
   position: relative;
   /* so the panel can size itself against the mark rather than the viewport */
   container-type: inline-size;
-  animation: float-slow 9s ease-in-out infinite;
-  will-change: transform;
-}
-
-.hero-mark[data-paused="true"] {
-  animation-play-state: paused;
 }
 
 /* Zero-height: every child is absolutely positioned against `.hero-mark`. */

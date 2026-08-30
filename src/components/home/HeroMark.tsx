@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
 import { sectors } from "@/content/home";
 
@@ -22,7 +21,7 @@ import { sectors } from "@/content/home";
  *          keyboard; focus opens the popup exactly as hover does.
  *   1.4.13 the popup is hoverable (an invisible bridge spans the gap between
  *          the dot and the panel, and leaving is delayed), it persists until
- *          dismissed, and Escape closes it from anywhere on the page — which
+ *          it is dismissed, and Escape closes it from anywhere on the page — which
  *          is why open/closed is state here rather than a CSS `:hover` rule
  *          that Escape could not overrule.
  *   2.5.8  targets are 44px; the map keeps them from overlapping at any width.
@@ -35,6 +34,7 @@ export function HeroMark() {
   const [open, setOpen] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<number | undefined>(undefined);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const cancelClose = () => {
     if (closeTimer.current !== undefined) {
@@ -56,6 +56,17 @@ export function HeroMark() {
   };
 
   useEffect(() => cancelClose, []);
+
+  /* Pause the loop video while a popup is open so the mark holds still. */
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (open !== null) {
+      video.pause();
+    } else {
+      video.play().catch(() => {});
+    }
+  }, [open]);
 
   // Escape and outside clicks dismiss. Both are on the document because a
   // hover-opened popup leaves focus elsewhere entirely (1.4.13 Dismissible).
@@ -85,15 +96,21 @@ export function HeroMark() {
 
   return (
     <div ref={rootRef} className="hero-mark" data-paused={open !== null}>
-      <Image
-        src="/images/hero-infinity.png"
-        alt=""
-        width={1600}
-        height={1000}
-        priority
-        sizes="(max-width: 1024px) 92vw, 1120px"
+      {/* Infinity loop video — replaces the static hero-infinity.png */}
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        loop
+        playsInline
+        disablePictureInPicture
+        disableRemotePlayback
+        preload="auto"
+        aria-hidden="true"
         className="h-auto w-full"
-      />
+      >
+        <source src="/videos/loop-01.mp4" type="video/mp4" />
+      </video>
 
       <ul role="list" aria-label="What we work on" className="hero-spots">
         {sectors.map((sector) => {

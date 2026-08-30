@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 import Image from "next/image";
 import { CarouselControls } from "@/components/ui/CarouselControls";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -7,6 +9,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { journey, journeyIntro, type JourneyStage } from "@/content/home";
 import { useCarousel } from "@/hooks/useCarousel";
 import { cn } from "@/lib/cn";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /* --------------------------------------------------------------------------
    The arc
@@ -116,6 +119,19 @@ export function FounderJourney() {
 
   const active = journey[index];
   const centre = Math.floor(journey.length / 2);
+  const reduced = useReducedMotion();
+  const [paused, setPaused] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || reduced) return;
+    if (paused) {
+      video.pause();
+    } else {
+      video.play().catch(() => {});
+    }
+  }, [paused, reduced]);
 
   /* The arc has one slot per stage, so advancing recycles the node that falls
      off one end round to the other. Animating `left` across that wrap would
@@ -138,16 +154,22 @@ export function FounderJourney() {
           </h2>
         </Reveal>
 
-        {/* --- Floating ribbon --- */}
+        {/* --- Floating ribbon (WebM with alpha transparency) --- */}
         <Reveal variant="scale" delay={120} className="mx-auto mt-8 w-[78%] max-w-[900px] lg:mt-2">
-          <Image
-            src="/images/ribbon-3d.png"
-            alt=""
-            width={1400}
-            height={789}
-            sizes="(max-width: 1024px) 78vw, 900px"
-            className="animate-float-slow h-auto w-full [will-change:transform]"
-          />
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            disablePictureInPicture
+            disableRemotePlayback
+            preload="auto"
+            aria-hidden="true"
+            className="h-auto w-full"
+          >
+            <source src="/videos/loop-02.webm" type="video/webm" />
+          </video>
         </Reveal>
 
         <div
