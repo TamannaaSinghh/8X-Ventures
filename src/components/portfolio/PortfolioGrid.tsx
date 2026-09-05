@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
+import { CardArrow } from "@/components/ui/CardArrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { portfolioCards, portfolioFilters } from "@/content/portfolio";
 
@@ -56,14 +58,17 @@ export function PortfolioGrid() {
              rather than being wrapped in one. Stepped across the row and then
              capped, so a long list does not take longer to arrive the further
              down it goes. */
-          <Reveal
-            as="article"
-            variant="card"
-            delay={Math.min(i, 5) * 90}
-            key={card.id}
-            data-tilt="card"
-            className="pf-card"
-          >
+          <Link key={card.id} href={`/portfolio/${card.id}`} className="pf-card-link">
+            <Reveal
+              as="article"
+              variant="card"
+              delay={Math.min(i, 5) * 90}
+              data-tilt="card"
+              data-card-arrow=""
+              className="pf-card"
+            >
+            <CardArrow />
+
             {/* The client supplied logos rather than photography, so the
                 panel is a white plate with the mark held inside it — same
                 box, same aspect, `contain` instead of `cover`. */}
@@ -98,6 +103,7 @@ export function PortfolioGrid() {
               </p>
             </div>
           </Reveal>
+          </Link>
         ))}
       </div>
 

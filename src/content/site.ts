@@ -41,7 +41,7 @@ export const footerColumns: { heading: string; links: NavItem[] }[] = [
       { label: "About", href: "/about" },
       { label: "Portfolio", href: "/portfolio" },
       { label: "Team", href: "/team" },
-      { label: "Perspectives", href: "/media" },
+      { label: "Media", href: "/media" },
     ],
   },
   {

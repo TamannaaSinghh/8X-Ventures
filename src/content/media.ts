@@ -62,6 +62,24 @@ export const mediaInsights = {
 } as const;
 
 /**
+ * The written pieces, listed below the video insights.
+ *
+ * The client's content doc splits its Blog page into two: "Videos", which is
+ * what `mediaInsights` above already carries, and "Blogs", whose items are
+ * kicked "Articles". Only the videos were ever built, so this is the missing
+ * half — and the shelf a perspective can be reached from.
+ *
+ * The heading is the one line here not taken from the doc or the prototype:
+ * neither writes a title for this section, and the frame only ever draws the
+ * shelf as "Related articles" inside an article.
+ */
+export const mediaArticles = {
+  eyebrow: "Articles",
+  lead: "Writing from",
+  accent: "the frontier.",
+} as const;
+
+/**
  * The frame's closing band is not the homepage's: it is 1920 x 488 rather
  * than 1920 x 1062, it carries no robot arm, and "Good." is live bold text
  * on the second line instead of art baked into the plate. The gradient is

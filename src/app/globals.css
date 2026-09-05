@@ -1099,6 +1099,9 @@
 /* --- portrait cards --- */
 .tm-card {
   position: relative;
+  /* Explicit, so the photo's negative z-index below stays above the card's
+     own gradient rather than disappearing behind it. */
+  isolation: isolate;
   overflow: hidden;
   border-radius: 26px;
   /* the artboard's card: brightest at the top right, deepest at the foot */
@@ -1112,9 +1115,11 @@
   background: linear-gradient(212deg, #2196dc 0%, #0d78bd 48%, #004e8c 100%);
 }
 
+/* Deliberately unpositioned. `.tm-card-open::after` is stretched from here to
+   make the whole card navigate, and it takes its box from the nearest
+   positioned ancestor — so a `position: relative` on this element silently
+   shrinks the click target to the name. The photo goes behind instead. */
 .tm-card-head {
-  position: relative;
-  z-index: 2;
   padding: 5.2cqw 7cqw 0;
 }
 
@@ -1147,6 +1152,9 @@
 .tm-card-photo {
   position: absolute;
   inset: auto 0 0 0;
+  /* Behind the head's text, which is now in flow, and still above the card's
+     gradient because the card isolates. */
+  z-index: -1;
   height: 82%;
 }
 
@@ -1178,7 +1186,19 @@
   color: rgba(255, 255, 255, 0.95);
 }
 
+/* The name's anchor, stretched over the whole card so the card navigates.
+   Sits above the portrait and the bio panel, and below the LinkedIn link. */
+.tm-card-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+}
+
+/* Raised over the stretched link so it stays separately clickable. */
 .tm-card-link {
+  position: relative;
+  z-index: 5;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1628,12 +1648,26 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
   gap: 2rem;
+  /* Every card the same height whatever it holds. Grid items already stretch
+     to their own row, so this is what levels the rows against each other:
+     equal `1fr` tracks in an auto-height grid all resolve to the tallest
+     row's content, so a two-line company name in the last row raises the
+     first row with it rather than leaving the grid stepped. */
+  grid-auto-rows: 1fr;
+}
+
+/* The link is the grid item and the card is inside it, so the stretch has to
+   be handed down one level or the card keeps its own content height inside a
+   full-height box. */
+.pf-card-link {
+  display: flex;
 }
 
 .pf-card {
   position: relative;
   display: flex;
   flex-direction: column;
+  flex: 1;
   overflow: hidden;
   border-radius: 22px;
   background: var(--color-brand-sky);
@@ -1663,12 +1697,20 @@
      own blue and the mark sits inside it on the logo file's own ground, so
      the card still reads as one object — a white plate here would be
      indistinguishable from the white page behind the grid. */
+  /* The plate is drawn to its aspect and nothing else: the extra height a
+     levelled card carries belongs to the body below it, not to the mark. */
+  flex: none;
 }
 
 .pf-card-body {
   /* 38 of the artboard's 548-wide card */
   padding: 6.85cqw 7.08cqw 9.3cqw;
   color: #ffffff;
+  /* The body is where a levelled card's spare height goes, so it is the
+     column the stage line can be pushed to the foot of. */
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 .pf-card-tags {
@@ -1719,7 +1761,11 @@
 }
 
 .pf-card-stage {
-  margin-top: 5.6cqw;
+  /* `auto` first so the stage line rides the foot of the card and the last
+     line of every card in a row sits on one baseline; the padding keeps the
+     artboard's 5.6 gap when a card is tall enough to have no slack to give. */
+  margin-top: auto;
+  padding-top: 5.6cqw;
 }
 
 .pf-card-stage strong {
@@ -2590,6 +2636,2012 @@ html.js-img img[data-img-in="fade"] {
     rgba(0, 0, 0, 0.28) 80%,
     rgba(0, 0, 0, 0) 100%
   );
+}
+
+/* ==========================================================================
+   PORTFOLIO — COMPANY PAGE  (`/portfolio/[slug]`)
+
+   Traced from the Figma prototype's `Portfolio / Company` frame, node 302-213,
+   drawn at 1920 for Neuralzome and applied to all twelve. The frame runs eight
+   bands top to bottom:
+
+     hero        the mark beside the name, standfirst and website link
+     strip       sector / fund / invested at / status, on one row
+     statement   the centred two-line claim and its two paragraphs
+     figure      a full-width photograph, 1136 wide in the artboard
+     why         the dark field: claim, paragraph, environment list, close
+     snapshot    the mark beside four label/value rows
+     view        the dark field again, on the circuit plate, 8X's own thesis
+     cta         the cyan-to-blue panel and "Share Your Vision"
+
+   Measurements are vw against the 1920 artboard (artboard px / 19.2), the same
+   basis the portfolio grid above uses, with rem-floored clamps so the type
+   still answers the reader's own font size (WCAG 1.4.4).
+   ========================================================================== */
+
+@theme {
+  /* The frame's own sizes, which the page scale above does not carry: the
+     fact strip's label (15) and value (22), the dark bands' copy (24), the
+     environment list (38) and the closing panel's lines (56). Everything
+     else reuses `--ab-*`. */
+  --pd-label: clamp(0.6875rem, 0.781vw, 0.9375rem); /* → 15px @1920 */
+  --pd-value: clamp(1rem, 1.146vw, 1.375rem); /* → 22px */
+  --pd-band-body: clamp(0.9375rem, 1.25vw, 1.5rem); /* → 24px */
+  --pd-env: clamp(1.125rem, 1.979vw, 2.375rem); /* → 38px */
+  --pd-cta-line: clamp(1.375rem, 2.917vw, 3.5rem); /* → 56px */
+}
+
+/* --- the two band shells -------------------------------------------------
+   `pd-band` holds the page's 6.25% margin; `pd-band-full` bleeds to the
+   viewport and keeps that margin inside, because those bands carry a field. */
+.pd-band {
+  margin-inline: 6.25%;
+}
+
+.pd-band-full {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* --- shared type --- */
+.pd-eyebrow {
+  font-size: var(--ab-eyebrow);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-brand-sky);
+}
+
+/* On the dark fields the frame's sky blue clears 4.5:1 against the navy
+   beneath it, so it is kept as drawn rather than lightened. */
+.pd-eyebrow-on-dark {
+  color: var(--color-brand-sky);
+}
+
+/* ------------------------------------------------------------- back link */
+/* Set at the head of the copy and again at the foot of the page. The arrow
+   travels the way it points, matching `UnderlineLink`'s language, and the
+   hover is carried by colour *and* movement so it never depends on colour
+   alone (WCAG 1.4.1). */
+.pd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  font-size: var(--pd-value);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-ink-500);
+  transition: color 0.3s var(--ease-out-soft);
+}
+
+.pd-back:hover,
+.pd-back:focus-visible {
+  color: var(--color-brand-deep);
+}
+
+.pd-back-arrow {
+  width: 0.9em;
+  height: 0.9em;
+  flex: none;
+  transition: translate 0.4s var(--ease-out-expo);
+}
+
+.pd-back:hover .pd-back-arrow,
+.pd-back:focus-visible .pd-back-arrow {
+  translate: -0.25em 0;
+}
+
+/* Above the eyebrow, clear of the fixed bar. */
+.pd-back-top {
+  margin-bottom: 1.75rem;
+}
+
+/* Its own strip between the closing panel and the footer. */
+.pd-back-foot {
+  padding-block: 2.5rem;
+}
+
+/* ------------------------------------------------------------------- hero */
+.pd-hero {
+  display: grid;
+  gap: 2.5rem;
+  padding-top: calc(var(--header-h) + 3rem);
+  padding-bottom: 3rem;
+}
+
+.pd-hero-name {
+  margin-top: 1.5rem;
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--color-ink-950);
+}
+
+/* The frame breaks the name after its first word and colours the remainder.
+   Below the traced layout it wraps naturally instead of being forced. */
+.pd-hero-name-2 {
+  color: var(--color-brand-sky);
+}
+
+.pd-hero-standfirst {
+  margin-top: 1.5rem;
+  max-width: 30ch;
+  font-size: var(--ab-body);
+  font-weight: 300;
+  line-height: 1.35;
+  color: var(--color-ink-700);
+}
+
+/* The run the frame sets in blue inside the standfirst. `--color-brand-deep`
+   rather than the frame's sky: this is body-sized text on white, where sky
+   measures 2.56:1 and deep measures 5.79:1 (WCAG 1.4.3). */
+.pd-hero-accent {
+  font-weight: 600;
+  color: var(--color-brand-deep);
+}
+
+.pd-hero-link {
+  margin-top: 2rem;
+}
+
+/* The mark's field. The frame lights its subject with a soft blue bloom on
+   the white page rather than seating it on a panel — which matters here,
+   because the supplied logos carry their own white ground and any panel edge
+   would show around it. A bloom that fades to the page hides that seam. */
+.pd-hero-mark {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(63, 169, 245, 0.2) 0%,
+    rgba(63, 169, 245, 0.08) 40%,
+    rgba(63, 169, 245, 0) 70%
+  );
+}
+
+/* The frame's own hero composition, measured off the artboard: the art group
+   runs 941-1800 across (859 wide) and 361-765 down (404 tall), with the logo
+   lockup at 941-1253 and the vehicle at 1100-1689. Every figure below is that
+   geometry expressed against the group's own box.
+   The shot is cropped to the vehicle itself — the Figma fill carries about
+   63% transparent margin, and sizing the padded canvas is what made the
+   vehicle render a third of its drawn size. */
+.pd-hero-art {
+  position: relative;
+  aspect-ratio: 859 / 404;
+  background: radial-gradient(
+    circle at 53% 52%,
+    rgba(63, 169, 245, 0.18) 0%,
+    rgba(63, 169, 245, 0.07) 42%,
+    rgba(63, 169, 245, 0) 72%
+  );
+}
+
+/* 1100-1689 of 941-1800: 18.5% in, 68.6% wide. */
+.pd-hero-art-shot {
+  position: absolute;
+  top: 1.7%;
+  left: 18.5%;
+  width: 68.6%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 941-1253 of the same: flush left, 36.3% wide. */
+.pd-hero-art-lockup {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 36.3%;
+  height: auto;
+  object-fit: contain;
+}
+
+.pd-hero-mark-img {
+  width: 62%;
+  height: auto;
+  object-fit: contain;
+  /* Several of the supplied logos are drawn on their own ground —
+     Armory's is black, Pantherun's white. Rounding the mark makes
+     that ground read as a deliberate plate rather than a raw crop,
+     and does nothing at all to the ones with transparency. */
+  border-radius: 18px;
+}
+
+/* ------------------------------------------------------------- fact strip */
+.pd-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem 2.5rem;
+  padding-block: 2.5rem;
+  border-top: 1px solid rgba(10, 10, 10, 0.1);
+  border-bottom: 1px solid rgba(10, 10, 10, 0.1);
+}
+
+.pd-strip-label {
+  font-size: var(--pd-label);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-ink-500);
+}
+
+.pd-strip-value {
+  margin-top: 0.6rem;
+  font-size: var(--pd-value);
+  font-weight: 700;
+  line-height: 1.28;
+  color: var(--color-ink-950);
+}
+
+/* -------------------------------------------------------------- statement */
+.pd-statement {
+  padding-block: 4rem 2.5rem;
+  text-align: center;
+}
+
+.pd-statement-head {
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.16;
+  text-wrap: balance;
+  color: var(--color-ink-950);
+}
+
+/* Two spans rather than two rows, so the break can fall naturally when the
+   measure is narrower than the artboard; the traced layout blocks them. */
+.pd-statement-1,
+.pd-statement-2 {
+  display: inline;
+}
+
+.pd-statement-2 {
+  color: var(--color-brand-sky);
+}
+
+.pd-statement-body {
+  margin-inline: auto;
+  margin-top: 2rem;
+  max-width: 46ch;
+  font-size: var(--ab-body);
+  font-weight: 300;
+  line-height: 1.45;
+  text-wrap: pretty;
+  color: var(--color-ink-500);
+}
+
+/* ----------------------------------------------------------------- figure */
+.pd-figure {
+  position: relative;
+  overflow: hidden;
+  margin-block: 3.5rem;
+  aspect-ratio: 1136 / 636; /* the artboard's plate */
+}
+
+.pd-figure-img {
+  object-fit: cover;
+  object-position: center 28%;
+}
+
+/* --------------------------------------------------- the two dark fields */
+.pd-why,
+.pd-view {
+  color: #ffffff;
+}
+
+/* The frame photographs this field with the company's own environment. Until
+   those images are supplied it is the navy the photograph is graded to, so
+   the band's weight and the type's contrast are already the design's. */
+.pd-why {
+  background:
+    radial-gradient(120% 90% at 78% 18%, rgba(48, 106, 170, 0.55) 0%, rgba(6, 34, 71, 0) 62%),
+    linear-gradient(160deg, #061c3c 0%, #0a2c56 46%, #06203f 100%);
+}
+
+/* With the photograph in place the drawn field is only what shows through the
+   scrim, so it is dropped back to the grade the photograph is lit against. */
+.pd-why[data-photo] {
+  background: #05182f;
+}
+
+.pd-why-bg {
+  z-index: -10;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* The frame's photograph is dark at the left, where the copy sits, and opens
+   out to the right. The scrim follows that: heavy enough on the left for the
+   white type to clear 4.5:1, and almost absent on the right so the landscape
+   is still the thing you are looking at (WCAG 1.4.3). */
+.pd-why-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  background: linear-gradient(
+    100deg,
+    rgba(4, 20, 40, 0.93) 0%,
+    rgba(4, 22, 45, 0.86) 30%,
+    rgba(5, 26, 52, 0.55) 62%,
+    rgba(6, 30, 58, 0.28) 100%
+  );
+}
+
+/* A base under the plate, so the band is dark from the first paint. The
+   image below the fold is loaded lazily and the scrim is semi-transparent —
+   without this the scrim composites over the white page for as long as the
+   plate takes to arrive, and the band flashes grey under white type. */
+.pd-view {
+  background: #04101f;
+}
+
+.pd-view-bg {
+  z-index: -10;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* The scrim over the plate, fitted to the frame rather than guessed.
+   Sampled the band out of the prototype with its copy masked off, composited
+   the same plate behind candidate scrims, and solved for the pair that lands
+   on the frame's own tone: mean rgb(3, 8, 28) and luminance percentiles
+   50/75/90/99 of 5.6 / 11.5 / 20.1 / 34.7. This one gives rgb(2, 8, 28) and
+   5.1 / 7.6 / 20.0 / 34.9.
+   The earlier scrim ran 0.94 down to 0.70 and flattened the plate's
+   highlights to a p99 of 22.7 — the machine went black. Contrast was never
+   what forced that: the plate is dark enough on the left that white copy
+   clears 4.5:1 even unscrimmed, and at these values it measures 12.2:1. */
+.pd-view::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  background: linear-gradient(
+    100deg,
+    rgba(2, 6, 18, 0.7) 0%,
+    rgba(2, 8, 24, 0.56) 42%,
+    rgba(2, 10, 30, 0.32) 100%
+  );
+}
+
+.pd-why-inner {
+  margin-inline: 6.25%;
+  padding-block: clamp(3.5rem, 6.25vw, 7.5rem);
+}
+
+.pd-dark-head {
+  margin-top: 1.5rem;
+  max-width: 18ch;
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.16;
+  color: #ffffff;
+}
+
+.pd-dark-head-1,
+.pd-dark-head-2 {
+  display: inline;
+}
+
+.pd-dark-head-2 {
+  color: var(--color-brand-sky);
+}
+
+.pd-dark-body {
+  margin-top: 1.75rem;
+  max-width: 42ch;
+  font-size: var(--pd-band-body);
+  font-weight: 300;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.pd-dark-close {
+  margin-top: 2.5rem;
+  font-size: var(--pd-band-body);
+  font-weight: 700;
+  line-height: 1.4;
+  color: #ffffff;
+}
+
+/* --- the environment list --- */
+.pd-env-wrap {
+  margin-top: 2.75rem;
+}
+
+/* The rule beside the window. It stays put while the environments travel
+   past it, so the lit segment is simply its middle third — the band the mask
+   lights — rather than anything that has to be kept in step with the scroll. */
+.pd-env-rail {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.pd-env-rail::before,
+.pd-env-rail::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 2px;
+}
+
+.pd-env-rail::before {
+  inset-block: 0;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.pd-env-rail::after {
+  top: 33.33%;
+  height: 33.33%;
+  background: #ffffff;
+}
+
+/* Three lines tall — the lit centre and its two neighbours, which is what
+   `marquee-fade-y` is cut for. */
+.pd-env-window {
+  height: calc(var(--pd-env) * 1.62 * 3);
+}
+
+.pd-env-item {
+  font-size: var(--pd-env);
+  font-weight: 700;
+  line-height: 1.62;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  /* Full white; the mask does the dimming, so there is no per-line state to
+     hold. The dimmed neighbours are emphasis, not information: the lit line
+     is pure white on the graded field, and any line is one turn of the
+     scroll away from being that line — nothing is only ever legible dim. */
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------- snapshot */
+.pd-snapshot {
+  display: grid;
+  gap: 2.5rem;
+  padding-block: clamp(3rem, 5vw, 6rem);
+}
+
+.pd-snapshot-mark {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(63, 169, 245, 0.18) 0%,
+    rgba(63, 169, 245, 0.07) 40%,
+    rgba(63, 169, 245, 0) 70%
+  );
+}
+
+.pd-snapshot-mark-img {
+  width: 58%;
+  height: auto;
+  object-fit: contain;
+  /* Several of the supplied logos are drawn on their own ground —
+     Armory's is black, Pantherun's white. Rounding the mark makes
+     that ground read as a deliberate plate rather than a raw crop,
+     and does nothing at all to the ones with transparency. */
+  border-radius: 18px;
+}
+
+/* With the frame's own product shot in place the bloom comes off: the shot
+   is lit on white already, and a glow behind its white ground would draw the
+   photograph's edge as a rectangle. The shot also takes its true proportion
+   and loses the mark's rounding. */
+.pd-snapshot-mark[data-photo] {
+  aspect-ratio: auto;
+  background: none;
+}
+
+.pd-snapshot-mark[data-photo] .pd-snapshot-mark-img {
+  width: 100%;
+  border-radius: 0;
+}
+
+.pd-snapshot-head {
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.16;
+  color: var(--color-ink-950);
+}
+
+.pd-snapshot-head-2 {
+  color: var(--color-brand-sky);
+}
+
+.pd-snapshot-row {
+  margin-top: 2.25rem;
+}
+
+.pd-snapshot-label {
+  font-size: var(--pd-label);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  /* The frame sets these blue; `brand-deep` is the one accent that clears
+     4.5:1 on white at this size (WCAG 1.4.3). */
+  color: var(--color-brand-deep);
+}
+
+.pd-snapshot-value {
+  margin-top: 0.6rem;
+  font-size: var(--pd-value);
+  font-weight: 700;
+  line-height: 1.32;
+  color: var(--color-ink-950);
+}
+
+/* -------------------------------------------------------------------- cta */
+/* Sampled across the frame's panel: cyan at the left shoulder, brightening
+   through the middle and closing on the deep blue at the right. */
+.pd-cta {
+  padding-block: clamp(3.5rem, 6.25vw, 7.5rem);
+  padding-inline: 6.25%;
+  text-align: center;
+  background:
+    radial-gradient(80% 120% at 22% 42%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 58%),
+    linear-gradient(100deg, #1fb2d6 0%, #2ab8dd 16%, #189fdf 44%, #0d79cd 74%, #0a63bd 100%);
+}
+
+.pd-cta-head {
+  display: grid;
+  gap: 0.35rem;
+  color: #ffffff;
+  text-wrap: balance;
+}
+
+.pd-cta-lead {
+  font-size: var(--pd-cta-line);
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.pd-cta-line {
+  font-size: var(--pd-cta-line);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.pd-cta-link {
+  margin-top: 2.5rem;
+}
+
+/* --------------------------------------------------- the traced layout ---
+   At the artboard's own width the frame's two-column bands open up and the
+   type takes the measurements above verbatim. */
+@media (width >= 64rem) {
+  /* The artboard's own split: the copy holds 120-941 and the art group
+     941-1800, which butt against each other rather than sitting either side
+     of a gutter — the lockup's left edge is the boundary. */
+  .pd-hero {
+    grid-template-columns: 821fr 859fr;
+    align-items: center;
+    gap: 0;
+    padding-top: calc(var(--header-h) + 5.729vw); /* 110 */
+    padding-bottom: 4.167vw;
+  }
+
+  .pd-hero-standfirst {
+    max-width: 22ch;
+  }
+
+  .pd-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2.5vw;
+    padding-block: 2.292vw; /* 44 */
+  }
+
+  .pd-statement {
+    padding-block: 5.208vw 3.125vw; /* 100 / 60 */
+  }
+
+  /* The frame breaks the statement itself; at this width it is given the
+     artboard's own two lines rather than being left to wrap. */
+  .pd-statement-1,
+  .pd-statement-2 {
+    display: block;
+  }
+
+  .pd-statement-body {
+    max-width: 52ch;
+  }
+
+  /* 1136 of the artboard's 1920, centred — so it sits inside the 6.25%
+     margin rather than on it. */
+  .pd-figure {
+    width: 59.167%;
+    margin-inline: auto;
+    margin-block: 4.167vw;
+  }
+
+  .pd-dark-head,
+  .pd-cta-head {
+    max-width: none;
+  }
+
+  .pd-dark-head-1,
+  .pd-dark-head-2 {
+    display: block;
+  }
+
+  .pd-snapshot {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    align-items: center;
+    gap: 5.208vw; /* 100 */
+    padding-block: 5.208vw;
+  }
+
+  .pd-snapshot-row {
+    margin-top: 2.083vw; /* 40 */
+  }
+}
+
+/* ==========================================================================
+   TEAM — MEMBER PAGE  (`/team/[id]`)
+
+   Traced from the Figma prototype's member frame, node 311-514, drawn at 1920
+   for Chirag Gupta. One band before the footer:
+
+     back      "View all team members", small caps over a blue arrow
+     name      given name in ink, family name in brand blue
+     body      left: role over a short rule, the biography, the social buttons
+               right: the portrait on its blue plate
+
+   The artboard puts the copy at 120-1157 and the portrait at 1298-1800, its
+   top level with the role rather than the name. Measurements are % of the
+   1920 frame; the type reuses the inner pages' `--ab-*` scale.
+   ========================================================================== */
+
+@theme {
+  /* The frame's own two sizes: the back link and the role (14 and 20 @1920). */
+  --tmm-kicker: clamp(0.6875rem, 0.729vw, 0.875rem); /* → 14px */
+  --tmm-role: clamp(0.875rem, 1.042vw, 1.25rem); /* → 20px */
+}
+
+.tmm {
+  margin-inline: 6.25%;
+  padding-top: calc(var(--header-h) + 3.5rem);
+  padding-bottom: 4rem;
+}
+
+/* --------------------------------------------------------------- the way back */
+.tmm-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;
+  font-size: var(--tmm-kicker);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-500);
+  transition: color 0.3s var(--ease-out-soft);
+}
+
+.tmm-back-link:hover,
+.tmm-back-link:focus-visible {
+  color: var(--color-brand-deep);
+}
+
+/* The frame draws the arrow in blue against the grey label. It travels the
+   way it points, so the hover never rests on colour alone (WCAG 1.4.1). */
+.tmm-back-arrow {
+  width: 1.6em;
+  height: 1.6em;
+  flex: none;
+  color: var(--color-brand-sky);
+  transition: translate 0.4s var(--ease-out-expo);
+}
+
+.tmm-back-link:hover .tmm-back-arrow,
+.tmm-back-link:focus-visible .tmm-back-arrow {
+  translate: -0.25em 0;
+}
+
+/* ------------------------------------------------------------------- the name */
+.tmm-name {
+  margin-top: 1.5rem;
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--color-ink-950);
+}
+
+.tmm-name-2 {
+  color: var(--color-brand-sky);
+}
+
+/* ------------------------------------------------------------------- the body */
+.tmm-body {
+  display: grid;
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+
+.tmm-role {
+  font-size: var(--tmm-role);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  /* The frame's sky blue is decorative-weight against white at this size;
+     `brand-deep` is the one accent that clears 4.5:1 on it (WCAG 1.4.3). */
+  color: var(--color-brand-deep);
+}
+
+/* 89 of the artboard, 3 thick. */
+.tmm-rule {
+  width: 4.64%;
+  min-width: 3rem;
+  height: 3px;
+  margin-top: 1rem;
+  border-radius: 2px;
+  background: var(--color-brand-sky);
+}
+
+.tmm-para {
+  margin-top: 1.75rem;
+  max-width: 62ch;
+  font-size: var(--pd-band-body);
+  font-weight: 300;
+  line-height: 1.75;
+  text-wrap: pretty;
+  color: var(--color-ink-700);
+}
+
+/* ------------------------------------------------------------ social buttons */
+.tmm-social {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2.75rem;
+}
+
+.tmm-social-btn {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid rgba(10, 10, 10, 0.25);
+  border-radius: 9999px;
+  color: var(--color-ink-900);
+  transition:
+    border-color 0.3s var(--ease-out-soft),
+    color 0.3s var(--ease-out-soft),
+    background-color 0.3s var(--ease-out-soft);
+}
+
+.tmm-social-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.tmm-social-btn:hover,
+.tmm-social-btn:focus-visible {
+  border-color: var(--color-brand-deep);
+  background: var(--color-brand-deep);
+  color: #ffffff;
+}
+
+/* ---------------------------------------------------------------- the portrait */
+/* 502 x 542 in the artboard, on the same plate the team cards use. */
+.tmm-portrait {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 502 / 542;
+  border-radius: 30px;
+  background: linear-gradient(212deg, #1c8fd6 0%, #0a6cb4 46%, #00457f 100%);
+}
+
+.tmm-portrait-img {
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* --------------------------------------------------- the traced layout ---
+   Two columns: the copy holds the left, the portrait sits against the page's
+   right margin with its top level with the role. */
+@media (width >= 64rem) {
+  .tmm {
+    padding-top: calc(var(--header-h) + 5.2vw);
+    padding-bottom: 6.25vw;
+  }
+
+  .tmm-body {
+    grid-template-columns: minmax(0, 1fr) 26.15%;
+    gap: 5.2%;
+    align-items: start;
+    margin-top: 1.5rem;
+  }
+
+  .tmm-name {
+    margin-top: 2rem;
+  }
+}
+
+/* Below the traced layout the portrait leads, at a size that does not take
+   the whole first screen. */
+@media (width < 64rem) {
+  .tmm-portrait {
+    order: -1;
+    max-width: 22rem;
+  }
+}
+
+/* ==========================================================================
+   CARD ARROW
+
+   The badge on cards that open a page of their own — the portfolio grid, the
+   team cards, the insight cards. The LP Day cards are not here: they already
+   carry the same arrow inline in their footer row.
+
+   It answers to `[data-card-arrow]`, which goes on whichever element owns the
+   card's hover, so the badge lights with the rest of the card rather than
+   needing a hover of its own. Every card it sits on is a blue or dark ground,
+   so one light treatment covers all three.
+   ========================================================================== */
+
+.card-arrow {
+  position: absolute;
+  /* Decorative, and it sits over the card's own link. Without this it is the
+     topmost thing at that corner and eats the click instead of passing it on. */
+  pointer-events: none;
+  top: clamp(0.75rem, 1.2vw, 1.25rem);
+  right: clamp(0.75rem, 1.2vw, 1.25rem);
+  /* Above the card's own artwork, below the stretched link the team cards use
+     for navigation (z-index 4), so the badge never eats the click. */
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: clamp(1.75rem, 2.2vw, 2.375rem);
+  height: clamp(1.75rem, 2.2vw, 2.375rem);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  transition:
+    background-color 0.45s var(--ease-out-soft),
+    border-color 0.45s var(--ease-out-soft),
+    color 0.45s var(--ease-out-soft);
+}
+
+.card-arrow svg {
+  width: 58%;
+  height: auto;
+  transition: translate 0.45s var(--ease-out-expo);
+}
+
+/* The card's hover and its keyboard focus drive it. Both are covered: the
+   portfolio and insight cards are links themselves, the team card holds its
+   link inside, which is what `focus-within` catches. */
+[data-card-arrow]:hover .card-arrow,
+[data-card-arrow]:focus-visible .card-arrow,
+[data-card-arrow]:focus-within .card-arrow {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: var(--color-brand-deep);
+}
+
+[data-card-arrow]:hover .card-arrow svg,
+[data-card-arrow]:focus-visible .card-arrow svg,
+[data-card-arrow]:focus-within .card-arrow svg {
+  translate: 0.14em 0;
+}
+
+/* For a card whose corner is pale. The insight cards are the case: their
+   plate is drawn over by a near-white still, so the light badge disappears
+   into it. */
+.card-arrow[data-tone="dark"] {
+  border-color: rgba(10, 10, 10, 0.22);
+  background: rgba(10, 10, 10, 0.05);
+  color: var(--color-ink-700);
+}
+
+[data-card-arrow]:hover .card-arrow[data-tone="dark"],
+[data-card-arrow]:focus-visible .card-arrow[data-tone="dark"],
+[data-card-arrow]:focus-within .card-arrow[data-tone="dark"] {
+  border-color: var(--color-brand-deep);
+  background: var(--color-brand-deep);
+  color: #ffffff;
+}
+
+/* The written half of `/media`: the listing the article pages hang off. Its
+   cards are the shared `.ar` card, so this shelf and the one inside an article
+   are the same object. */
+.md-articles {
+  padding-block: clamp(3rem, 5.2vw, 6.25rem);
+  background: #ffffff;
+}
+
+.md-articles-grid {
+  display: grid;
+  gap: clamp(2rem, 3.125vw, 3.75rem);
+  margin-top: clamp(2.5rem, 4.167vw, 5rem);
+}
+
+@media (width >= 48rem) {
+  .md-articles-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 64rem) {
+  .md-articles-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ==========================================================================
+   PERSPECTIVES — ARTICLE PAGE  (`/media/[slug]`)
+
+   Traced from the Figma prototype's perspective frame, node 317-759, drawn at
+   1920 for "Deep-Tech Commercialisation Is Not a Straight Line".
+
+     meta      kicker · date · reading time, centred, letterspaced
+     title     two centred lines, the second in brand blue
+     hero      the plate, 6.25% to 93.75% across the frame, 16:9
+     body      left-aligned prose with bold run-in headings
+     related   a pale shelf: three cards, image over kicker, title and date
+
+   The frame runs its prose to nearly the full measure rather than a narrow
+   column, so the body keeps that width and leans on line-height for comfort.
+   ========================================================================== */
+
+@theme {
+  /* The frame's own three sizes: the meta line (16), the body (21) and the
+     run-in headings (30) at 1920. */
+  --pv-meta: clamp(0.6875rem, 0.833vw, 1rem);
+  --pv-body: clamp(0.9375rem, 1.094vw, 1.3125rem);
+  --pv-h: clamp(1.125rem, 1.5625vw, 1.875rem);
+}
+
+.pv {
+  margin-inline: 6.25%;
+  padding-top: calc(var(--header-h) + 2.5rem);
+}
+
+/* -------------------------------------------------------------- meta line */
+.pv-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  font-size: var(--pv-meta);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-500);
+}
+
+.pv-meta-kicker {
+  /* The frame's sky blue; `brand-deep` is the accent that clears 4.5:1 on
+     white at this size (WCAG 1.4.3). */
+  color: var(--color-brand-deep);
+}
+
+.pv-meta-dot {
+  color: var(--color-ink-300);
+}
+
+/* ------------------------------------------------------------------ title */
+.pv-title {
+  margin-top: 1.5rem;
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.16;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--color-ink-950);
+}
+
+.pv-title-1,
+.pv-title-2 {
+  display: inline;
+}
+
+.pv-title-2 {
+  color: var(--color-brand-sky);
+}
+
+/* ------------------------------------------------------------------- hero */
+.pv-hero {
+  position: relative;
+  overflow: hidden;
+  margin-top: clamp(2rem, 3.125vw, 3.75rem);
+  aspect-ratio: 16 / 9;
+}
+
+.pv-hero-img {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ------------------------------------------------------------------- body */
+.pv-body {
+  padding-block: clamp(2.5rem, 3.646vw, 4.375rem) clamp(3rem, 5.2vw, 6.25rem);
+}
+
+.pv-p {
+  margin-top: 1.15em;
+  font-size: var(--pv-body);
+  font-weight: 300;
+  line-height: 1.62;
+  text-wrap: pretty;
+  color: var(--color-ink-700);
+}
+
+/* The frame's run-in headings: bold, ink, with more air above than below so
+   each one binds to the paragraph it introduces. */
+.pv-h {
+  margin-top: 1.9em;
+  font-size: var(--pv-h);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-ink-950);
+}
+
+.pv-h + .pv-p {
+  margin-top: 0.85em;
+}
+
+/* --------------------------------------------------------------- related */
+/* The frame's pale shelf, sampled off the band: a very light brand tint. */
+.pv-related {
+  padding-block: clamp(3rem, 5.2vw, 6.25rem);
+  padding-inline: 6.25%;
+  background: #e8f4fb;
+}
+
+.pv-related-head {
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.16;
+  text-align: center;
+  color: var(--color-ink-950);
+}
+
+.pv-related-accent {
+  color: var(--color-brand-sky);
+}
+
+.pv-related-grid {
+  display: grid;
+  gap: clamp(2rem, 3.125vw, 3.75rem);
+  margin-top: clamp(2.5rem, 4.167vw, 5rem);
+}
+
+@media (width >= 48rem) {
+  .pv-related-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ar {
+  display: grid;
+  /* The whole card is one link; the plate, kicker, title and date stack.
+     Shared by the perspective page's related shelf and the /media listing. */
+  grid-template-rows: auto auto auto auto;
+}
+
+.ar-plate {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 1093 / 728;
+  border-radius: 14px;
+}
+
+.ar-img {
+  object-fit: cover;
+  transition: scale 0.7s var(--ease-out-expo);
+}
+
+.ar:hover .ar-img,
+.ar:focus-visible .ar-img {
+  scale: 1.04;
+}
+
+.ar-kicker {
+  margin-top: 1.5rem;
+  font-size: var(--pv-meta);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-brand-deep);
+}
+
+.ar-title {
+  margin-top: 0.9rem;
+  font-size: var(--pv-h);
+  font-weight: 700;
+  line-height: 1.3;
+  text-wrap: pretty;
+  color: var(--color-ink-950);
+  transition: color 0.4s var(--ease-out-soft);
+}
+
+.ar:hover .ar-title,
+.ar:focus-visible .ar-title {
+  color: var(--color-brand-deep);
+}
+
+.ar-date {
+  margin-top: 1.1rem;
+  font-size: var(--pv-body);
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--color-ink-500);
+}
+
+/* ==========================================================================
+   REACH OUT  (`/contact`)
+
+   Traced from the Figma prototype's frame, node 312-636. Five bands:
+
+     hero        centred eyebrow, two-line title, standfirst, pitch address
+     ribbon      the glass wave, spanning the frame
+     enquiry     pale field: copy left, the form on a white card right
+     offices     three plates with a pale foot carrying city and address
+     note        the compliance line that closes the page
+
+   The page keeps the site's 6.25% margin and the inner pages' `--ab-*` type.
+   ========================================================================== */
+
+@theme {
+  /* The frame's own sizes: the field labels (13) and the form text (17). */
+  --ro-label: clamp(0.625rem, 0.677vw, 0.8125rem);
+  --ro-input: clamp(0.9375rem, 0.885vw, 1.0625rem);
+}
+
+/* ------------------------------------------------------------------- hero */
+.ro-hero {
+  margin-inline: 6.25%;
+  padding-top: calc(var(--header-h) + 4vw);
+  text-align: center;
+}
+
+.ro-eyebrow {
+  font-size: var(--ab-eyebrow);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand-sky);
+}
+
+.ro-eyebrow-left {
+  text-align: left;
+}
+
+.ro-title {
+  margin-top: 1.5rem;
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.14;
+  text-wrap: balance;
+  color: var(--color-ink-950);
+}
+
+.ro-title-1,
+.ro-title-2 {
+  display: inline;
+}
+
+.ro-title-2 {
+  color: var(--color-brand-sky);
+}
+
+.ro-hero-body {
+  margin-inline: auto;
+  margin-top: 1.75rem;
+  max-width: 46ch;
+  font-size: var(--ab-body);
+  font-weight: 300;
+  line-height: 1.4;
+  text-wrap: pretty;
+  color: var(--color-ink-500);
+}
+
+.ro-hero-mail {
+  margin-top: 2.25rem;
+}
+
+/* The frame sets the address in its sky blue. `brand-deep` is the accent that
+   clears 4.5:1 on white at this size (WCAG 1.4.3). */
+.ro-mail-link {
+  font-size: var(--ab-body);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-brand-deep);
+  text-decoration-color: transparent;
+  text-decoration-line: underline;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color 0.35s var(--ease-out-soft);
+}
+
+.ro-mail-link:hover,
+.ro-mail-link:focus-visible {
+  text-decoration-color: currentColor;
+}
+
+/* ----------------------------------------------------------------- ribbon */
+/* Full-bleed, so it clips its own reveal: a scale or a lean on something
+   already the width of the viewport pushes a horizontal scrollbar. */
+.ro-ribbon {
+  display: block;
+  overflow: clip;
+  margin-top: clamp(1.5rem, 2.6vw, 3rem);
+}
+
+.ro-ribbon-img {
+  width: 100%;
+  height: auto;
+}
+
+/* ---------------------------------------------------------------- enquiry */
+/* The frame's pale field, sampled off the band. */
+.ro-enquiry {
+  display: grid;
+  gap: clamp(2.5rem, 4vw, 4.5rem);
+  padding-block: clamp(3rem, 5.2vw, 6.25rem);
+  padding-inline: 6.25%;
+  background: #e8f4fb;
+}
+
+.ro-sub-title {
+  margin-top: 1.25rem;
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.14;
+  color: var(--color-ink-950);
+}
+
+.ro-sub-body {
+  margin-top: 1.5rem;
+  max-width: 30ch;
+  font-size: var(--ab-body);
+  font-weight: 300;
+  line-height: 1.4;
+  text-wrap: pretty;
+  color: var(--color-ink-500);
+}
+
+/* --- the card --- */
+.ro-form-card {
+  padding: clamp(1.5rem, 2.6vw, 3rem);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px -30px rgba(0, 40, 90, 0.35);
+}
+
+.ro-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.ro-field {
+  display: grid;
+}
+
+.ro-label {
+  margin-bottom: 0.6rem;
+  font-size: var(--ro-label);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-900);
+}
+
+.ro-input {
+  width: 100%;
+  padding: 0.95rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #f2f7fb;
+  font: inherit;
+  font-size: var(--ro-input);
+  font-weight: 300;
+  line-height: 1.4;
+  color: var(--color-ink-900);
+  transition:
+    border-color 0.3s var(--ease-out-soft),
+    background-color 0.3s var(--ease-out-soft);
+}
+
+.ro-input::placeholder {
+  /* 4.62:1 on the field — placeholders carry the frame's example text, and
+     the label above already names each field (WCAG 1.4.3, 3.3.2). */
+  color: #6a7683;
+}
+
+.ro-input:hover {
+  background: #edf4f9;
+}
+
+.ro-input:focus-visible {
+  border-color: var(--color-brand-deep);
+  background: #ffffff;
+  outline: none;
+}
+
+.ro-textarea {
+  min-height: 9.5rem;
+  resize: vertical;
+}
+
+/* --- the deck row --- */
+/* A label wrapping the real file input: the row is the control, so a click
+   or a keyboard press opens the picker exactly once. */
+.ro-file {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #f2f7fb;
+  cursor: pointer;
+  transition:
+    border-color 0.3s var(--ease-out-soft),
+    background-color 0.3s var(--ease-out-soft);
+}
+
+.ro-file:hover {
+  background: #edf4f9;
+}
+
+/* The input is the focusable thing, so the row shows its focus. */
+.ro-file:has(.ro-file-input:focus-visible) {
+  border-color: var(--color-brand-deep);
+  background: #ffffff;
+}
+
+.ro-file-name {
+  font-size: var(--ro-input);
+  font-weight: 300;
+  line-height: 1.4;
+  color: #6a7683;
+  overflow-wrap: anywhere;
+}
+
+.ro-file-name.is-set {
+  color: var(--color-ink-900);
+}
+
+.ro-file-browse {
+  flex: none;
+  font-size: var(--ro-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-brand-deep);
+}
+
+/* Kept in the layout rather than `display:none`, so it stays focusable. */
+.ro-file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* --- submit --- */
+.ro-submit-row {
+  margin-top: 0.5rem;
+}
+
+/* The frame draws it as a text link on a rule, like the site's other calls to
+   action, rather than a filled button. */
+.ro-submit {
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-brand-rule);
+  font-size: var(--ab-body);
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--color-brand-deep);
+  cursor: pointer;
+  transition:
+    border-color 0.35s var(--ease-out-soft),
+    color 0.35s var(--ease-out-soft),
+    translate 0.35s var(--ease-out-soft);
+}
+
+.ro-submit:hover,
+.ro-submit:focus-visible {
+  border-color: var(--color-brand-deep);
+  translate: 0 -2px;
+}
+
+/* ---------------------------------------------------------------- offices */
+.ro-offices {
+  margin-inline: 6.25%;
+  padding-block: clamp(3rem, 5.2vw, 6.25rem);
+}
+
+.ro-offices-title {
+  text-wrap: balance;
+}
+
+.ro-office-grid {
+  display: grid;
+  gap: clamp(1.5rem, 2.6vw, 3rem);
+  margin-top: clamp(2.5rem, 4.167vw, 5rem);
+}
+
+@media (width >= 48rem) {
+  .ro-office-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ro-office {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #f4f8fb;
+}
+
+.ro-office-plate {
+  position: relative;
+  display: block;
+  aspect-ratio: 437 / 350;
+  background: #dce8f2;
+}
+
+.ro-office-img {
+  object-fit: cover;
+}
+
+.ro-office-foot {
+  display: block;
+  padding: clamp(1.25rem, 1.8vw, 2rem);
+}
+
+.ro-office-city {
+  font-size: var(--pd-value);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-ink-900);
+}
+
+.ro-office-address {
+  margin-top: 0.75rem;
+  font-size: var(--pv-body);
+  font-weight: 300;
+  line-height: 1.5;
+  text-wrap: pretty;
+  color: var(--color-ink-500);
+}
+
+/* ------------------------------------------------------------------- note */
+.ro-note {
+  padding-block: clamp(2.5rem, 3.6vw, 4.5rem);
+  padding-inline: 6.25%;
+  background: #f2f7fb;
+}
+
+.ro-note-text {
+  font-size: var(--pv-body);
+  font-weight: 300;
+  line-height: 1.6;
+  text-wrap: pretty;
+  color: var(--color-ink-500);
+}
+
+/* --------------------------------------------------- the traced layout --- */
+@media (width >= 64rem) {
+  .ro-hero {
+    padding-top: calc(var(--header-h) + 5.2vw);
+  }
+
+  /* The frame breaks the hero and the enquiry headings itself; below this
+     width they wrap on their own. */
+  .ro-title-1,
+  .ro-title-2 {
+    display: block;
+  }
+
+  /* The offices heading is the exception: the frame sets all three cities on
+     one line, with only the last in blue. */
+  .ro-offices-title span {
+    display: inline;
+  }
+
+  /* The frame holds the copy against the left margin and the card to the
+     right of centre. */
+  .ro-enquiry {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: start;
+    gap: 4.167vw;
+  }
+
+  .ro-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 2rem;
+  }
+
+  .ro-field-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ==========================================================================
+   LP DAY  (`/media/lp-day`)
+
+   Traced from the Figma prototype's frame, node 320-55. Eight bands:
+
+     hero      full-bleed auditorium, centred eyebrow / title / standfirst
+     intro     the three-word claim and its two centred lines
+     why       dark factory field: the claim, the looping list, the close
+     prog      "What happens at LP Day" over a two-by-two grid
+     gallery   pale field, a carousel per edition
+     quotes    dark auditorium, three quotes across
+     cta       the indigo panel and "Connect With Us"
+   ========================================================================== */
+
+@theme {
+  /* The frame's hero eyebrow (18) at 1920. */
+  --lp-eyebrow: clamp(0.6875rem, 0.9375vw, 1.125rem);
+  /* Traced off the frame: the quotes run at 31/42 and the closing panel's
+     lines at 90/113. The panel is deliberately the largest type on the page
+     — larger than the display headings — because it is the last thing said. */
+  --lp-quote: clamp(1rem, 1.615vw, 1.9375rem);
+  --lp-cta-line: clamp(1.75rem, 4.6875vw, 5.625rem);
+}
+
+/* Shared: the blue half of a two-tone heading, and forced line breaks. */
+.lp-accent {
+  color: var(--color-brand-sky);
+}
+
+.lp-line {
+  display: block;
+}
+
+.lp-eyebrow {
+  font-size: var(--ab-eyebrow);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand-sky);
+}
+
+/* On white the sky blue is decorative-weight; `brand-deep` clears 4.5:1. */
+.lp-eyebrow-ink {
+  color: var(--color-brand-deep);
+}
+
+.lp-title {
+  margin-top: 1.25rem;
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.14;
+  color: var(--color-ink-950);
+}
+
+.lp-dark-title {
+  margin-top: 1.25rem;
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.14;
+  color: #ffffff;
+}
+
+/* ------------------------------------------------------------------- hero */
+/* The frame opens the photograph below the navigation rather than behind it:
+   its header is a white band and the auditorium starts under it. The bar here
+   is fixed and transparent until you scroll, so without this the nav sits
+   dark-on-dark and is unreadable over the room. */
+.lp-hero {
+  position: relative;
+  margin-top: var(--header-h);
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  min-height: clamp(28rem, 41.7vw, 50rem);
+  padding-block: clamp(6rem, 9vw, 11rem);
+  padding-inline: 6.25%;
+  background: #04101f;
+  text-align: center;
+}
+
+.lp-hero-img {
+  z-index: -10;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Weighted to the middle, where the copy sits, and lighter at the edges so
+   the room still reads as a room. */
+.lp-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  background:
+    radial-gradient(70% 60% at 50% 55%, rgba(3, 12, 28, 0.72) 0%, rgba(3, 12, 28, 0.3) 70%, rgba(3, 12, 28, 0.12) 100%),
+    linear-gradient(180deg, rgba(3, 12, 28, 0.55) 0%, rgba(3, 12, 28, 0.25) 40%, rgba(3, 12, 28, 0.6) 100%);
+}
+
+.lp-hero-eyebrow {
+  font-size: var(--lp-eyebrow);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--color-brand-sky);
+}
+
+.lp-hero-title {
+  margin-top: 1.75rem;
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.14;
+  text-wrap: balance;
+  color: #ffffff;
+}
+
+.lp-hero-title-1 {
+  display: inline;
+}
+
+.lp-hero-body {
+  margin-inline: auto;
+  margin-top: 1.75rem;
+  max-width: 52ch;
+  font-size: var(--pd-band-body);
+  font-weight: 300;
+  line-height: 1.5;
+  text-wrap: pretty;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ------------------------------------------------------------------ intro */
+.lp-intro {
+  margin-inline: 6.25%;
+  padding-block: clamp(3.5rem, 6.25vw, 7.5rem);
+  text-align: center;
+}
+
+.lp-intro-title {
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.14;
+  text-wrap: balance;
+  color: var(--color-ink-950);
+}
+
+.lp-intro-sub {
+  margin-top: 1.75rem;
+  font-size: var(--ab-body);
+  font-weight: 300;
+  line-height: 1.4;
+  color: var(--color-ink-800);
+}
+
+.lp-intro-body {
+  margin-inline: auto;
+  margin-top: 2rem;
+  max-width: 52ch;
+  font-size: var(--pd-band-body);
+  font-weight: 300;
+  line-height: 1.5;
+  text-wrap: pretty;
+  color: var(--color-ink-500);
+}
+
+/* -------------------------------------------------------------------- why */
+.lp-why {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #04122a;
+}
+
+.lp-why-img {
+  z-index: -10;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* The scrim over the plate, fitted to the frame rather than guessed.
+   Sampled the band out of the prototype clear of its type, composited the
+   same plate behind candidate scrims and solved for the frame's own tone:
+   mean rgb(10, 25, 74) and luminance percentiles 50/75/90/99 of
+   26.0 / 31.4 / 36.5 / 45.1. This one gives rgb(9, 27, 73) and
+   24.9 / 30.7 / 34.7 / 44.8.
+   The first attempt ran 0.94 down to 0.42 and left the machinery at a
+   luminance p90 of 68 against the frame's 37 — the band read washed out and
+   too green. The frame holds it dark and saturated the whole way across, so
+   the alphas barely fall; it is the scrim's own blue that opens up to the
+   right, not the amount of it. White copy measures 13.1:1 here. */
+.lp-why-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  background: linear-gradient(
+    100deg,
+    rgba(3, 10, 34, 0.89) 0%,
+    rgba(4, 15, 53, 0.87) 38%,
+    rgba(6, 20, 72, 0.86) 100%
+  );
+}
+
+.lp-why-copy {
+  margin-inline: 6.25%;
+  padding-block: clamp(3.5rem, 6.25vw, 7.5rem);
+}
+
+.lp-why-list {
+  margin-top: 2.5rem;
+  max-width: 34rem;
+}
+
+.lp-why-close {
+  margin-top: 2.5rem;
+  font-size: var(--pd-band-body);
+  font-weight: 700;
+  line-height: 1.4;
+  color: #ffffff;
+}
+
+/* -------------------------------------------------------------- programme */
+.lp-prog {
+  margin-inline: 6.25%;
+  padding-block: clamp(3.5rem, 6.25vw, 7.5rem);
+}
+
+.lp-prog-grid {
+  display: grid;
+  gap: clamp(2rem, 3.6vw, 4.25rem);
+  margin-top: clamp(2.5rem, 4.167vw, 5rem);
+}
+
+.lp-prog-title {
+  font-size: var(--pd-value);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-ink-950);
+}
+
+.lp-prog-body {
+  margin-top: 1rem;
+  max-width: 44ch;
+  font-size: var(--pv-body);
+  font-weight: 300;
+  line-height: 1.6;
+  text-wrap: pretty;
+  color: var(--color-ink-500);
+}
+
+/* ---------------------------------------------------------------- gallery */
+.lp-gallery {
+  padding-block: clamp(3.5rem, 6.25vw, 7.5rem);
+  padding-inline: 6.25%;
+  background: #e8f4fb;
+}
+
+.lp-gallery-body {
+  margin-top: 1.75rem;
+  max-width: 46ch;
+  font-size: var(--pd-band-body);
+  font-weight: 300;
+  line-height: 1.5;
+  text-wrap: pretty;
+  color: var(--color-ink-500);
+}
+
+.lp-edition {
+  margin-top: clamp(3rem, 5.2vw, 6.25rem);
+}
+
+.lp-edition-head {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.lp-edition-year {
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.14;
+  color: var(--color-ink-950);
+}
+
+.lp-edition-body {
+  max-width: 52ch;
+  font-size: var(--pd-band-body);
+  font-weight: 300;
+  line-height: 1.5;
+  text-wrap: pretty;
+  color: var(--color-ink-500);
+}
+
+/* --- the strip --- */
+/* A real scroll container: it clamps at both ends by itself, takes a swipe,
+   and the arrows drive the same scroll rather than a parallel state. */
+.lp-strip {
+  --lp-gap: clamp(1rem, 1.6vw, 1.75rem);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - var(--lp-gap)) / 2);
+  gap: var(--lp-gap);
+  margin-top: clamp(2rem, 3.125vw, 3.75rem);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.lp-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.lp-slide {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  background: #d8e8f4;
+  scroll-snap-align: start;
+}
+
+.lp-slide-img {
+  object-fit: cover;
+}
+
+.lp-controls {
+  margin-top: clamp(1.5rem, 2.2vw, 2.5rem);
+}
+
+/* ----------------------------------------------------------------- quotes */
+.lp-quotes {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #04101f;
+}
+
+.lp-quotes-img {
+  z-index: -10;
+  object-fit: cover;
+  object-position: center;
+}
+
+.lp-quotes-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  background: linear-gradient(
+    180deg,
+    rgba(3, 12, 28, 0.62) 0%,
+    rgba(3, 12, 28, 0.5) 45%,
+    rgba(3, 12, 28, 0.78) 100%
+  );
+}
+
+/* The frame runs this band 808 tall at 1920 and hangs the copy in its upper
+   half, so the auditorium stays open underneath — hence the asymmetric
+   padding (266 over, 170 under) rather than an even `padding-block`. */
+.lp-quotes-inner {
+  margin-inline: 6.25%;
+  padding-top: clamp(3.5rem, 13.854vw, 16.625rem);
+  padding-bottom: clamp(2.5rem, 8.854vw, 10.625rem);
+}
+
+.lp-quotes-head {
+  font-size: var(--ab-display);
+  font-weight: 700;
+  line-height: 1.14;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* 154 under the heading, and 156 between columns — the frame sets the three
+   quotes well apart so each reads as its own voice rather than as a row. */
+.lp-quotes-grid {
+  display: grid;
+  gap: clamp(2rem, 8.125vw, 9.75rem);
+  margin-top: clamp(2.5rem, 8.02vw, 9.625rem);
+}
+
+.lp-quote-text {
+  font-size: var(--lp-quote);
+  font-weight: 300;
+  line-height: 1.355;
+  text-wrap: pretty;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* -------------------------------------------------------------------- cta */
+.lp-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* The frame's indigo, in case the plate is slow or missing. */
+  background: linear-gradient(120deg, #131a3a 0%, #2f3f9e 48%, #1b2352 100%);
+  text-align: center;
+}
+
+.lp-cta-img {
+  z-index: -10;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* 820 tall at 1920, near enough evenly padded (176 over, 174 under).
+   The under-padding is set 29 short of the frame's because `UnderlineLink`
+   reserves that much empty space beneath its rule for the hover arrow, so
+   the gap the reader actually sees lands on the frame's 174. */
+.lp-cta-inner {
+  margin-inline: 6.25%;
+  padding-top: clamp(2.5rem, 9.167vw, 11rem);
+  padding-bottom: clamp(2rem, 7.552vw, 9.0625rem);
+}
+
+.lp-cta-head {
+  font-size: var(--lp-cta-line);
+  font-weight: 300;
+  line-height: 1.256;
+  text-wrap: balance;
+  color: #ffffff;
+}
+
+.lp-cta-strong {
+  font-weight: 700;
+}
+
+.lp-cta-link {
+  margin-top: clamp(2rem, 4.01vw, 4.8125rem);
+}
+
+/* --------------------------------------------------- the traced layout --- */
+@media (width >= 48rem) {
+  .lp-prog-grid,
+  .lp-quotes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lp-edition-head {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    align-items: start;
+    gap: 3rem;
+  }
+
+  .lp-strip {
+    grid-auto-columns: calc((100% - 2 * var(--lp-gap)) / 3);
+  }
+}
+
+@media (width >= 64rem) {
+  .lp-quotes-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* The frame shows four photographs across. */
+  .lp-strip {
+    grid-auto-columns: calc((100% - 3 * var(--lp-gap)) / 4);
+  }
+
+  /* The frame breaks the hero title itself. */
+  .lp-hero-title-1 {
+    display: block;
+  }
 }
 
 /* ==========================================================================

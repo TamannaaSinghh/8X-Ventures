@@ -1,9 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
+import { ArticleCard } from "@/components/media/ArticleCard";
+import { CardArrow } from "@/components/ui/CardArrow";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import { lpDay } from "@/content/home";
-import { mediaBook, mediaCta, mediaHero, mediaInsights } from "@/content/media";
+import { mediaArticles, mediaBook, mediaCta, mediaHero, mediaInsights } from "@/content/media";
+import { articleIndex } from "@/content/perspectives";
+import { MediaHeroMark } from "@/components/media/MediaHeroMark";
+import { InsightPlateVideo } from "@/components/media/InsightPlateVideo";
 
 /* The frame's arrow: a 47 x 32 shaft-and-head at the right of each LP Day
    card's bar. Decorative — the card's own text names the destination. */
@@ -54,18 +59,9 @@ export function MediaPage() {
             </Reveal>
           </div>
 
-          {/* Decorative: the mark is the site's own, and the headline beside
-              it already says what the page is. */}
+          {/* Animated infinity mark — loop-01 replaces the static image */}
           <Reveal variant="scale" delay={40} className="md-hero-art">
-            <Image
-              src={mediaHero.art.src}
-              alt=""
-              width={mediaHero.art.width}
-              height={mediaHero.art.height}
-              priority
-              sizes="(max-width: 1024px) 100vw, 51vw"
-              className="art-3d h-auto w-full"
-            />
+            <MediaHeroMark />
           </Reveal>
         </div>
       </section>
@@ -166,9 +162,17 @@ export function MediaPage() {
           <ul role="list" className="md-ins-cards">
             {mediaInsights.items.map((item, i) => (
               <Reveal as="li" variant="card" key={item.title} delay={i * 120}>
-                <Link href={item.href} data-tilt="card" className="group md-ins-card">
+                <Link
+                  href={item.href}
+                  data-tilt="card"
+                  data-card-arrow=""
+                  className="group md-ins-card"
+                >
+                  <CardArrow tone="dark" />
+
                   <div aria-hidden="true" className="md-ins-plate">
-                    <span className="md-ins-play">
+                    <InsightPlateVideo />
+                    <span className="md-ins-play relative z-10">
                       <PlayGlyph />
                     </span>
                   </div>
@@ -178,6 +182,30 @@ export function MediaPage() {
                     <span className="md-ins-kicker">{item.kicker}</span>
                   </div>
                 </Link>
+              </Reveal>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* ================= ARTICLES ================= */}
+      {/* The client's content doc splits its blog page into Videos, which the
+          Insights band above carries, and Blogs. This is that second half —
+          and where a perspective is reached from. */}
+      <section aria-labelledby="articles-heading" className="md-articles">
+        <div className="md-shell">
+          <Reveal className="text-center">
+            <p className="md-eyebrow">{mediaArticles.eyebrow}</p>
+            <h2 id="articles-heading" className="md-display md-ins-title text-balance text-ink-950">
+              <span className="block">{mediaArticles.lead}</span>
+              <span className="block text-brand-sky">{mediaArticles.accent}</span>
+            </h2>
+          </Reveal>
+
+          <ul role="list" className="md-articles-grid">
+            {articleIndex.map((item, i) => (
+              <Reveal as="li" variant="card" key={item.title} delay={Math.min(i, 3) * 120}>
+                <ArticleCard article={item} />
               </Reveal>
             ))}
           </ul>

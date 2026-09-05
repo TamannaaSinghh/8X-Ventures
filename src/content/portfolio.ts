@@ -60,10 +60,13 @@ export type PortfolioCard = PortfolioCompany & {
   summary: string;
   stageLabel: string;
   stageNote: string;
+  /** Extra fields for the detail page's 4-column info strip. */
+  status?: string;
+  investedAt?: string;
 };
 
 /** Founding year, home city and the one-line "what they build", per company. */
-const DETAILS: Record<string, { founded: string; note: string }> = {
+const DETAILS: Record<string, { founded: string; note: string; status?: string; investedAt?: string }> = {
   pantherun: {
     founded: "Founded 2019 · Bengaluru",
     note: "Real-time, hardware-assisted encryption for defence, telecom, industrial and IoT systems.",
@@ -90,7 +93,9 @@ const DETAILS: Record<string, { founded: string; note: string }> = {
   },
   neuralzome: {
     founded: "Founded 2023 · Bengaluru",
-    note: "Autonomous mowing, weeding and soil-sensing robots, run from a single dashboard.",
+    note: "Autonomous AI for off-road robotics in complex real-world environments.",
+    status: "Scaling from product validation to commercial deployment.",
+    investedAt: "Seed Stage",
   },
   "trishul-space": {
     founded: "Founded 2022 · New Delhi",
@@ -122,6 +127,8 @@ export const portfolioCards: readonly PortfolioCard[] = portfolio.map((company) 
     summary: company.description,
     stageLabel: detail.founded,
     stageNote: detail.note,
+    status: detail.status,
+    investedAt: detail.investedAt,
   };
 });
 

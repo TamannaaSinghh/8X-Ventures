@@ -141,7 +141,7 @@ export function FounderJourney() {
   const step = ringOffset(previousIndex, index, journey.length);
 
   return (
-    <section aria-labelledby="journey-heading" className="relative overflow-hidden bg-white">
+    <section aria-labelledby="journey-heading" className="relative overflow-hidden bg-[#F0EEF0]">
       <div className="container-8x pt-20 pb-16 lg:pt-32 lg:pb-24">
         <Reveal className="text-center">
           <Eyebrow>{journeyIntro.eyebrow}</Eyebrow>
@@ -154,7 +154,7 @@ export function FounderJourney() {
           </h2>
         </Reveal>
 
-        {/* --- Floating ribbon (WebM with alpha transparency) --- */}
+        {/* --- Floating ribbon (MP4 loop) --- */}
         <Reveal variant="scale" delay={120} className="mx-auto mt-8 w-[78%] max-w-[900px] lg:mt-2">
           <video
             ref={videoRef}
@@ -168,7 +168,7 @@ export function FounderJourney() {
             aria-hidden="true"
             className="h-auto w-full"
           >
-            <source src="/videos/loop-02.webm" type="video/webm" />
+            <source src="/videos/loop-02.mp4" type="video/mp4" />
           </video>
         </Reveal>
 

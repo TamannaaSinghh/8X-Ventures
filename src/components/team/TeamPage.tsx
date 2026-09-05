@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { MentorRail } from "@/components/team/MentorRail";
+import { CardArrow } from "@/components/ui/CardArrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import { teamCta, teamGroup, teamHero, teamMentors, teamPartners, type Person } from "@/content/team";
@@ -20,9 +24,19 @@ function LinkedInIcon() {
 
 /**
  * A portrait card: name and role at the top, the cut-out portrait below, and
- * the person's bio and LinkedIn on hover — revealed on keyboard focus too, and
- * kept in flow rather than mounted, so the link inside stays tabbable and
- * tabbing to it is what opens the panel.
+ * the person's bio and LinkedIn on hover.
+ *
+ * The card is the grid's own item, not wrapped in one — the grids size their
+ * children with `.tm-pt-grid .tm-card { width: ... }`, so an intermediate
+ * element takes that width instead and the card, which has only an aspect
+ * ratio, collapses to nothing.
+ *
+ * The whole card navigates to the profile, but the anchor is the name and it
+ * is stretched over the card rather than the card being a `div` with a click
+ * handler: that keeps real link semantics — a URL to open in a new tab, a
+ * context menu, and keyboard support without reimplementing Enter and Space.
+ * LinkedIn sits above the stretched link and is a sibling of it, so the two
+ * anchors never nest.
  */
 function PersonCard({
   person,
@@ -35,18 +49,22 @@ function PersonCard({
   index?: number;
 }) {
   return (
-    /* The card is the grid's own item, so it reveals as itself rather than
-       inside a wrapper that would break the grid. `variant="card"` rides
-       `translate`/`scale`, which leaves `transform` to the pointer lean. */
     <Reveal
       as="article"
       variant="card"
       delay={Math.min(index, 5) * 90}
       data-tilt="card"
+      data-card-arrow=""
       className={cn("tm-card", variant === "team" && "tm-card-sm")}
     >
+      <CardArrow />
+
       <div className="tm-card-head">
-        <h3 className="tm-card-name">{person.name}</h3>
+        <h3 className="tm-card-name">
+          <Link href={`/team/${person.id}`} className="tm-card-open">
+            {person.name}
+          </Link>
+        </h3>
         <p className="tm-card-role">{person.role}</p>
       </div>
 
