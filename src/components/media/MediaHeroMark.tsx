@@ -38,7 +38,7 @@ export function MediaHeroMark() {
       disableRemotePlayback
       preload="auto"
       aria-hidden="true"
-      className="art-3d h-auto w-full"
+      className="art-3d md-hero-mark animate-float-3d h-auto w-full"
     >
       <source src="/videos/loop-03.mp4" type="video/mp4" />
     </video>

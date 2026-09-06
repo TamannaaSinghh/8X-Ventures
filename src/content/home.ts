@@ -512,11 +512,22 @@ export const lpDay = {
   line1: "Operators. Investors.",
   line2: "Technologists.",
   body: "LP Day brings together investors, founders, mentors, and ecosystem leaders around India's deep-tech future.",
+  /* `focus` is the `object-position` each still is cropped around. The cards are
+     far wider than the photographs — 788/353 on the media page against a 3:2 and
+     a 16:9 — so a third of the height is cut, and centring that cut is only
+     right when the subject is centred too.
+
+     2026 is a group photographed dead centre on the lawn, so it is left alone.
+     2025 is four people stood full height beside the banner: centring takes the
+     crop off the top of their heads and their feet at once, which is the one
+     framing that serves neither. Pulling it to 12% keeps the heads with room
+     above them and lets the cut fall around the knee, where a crop belongs. */
   editions: [
     {
       year: "2025",
       href: "/media/lp-day-2025",
       image: "/images/lpday-2025.jpg",
+      focus: "50% 12%",
       imageAlt:
         "Members of the 8X Ventures team beside the Annual Investors Meet banner at LP Day 2025, IIT Madras Research Park.",
     },
@@ -524,6 +535,7 @@ export const lpDay = {
       year: "2026",
       href: "/media/lp-day-2026",
       image: "/images/lpday-2026.jpg",
+      focus: "50% 50%",
       imageAlt:
         "The full LP Day 2026 gathering — investors, founders and mentors — photographed together on the lawn.",
     },

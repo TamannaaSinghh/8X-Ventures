@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
+import { PointerField } from "@/components/ui/PointerField";
 import { closingCta } from "@/content/home";
 
 /**
@@ -26,6 +27,7 @@ export function ClosingCta() {
         sizes="100vw"
         className="-z-10 object-cover object-bottom lg:object-center"
       />
+      <PointerField />
 
       <div className="cta-stage">
         <Reveal

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { MotionToggle } from "@/components/ui/MotionToggle";
 import { Reveal } from "@/components/ui/Reveal";
+import { PointerField } from "@/components/ui/PointerField";
 import { RotatingWord } from "@/components/ui/RotatingWord";
 import { manifesto, sectorsInline, sectorsInlineStart } from "@/content/home";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -25,6 +26,7 @@ export function ManifestoBanner() {
         sizes="100vw"
         className="animate-drift -z-20 object-cover [will-change:transform]"
       />
+      <PointerField />
 
       <div className="container-8x py-24 text-center sm:py-32 lg:py-44">
         <Reveal>

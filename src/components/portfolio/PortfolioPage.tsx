@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { PortfolioGrid } from "@/components/portfolio/PortfolioGrid";
 import { Reveal } from "@/components/ui/Reveal";
+import { PointerField } from "@/components/ui/PointerField";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import { portfolioCta, portfolioHero, portfolioIntro } from "@/content/portfolio";
 import { cn } from "@/lib/cn";
@@ -72,6 +73,7 @@ export function PortfolioPage() {
         <div aria-hidden="true" className="pf-cta-photo">
           <Image src="/images/portfolio-cta.jpg" alt="" fill sizes="100vw" className="object-cover mix-blend-multiply" />
         </div>
+        <PointerField />
         <div className="pf-stage pf-cta">
           <Reveal
             as="h2"

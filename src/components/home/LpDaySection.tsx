@@ -61,6 +61,7 @@ export function LpDaySection() {
                     alt={edition.imageAlt}
                     fill
                     sizes="(max-width: 1024px) 92vw, 46vw"
+                    style={{ objectPosition: edition.focus }}
                     className="transform-gpu object-cover transition-transform duration-700 ease-[var(--ease-out-soft)] [will-change:transform] group-hover:scale-[1.05] group-focus-visible:scale-[1.05]"
                   />
                   {/* Light wash under the year label, matching the artboard's

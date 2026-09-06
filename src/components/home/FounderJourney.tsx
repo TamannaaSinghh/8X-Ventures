@@ -166,7 +166,7 @@ export function FounderJourney() {
             disableRemotePlayback
             preload="auto"
             aria-hidden="true"
-            className="h-auto w-full"
+            className="animate-float-3d h-auto w-full"
           >
             <source src="/videos/loop-02.mp4" type="video/mp4" />
           </video>

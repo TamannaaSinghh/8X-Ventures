@@ -255,7 +255,9 @@
   );
   z-index: 20;
   width: var(--pop-w);
-  padding: 0.85rem 1rem 0.95rem;
+  /* Right side is held open for the close control; on a mouse, where no
+     control is drawn, it is given back below. */
+  padding: 0.85rem 2.4rem 0.95rem 1rem;
   border-radius: 14px;
   background: #ffffff;
   box-shadow:
@@ -310,6 +312,51 @@
   visibility: visible;
   translate: -50% 0;
   transition-delay: 0s;
+}
+
+/* The close control.
+
+   With a mouse the panel is dismissed by moving off it, so no control is drawn
+   — it would be clutter on an affordance that already reads. Without hover
+   there is no "moving off": a tap opens the panel and nothing in the gesture
+   says how to shut it again. Tapping the dot a second time and tapping outside
+   both already worked, but neither is visible, and a panel you have to guess
+   your way out of is not dismissible in any sense that helps (1.4.13).
+
+   44px of target around the glyph, the same budget the dots are given
+   (2.5.8), sat in the padding the panel holds open for it. */
+.hero-pop-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: var(--color-ink-500);
+  transition: color 0.25s var(--ease-out-soft);
+}
+
+.hero-pop-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.hero-pop-close:hover,
+.hero-pop-close:focus-visible {
+  color: var(--color-ink-900);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-pop-close {
+    display: none;
+  }
+
+  /* Nothing to clear, so the measure goes back to the artboard's. */
+  .hero-pop {
+    padding-right: 1rem;
+  }
 }
 
 /* ==========================================================================
@@ -423,9 +470,9 @@
     padding: 0;
   }
 
-  /* Centred with the standalone `translate` property, not `transform`: the
-     scroll-reveal resets `transform` to `none` when an element becomes
-     visible, which would otherwise wipe the centring. They compose. */
+  /* Centred on the standalone `translate` property. This was written when the
+     scroll-reveal ran on `transform` and reset it to `none` on arrival, which
+     would have wiped the centring; the two properties kept it apart. */
   .stats-headline,
   .stats-ghost,
   .stats-figure,
@@ -436,9 +483,23 @@
     margin: 0;
   }
 
+  /* The reveal has since moved the other way — it animates `translate` now, so
+     that a card can rise on scroll and lean under the pointer on `transform` at
+     the same time. Which leaves the headline, the only one of these four
+     wrapped in `Reveal`, having its centring overwritten the moment the block
+     arrives: `[data-reveal].is-visible` wins on specificity and lands
+     `translate: 0 0`, so the line sits with its left edge on the centre line
+     instead of straddling it and runs off the right of the stage. The other
+     three are plain paragraphs and centre correctly, which is why it is this
+     line alone that overhangs.
+
+     So the centring moves to `transform`, which nothing in this section is
+     using — no part of it leans under the pointer. The reveal keeps `translate`
+     for its rise, the centring holds on `transform`, and the two compose. */
   .stats-headline {
     top: 14.21%;
     left: 50%;
+    transform: translateX(-50%);
   }
 
   /* The ghost is not simply the figure faded: it is set smaller (157px cap
@@ -1930,6 +1991,39 @@
   width: 100%;
 }
 
+/* The loop is rendered on the same mist plate the other bands use, so its
+   backdrop sits at 245-248 while the hero band is pure white — the plate reads
+   as a grey rectangle parked behind the mark. `brightness` lifts it: a 1.042
+   slope clips 245 to white, and the artwork, which never rises above 230, moves
+   by under 4%.
+
+   Two things the lift can't reach, both handled by the one mask. The encoder
+   leaves a single dark row (~227) along the top and bottom edges, too dark to
+   lift and too light to ignore against white. And below about 1600 the mark
+   hangs past the band onto THE BOOK's mist — roughly a tenth of its height at
+   1280 — where a plate lifted to white would seam all over again.
+
+   The frame carries no art above 29% or below 77%, so trimming a hair off the
+   top and dissolving the last fifth costs nothing and lets the foot of the mark
+   settle into whichever band it happens to land on. */
+.md-hero-mark {
+  filter: brightness(1.042);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 0.6%,
+    #000 80%,
+    transparent 88%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 0.6%,
+    #000 80%,
+    transparent 88%
+  );
+}
+
 @media (width >= 64rem) {
   /* The mark starts at x905, so the copy column stops at 785 of the shell's
      1680 — a hard stop rather than a hope. It is also the paragraph's measure:
@@ -2329,11 +2423,16 @@ html.js-reveal [data-reveal].is-visible {
    shadow eased over half a second while the 6px lift jumped. All three names
    are listed here, so the lift eases on every card that opts in. */
 [data-tilt="card"] {
-  --tilt-deg: 5.5deg;
-  transform: perspective(1100px)
+  --tilt-deg: 7deg;
+  /* Nearer eye, wider swing, more travel towards the reader than the first
+     pass carried. The vanishing point is what does most of the work: at 1100px
+     the far edge of a card barely shortens, so a 5.5deg turn read as the card
+     sliding rather than turning. Bringing it to 880 makes the same rotation
+     foreshorten visibly, and the degrees and the lift are raised to match. */
+  transform: perspective(880px)
     rotateX(calc(var(--tilt-y) * -1 * var(--tilt-deg)))
     rotateY(calc(var(--tilt-x) * var(--tilt-deg)))
-    translateZ(calc(var(--tilt-mag) * 12px));
+    translateZ(calc(var(--tilt-mag) * 18px));
   transition:
     transform 0.75s var(--ease-out-soft),
     translate 0.5s var(--ease-out-soft),
@@ -2360,11 +2459,37 @@ html.js-reveal [data-reveal].is-visible {
   z-index: 5;
   border-radius: inherit;
   pointer-events: none;
-  opacity: calc(var(--tilt-mag) * 0.55);
+  opacity: calc(var(--tilt-mag) * 0.62);
   background: radial-gradient(
-    38% 48% at var(--tilt-px) var(--tilt-py),
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0) 72%
+    36% 46% at var(--tilt-px) var(--tilt-py),
+    rgba(255, 255, 255, 0.62) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  transition: opacity 0.75s var(--ease-out-soft);
+}
+
+/* And the side that turns away from it. A highlight on its own reads as a flat
+   card catching a light; it takes something falling off opposite the highlight
+   before the face reads as tipped. Anchored to the point opposite the pointer,
+   so the lit side and the shaded side travel across the card together.
+
+   Both are scaled by `--tilt-mag`, which is 0 at the centre — so this is at its
+   strongest only when the pointer is out at an edge, and the shade is at the
+   far edge by then rather than over the middle where a card keeps its words.
+   At its darkest it is about 7% black-blue at the corner, and gone by the time
+   it reaches the centre. */
+[data-tilt="card"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: calc(var(--tilt-mag) * 0.5);
+  background: radial-gradient(
+    62% 72% at calc(100% - var(--tilt-px)) calc(100% - var(--tilt-py)),
+    rgba(6, 34, 71, 0.22) 0%,
+    rgba(6, 34, 71, 0) 62%
   );
   transition: opacity 0.75s var(--ease-out-soft);
 }
@@ -2374,6 +2499,43 @@ html.js-reveal [data-reveal].is-visible {
    band is what the pointer actually reaches. */
 [data-tilt="scene"] {
   --tilt-deg: 3.5deg;
+}
+
+/* ==========================================================================
+   POINTER FIELD
+
+   The canvas `PointerField` paints into, on the flat statement bands. It sits
+   between the band's plate and its sentence: the plates are laid at -10, so -5
+   is above the colour and still below every word.
+
+   Plain compositing, deliberately — no `mix-blend-mode`. `screen` reads as the
+   natural choice for a light laid over a plate, and on most of these bands it
+   is, but the manifesto's plate drifts and carries `will-change: transform`.
+   That promotes it to a compositing layer of its own, which takes it out of the
+   group a blended element blends against: the canvas would then screen against
+   the white page behind the section instead of the plate, and blow the whole
+   band out to white. Everything the blend was wanted for survives without it —
+   the canvas paints white and pale blue at low alpha, so it can still only
+   lighten, and it is transparent wherever nothing is drawn, so there is no lit
+   rectangle on the band at rest and no edge where the canvas stops.
+   ========================================================================== */
+
+.pointer-field {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Nothing is drawn under a reduced-motion preference — the component returns
+   before it ever takes a context — but the element is still in the tree, so it
+   is taken out of the blend too rather than left as a no-op layer. */
+@media (prefers-reduced-motion: reduce) {
+  .pointer-field {
+    display: none;
+  }
 }
 
 /* Set on the picture rather than its wrapper: the wrappers are often `Reveal`
@@ -2463,6 +2625,40 @@ html.js-img img[data-img-in="fade"] {
   }
 }
 
+/* The same travel as `float-slow`, written in the individual transform
+   properties instead of one `transform`.
+
+   That is the whole point of it. The renders it goes on are `art-3d`, whose
+   `transform` belongs to the pointer lean, and an animation's `transform` does
+   not merge with a declared one — it replaces it, and the lean would stop dead
+   the moment the float started. `translate` and `rotate` are their own
+   properties, applied before `transform` rather than instead of it, so the two
+   compose: the piece leans under the cursor and drifts at the same time. It is
+   the reasoning the LP Day cards already use for their hover lift.
+
+   Vertical distance and roll are `float-slow`'s, unchanged, so everything on
+   the site rises and settles by the same amount. The pitch and yaw are left
+   out here — on these renders the lean is already supplying them. */
+@keyframes float-3d {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  25% {
+    translate: 0 -0.9rem;
+    rotate: -0.5deg;
+  }
+  50% {
+    translate: 0 -1.75rem;
+    rotate: -1.2deg;
+  }
+  75% {
+    translate: 0 -0.9rem;
+    rotate: -0.5deg;
+  }
+}
+
 @keyframes drift {
   0%,
   100% {
@@ -2526,6 +2722,25 @@ html.js-img img[data-img-in="fade"] {
 
 .animate-float-slow {
   animation: float-slow 9s ease-in-out infinite;
+}
+/* Named `animate-` deliberately, like the rest: that prefix is what the image
+   arrival above keys its exclusion off, so a render wearing this keeps its
+   drift and takes the plain fade in instead of the keyframed one.
+
+   `--float-phase` is a negative delay, which starts the piece part-way through
+   the cycle rather than holding it still first. Two renders that can share the
+   screen want different values: at the same phase they rise and settle as one
+   object, which is the moment the drift stops reading as several pieces each
+   floating and starts reading as the page itself moving. */
+.animate-float-3d {
+  animation: float-3d 9s ease-in-out infinite;
+  animation-delay: var(--float-phase, 0s);
+}
+/* The hero mark holds still while a sector popup is open — the panel is
+   anchored to a dot on the ribbon, and reading it should not mean tracking a
+   moving target. The video is already paused there for the same reason. */
+.hero-mark[data-paused="true"] {
+  animation-play-state: paused;
 }
 .animate-drift {
   animation: drift 12s ease-in-out infinite;

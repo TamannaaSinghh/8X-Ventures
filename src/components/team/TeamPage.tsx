@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MentorRail } from "@/components/team/MentorRail";
 import { CardArrow } from "@/components/ui/CardArrow";
 import { Reveal } from "@/components/ui/Reveal";
+import { PointerField } from "@/components/ui/PointerField";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import { teamCta, teamGroup, teamHero, teamMentors, teamPartners, type Person } from "@/content/team";
 import { cn } from "@/lib/cn";
@@ -127,7 +128,7 @@ export function TeamPage() {
               height={1500}
               priority
               sizes="(max-width: 1024px) 52vw, 57vw"
-              className="art-3d h-auto w-full"
+              className="art-3d animate-float-3d h-auto w-full"
             />
           </div>
         </div>
@@ -245,6 +246,7 @@ export function TeamPage() {
         <div aria-hidden="true" className="tm-cta-bg">
           <Image src="/images/team-gradient.jpg" alt="" width={2400} height={1600} sizes="180vw" />
         </div>
+        <PointerField />
 
         <div className="tm-stage tm-cta">
           <Reveal

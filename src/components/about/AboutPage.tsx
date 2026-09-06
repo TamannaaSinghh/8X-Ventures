@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
+import { PointerField } from "@/components/ui/PointerField";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import { JourneyTimeline } from "@/components/about/JourneyTimeline";
 import { PhilosophyScroller } from "@/components/about/PhilosophyScroller";
@@ -72,7 +73,7 @@ export function AboutPage() {
               height={1200}
               priority
               sizes="(max-width: 1024px) 46vw, 55vw"
-              className="art-3d h-auto w-full"
+              className="art-3d animate-float-3d h-auto w-full"
             />
           </div>
         </div>
@@ -113,7 +114,8 @@ export function AboutPage() {
               width={1000}
               height={1000}
               sizes="(max-width: 1024px) 62vw, 40vw"
-              className="art-3d h-auto w-full"
+              style={{ "--float-phase": "-4.5s" } as React.CSSProperties}
+              className="art-3d animate-float-3d h-auto w-full"
             />
           </Reveal>
 
@@ -174,6 +176,7 @@ export function AboutPage() {
       {/* ================= CLOSING ================= */}
       <section aria-labelledby="about-cta-heading" className="on-dark relative isolate overflow-hidden">
         <Image src="/images/about-cta.jpg" alt="" fill sizes="100vw" className="-z-10 object-cover" />
+        <PointerField />
         <div className="ab-stage ab-cta">
           <Reveal
             as="h2"

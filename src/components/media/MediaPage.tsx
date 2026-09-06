@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
+import { PointerField } from "@/components/ui/PointerField";
 import { ArticleCard } from "@/components/media/ArticleCard";
 import { CardArrow } from "@/components/ui/CardArrow";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
@@ -76,7 +77,8 @@ export function MediaPage() {
               width={mediaBook.cover.width}
               height={mediaBook.cover.height}
               sizes="(max-width: 1024px) 70vw, 26vw"
-              className="art-3d h-auto w-full"
+              style={{ "--float-phase": "-3.4s" } as React.CSSProperties}
+              className="art-3d animate-float-3d h-auto w-full"
             />
           </Reveal>
 
@@ -120,6 +122,7 @@ export function MediaPage() {
                       alt={edition.imageAlt}
                       fill
                       sizes="(max-width: 1024px) 92vw, 41vw"
+                      style={{ objectPosition: edition.focus }}
                       className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
                     />
                     {/* The frame's own wash under the year. Not enough on its
@@ -221,6 +224,7 @@ export function MediaPage() {
           sizes="100vw"
           className="-z-10 object-cover"
         />
+        <PointerField />
 
         <div className="md-shell">
           <Reveal as="h2" id="media-cta-heading" className="md-cta-title text-center text-balance">

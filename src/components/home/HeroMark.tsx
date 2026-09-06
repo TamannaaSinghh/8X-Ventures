@@ -35,6 +35,9 @@ export function HeroMark() {
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<number | undefined>(undefined);
   const videoRef = useRef<HTMLVideoElement>(null);
+  /* Set while focus is being handed back to a dot, so the list item's `onFocus`
+     does not read that as a request to open the panel again. */
+  const reopenGuard = useRef(false);
 
   const cancelClose = () => {
     if (closeTimer.current !== undefined) {
@@ -53,6 +56,22 @@ export function HeroMark() {
   const show = (name: string) => {
     cancelClose();
     setOpen(name);
+  };
+
+  /* Closing from the panel's own control. Focus goes back to the dot that
+     opened it: the control lives inside the panel, and the panel hides itself
+     with `visibility`, so leaving focus where it is drops it on the body. */
+  const dismiss = (from: HTMLElement) => {
+    cancelClose();
+    const spot = from.closest("li")?.querySelector<HTMLElement>(".hero-spot");
+    /* Cleared on the next line rather than in a frame callback: the focus event
+       is dispatched synchronously inside `focus()`, so the guard only has to
+       span that call — and a `requestAnimationFrame` never runs in a hidden
+       tab, which would strand the flag and leave every dot unable to open. */
+    reopenGuard.current = true;
+    setOpen(null);
+    spot?.focus();
+    reopenGuard.current = false;
   };
 
   useEffect(() => cancelClose, []);
@@ -95,7 +114,7 @@ export function HeroMark() {
   }, [open]);
 
   return (
-    <div ref={rootRef} className="hero-mark" data-paused={open !== null}>
+    <div ref={rootRef} className="hero-mark animate-float-3d" data-paused={open !== null}>
       {/* Infinity loop video — replaces the static hero-infinity.png */}
       <video
         ref={videoRef}
@@ -138,7 +157,9 @@ export function HeroMark() {
               onPointerLeave={(e) => {
                 if (e.pointerType !== "touch") closeSoon();
               }}
-              onFocus={() => show(sector.name)}
+              onFocus={() => {
+                if (!reopenGuard.current) show(sector.name);
+              }}
               onBlur={closeSoon}
             >
               <button
@@ -164,6 +185,24 @@ export function HeroMark() {
                 >
                   {sector.description}
                 </p>
+
+                {/* Drawn only where there is no hover to dismiss with — see
+                    `.hero-pop-close`. */}
+                <button
+                  type="button"
+                  className="hero-pop-close"
+                  onClick={(e) => dismiss(e.currentTarget)}
+                >
+                  <span className="sr-only-8x">{`Close ${sector.name}`}</span>
+                  <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+                    <path
+                      d="M1.5 1.5l11 11m0-11l-11 11"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
               </div>
             </li>
           );
