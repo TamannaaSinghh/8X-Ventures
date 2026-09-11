@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MentorRail } from "@/components/team/MentorRail";
+import { ScrollPin } from "@/components/ui/ScrollPin";
 import { CardArrow } from "@/components/ui/CardArrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { PointerField } from "@/components/ui/PointerField";
@@ -54,7 +55,6 @@ function PersonCard({
       as="article"
       variant="card"
       delay={Math.min(index, 5) * 90}
-      data-tilt="card"
       data-card-arrow=""
       className={cn("tm-card", variant === "team" && "tm-card-sm")}
     >
@@ -70,7 +70,7 @@ function PersonCard({
       </div>
 
       <div className="tm-card-photo">
-        <Image
+        <Image suppressHydrationWarning
           src={person.image}
           alt=""
           fill
@@ -106,22 +106,24 @@ export function TeamPage() {
         className="tm-hero-section relative overflow-x-clip bg-white"
       >
         <div className="tm-stage tm-hero">
-          <Reveal as="h1" id="team-heading" className={cn("tm-at tm-hero-title text-ink-950", DISPLAY)}>
-            {teamHero.line1} <span className="block text-brand-sky">{teamHero.line2}</span>
-          </Reveal>
+          <div className="tm-hero-copy at-col">
+            <Reveal as="h1" id="team-heading" className={cn("text-ink-950", DISPLAY)}>
+              {teamHero.line1} <span className="block text-brand-sky">{teamHero.line2}</span>
+            </Reveal>
 
-          <Reveal className="tm-at tm-hero-body max-lg:mt-8">
-            <p className={cn("leading-[1.2] font-light text-pretty text-ink-800", BODY)}>
-              {teamHero.body}
-            </p>
-          </Reveal>
+            <Reveal className="at-body">
+              <p className={cn("leading-[1.2] font-light text-pretty text-ink-800", BODY)}>
+                {teamHero.body}
+              </p>
+            </Reveal>
+          </div>
 
           {/* Runs on down into the band below, as in the artboard */}
           <div
             aria-hidden="true"
             className="tm-at tm-hero-engine pointer-events-none z-10 max-lg:absolute max-lg:-top-6 max-lg:right-0 max-lg:w-[52%] max-lg:opacity-30"
           >
-            <Image
+            <Image suppressHydrationWarning
               src="/images/team-engine.png"
               alt=""
               width={1500}
@@ -137,34 +139,36 @@ export function TeamPage() {
       {/* ================= PARTNERS & BOARD ================= */}
       <section aria-labelledby="partners-heading" className="on-dark relative isolate overflow-hidden bg-[#144a7e]">
         <div aria-hidden="true" className="tm-partners-bg">
-          <Image src="/images/team-gradient.jpg" alt="" width={2400} height={1600} sizes="140vw" priority />
+          <Image suppressHydrationWarning src="/images/team-gradient.jpg" alt="" width={2400} height={1600} sizes="140vw" priority />
         </div>
 
         <div className="tm-stage tm-partners">
-          <Reveal className="tm-at tm-pt-eyebrow text-center">
-            <p className={cn("font-bold tracking-[0.02em] text-brand-sky uppercase", EYEBROW)}>
-              {teamPartners.eyebrow}
-            </p>
-          </Reveal>
+          <div className="tm-pt-copy at-col text-center">
+            <Reveal>
+              <p className={cn("font-bold tracking-[0.02em] text-brand-sky uppercase", EYEBROW)}>
+                {teamPartners.eyebrow}
+              </p>
+            </Reveal>
 
-          <Reveal
-            as="h2"
-            id="partners-heading"
-            className={cn("tm-at tm-pt-title text-center text-white max-lg:mt-3", DISPLAY)}
-          >
-            {teamPartners.line1} <span className="text-brand-sky">{teamPartners.line2}</span>
-          </Reveal>
+            <Reveal
+              as="h2"
+              id="partners-heading"
+              className={cn("at-title text-white", DISPLAY)}
+            >
+              {teamPartners.line1} <span className="text-brand-sky">{teamPartners.line2}</span>
+            </Reveal>
 
-          <Reveal className="tm-at tm-pt-body max-lg:mt-6">
-            <p className={cn("text-center leading-[1.35] font-light text-pretty text-white/95", BODY)}>
-              {teamPartners.body}
-            </p>
-          </Reveal>
+            <Reveal className="at-body tm-pt-body">
+              <p className={cn("leading-[1.35] font-light text-pretty text-white/95", BODY)}>
+                {teamPartners.body}
+              </p>
+            </Reveal>
 
-          <div className="tm-at tm-pt-grid">
-            {teamPartners.people.map((p, i) => (
-              <PersonCard key={p.id} person={p} variant="partner" index={i} />
-            ))}
+            <div className="at-tail tm-pt-grid">
+              {teamPartners.people.map((p, i) => (
+                <PersonCard key={p.id} person={p} variant="partner" index={i} />
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -172,97 +176,121 @@ export function TeamPage() {
       {/* ================= THE TEAM ================= */}
       <section aria-labelledby="the-team-heading" className="relative bg-white">
         <div className="tm-stage tm-group">
-          <Reveal className="tm-at tm-gp-eyebrow text-center">
-            <p className={cn("font-bold tracking-[0.02em] text-brand uppercase", EYEBROW)}>
-              {teamGroup.eyebrow}
-            </p>
-          </Reveal>
+          <div className="tm-gp-copy at-col text-center">
+            <Reveal>
+              <p className={cn("font-bold tracking-[0.02em] text-brand uppercase", EYEBROW)}>
+                {teamGroup.eyebrow}
+              </p>
+            </Reveal>
 
-          <Reveal
-            as="h2"
-            id="the-team-heading"
-            className={cn("tm-at tm-gp-title text-center text-ink-950 max-lg:mt-3", DISPLAY)}
-          >
-            {teamGroup.line1} <span className="text-brand-sky">{teamGroup.line2}</span>
-          </Reveal>
+            <Reveal
+              as="h2"
+              id="the-team-heading"
+              className={cn("at-title text-ink-950", DISPLAY)}
+            >
+              {teamGroup.line1} <span className="text-brand-sky">{teamGroup.line2}</span>
+            </Reveal>
 
-          <Reveal className="tm-at tm-gp-body max-lg:mt-6">
-            <p className={cn("text-center leading-[1.2] font-light text-pretty text-ink-800", BODY)}>
-              {teamGroup.body}
-            </p>
-          </Reveal>
+            <Reveal className="at-body">
+              <p className={cn("leading-[1.2] font-light text-pretty text-ink-800", BODY)}>
+                {teamGroup.body}
+              </p>
+            </Reveal>
 
-          <div className="tm-at tm-gp-grid">
-            {teamGroup.people.map((p, i) => (
-              <PersonCard key={p.id} person={p} variant="team" index={i} />
-            ))}
+            <div className="at-tail tm-gp-grid">
+              {teamGroup.people.map((p, i) => (
+                <PersonCard key={p.id} person={p} variant="team" index={i} />
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ================= MENTORS ================= */}
-      <section aria-labelledby="mentors-heading" className="on-dark relative isolate overflow-hidden bg-[#023363]">
-        <div aria-hidden="true" className="tm-mentors-art">
-          <Image
-            src="/images/team-infinity.jpg"
-            alt=""
-            width={1200}
-            height={1500}
-            sizes="(max-width: 1024px) 80vw, 51vw"
-            className="h-auto w-full"
-          />
-        </div>
-
+      {/* ================= MENTORS =================
+          Held while its five bands are read, the same way the philosophy
+          section on `/about` is — the list and the section are one movement. */}
+      <ScrollPin
+        labelledBy="mentors-heading"
+        className="tm-mt-pin on-dark bg-[#023363]"
+        /* The band's blue belongs on the stage as well as the section, and not
+           for tidiness: the infinity plate is `mix-blend-mode: screen`, which
+           drops its black ground out against whatever is behind it. The stage
+           is `position: sticky`, so it forms a stacking context of its own and
+           the blend can only see backdrop inside it — with the colour left on
+           the section outside, the plate had nothing to lighten against and
+           its ground showed as a black block. The section keeps it too, for
+           the runway either side of the pinned screenful. */
+        stageClassName="isolate bg-[#023363]"
+      >
+        {/* Inside the band, not the stage. The artboard places it as a share
+            of this band — 8.63% down, 50.94% wide — and the pinned stage is a
+            whole viewport, so hanging it off the stage sized and placed it
+            against the wrong box entirely. */}
         <div className="tm-stage tm-mentor-band">
-          <Reveal className="tm-at tm-mt-eyebrow">
-            <p className={cn("font-bold tracking-[0.02em] text-brand-sky uppercase", EYEBROW)}>
-              {teamMentors.eyebrow}
-            </p>
-          </Reveal>
+          <div aria-hidden="true" className="tm-mentors-art">
+            <Image suppressHydrationWarning
+              src="/images/team-infinity.jpg"
+              alt=""
+              width={1200}
+              height={1500}
+              sizes="(max-width: 1024px) 80vw, 51vw"
+              className="h-auto w-full"
+            />
+          </div>
 
-          <Reveal
-            as="h2"
-            id="mentors-heading"
-            className={cn("tm-at tm-mt-title text-white max-lg:mt-3", DISPLAY)}
-          >
-            {teamMentors.line1} <span className="block">{teamMentors.line2}</span>
-          </Reveal>
+          <div className="tm-at tm-mt-copy at-col">
+            <Reveal>
+              <p className={cn("font-bold tracking-[0.02em] text-brand-sky uppercase", EYEBROW)}>
+                {teamMentors.eyebrow}
+              </p>
+            </Reveal>
 
-          <Reveal delay={120} className="tm-at tm-mt-list max-lg:mt-10">
-            <MentorRail />
-          </Reveal>
+            <Reveal
+              as="h2"
+              id="mentors-heading"
+              className={cn("at-title text-white", DISPLAY)}
+            >
+              {teamMentors.line1} <span className="block">{teamMentors.line2}</span>
+            </Reveal>
 
-          <Reveal className="tm-at tm-mt-closing max-lg:mt-10">
-            <p className="tm-mt-closing-text font-bold text-white">
-              {teamMentors.closing1}
-              <span className="block">{teamMentors.closing2}</span>
-            </p>
-          </Reveal>
+            <Reveal delay={120} className="at-body tm-mt-list">
+              <MentorRail />
+            </Reveal>
+
+            <Reveal className="at-tail">
+              <p className="tm-mt-closing-text font-bold text-white">
+                {teamMentors.closing1}
+                <span className="block">{teamMentors.closing2}</span>
+              </p>
+            </Reveal>
+          </div>
         </div>
-      </section>
+      </ScrollPin>
 
       {/* ================= CLOSING ================= */}
       <section aria-labelledby="team-cta-heading" className="on-dark relative isolate overflow-hidden bg-[#0096d0]">
         <div aria-hidden="true" className="tm-cta-bg">
-          <Image src="/images/team-gradient.jpg" alt="" width={2400} height={1600} sizes="180vw" />
+          <Image suppressHydrationWarning src="/images/team-gradient.jpg" alt="" width={2400} height={1600} sizes="180vw" />
         </div>
         <PointerField />
 
         <div className="tm-stage tm-cta">
-          <Reveal
-            as="h2"
-            id="team-cta-heading"
-            className="tm-at tm-cta-title text-center leading-[1.2] text-white"
-          >
-            <span className="block font-light">{teamCta.line1}</span>
-            <span className="block font-bold">{teamCta.line2}</span>
-          </Reveal>
+          <div className="tm-cta-copy at-col text-center">
+            <Reveal
+              as="h2"
+              id="team-cta-heading"
+              className="tm-cta-title leading-[1.2] text-white"
+            >
+              <span className="block font-light">{teamCta.line1}</span>
+              <span className="block font-bold">{teamCta.line2}</span>
+            </Reveal>
 
-          <Reveal className="tm-at tm-cta-link flex justify-center max-lg:mt-10">
-            <UnderlineLink href={teamCta.link.href} tone="light">
-              {teamCta.link.label}
-            </UnderlineLink>
-          </Reveal>
+            <Reveal className="at-tail flex justify-center">
+              <UnderlineLink href={teamCta.link.href} tone="light">
+                {teamCta.link.label}
+              </UnderlineLink>
+            </Reveal>
+          </div>
         </div>
       </section>
     </>

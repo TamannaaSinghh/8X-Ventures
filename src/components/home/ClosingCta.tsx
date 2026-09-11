@@ -20,7 +20,7 @@ import { closingCta } from "@/content/home";
 export function ClosingCta() {
   return (
     <section aria-labelledby="cta-heading" className="relative isolate overflow-hidden">
-      <Image
+      <Image suppressHydrationWarning
         src="/images/cta-bg.jpg"
         alt=""
         fill

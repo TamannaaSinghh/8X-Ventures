@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import {
   contactCompliance,
@@ -22,7 +22,43 @@ import { offices, siteConfig } from "@/content/site";
  * what it appears to do. A real endpoint is the proper fix; see the README
  * note that ships with this page.
  */
+/**
+ * Opens the page on the ribbon rather than at the heading above it.
+ *
+ * Asked for deliberately, and worth being clear about what it does: the h1 and
+ * the pitch address sit above this, so a reader arriving here is put past them
+ * and has to scroll up to find them. That is the trade, and it is the reason
+ * this is written as narrowly as it can be — it only ever fires on a plain
+ * arrival at the top of the page:
+ *
+ *   - a URL with a hash is left alone, so `#enquiry` and the skip link still
+ *     go where they say they will;
+ *   - a page already scrolled is left alone, which is what a reload or a Back
+ *     lands on once the browser has restored its position;
+ *   - the jump is instant, not smooth: `scroll-behavior: smooth` is set for
+ *     in-page anchors and would otherwise animate this, which is precisely the
+ *     drifting scroll that was a bug when the router did it by accident.
+ */
+function useOpenOnRibbon() {
+  useEffect(() => {
+    if (window.location.hash) return;
+    if (window.scrollY > 4) return;
+
+    /* After paint, so the ribbon has been laid out and the router has finished
+       its own scroll to the top of the new page. */
+    const raf = requestAnimationFrame(() => {
+      const ribbon = document.querySelector<HTMLElement>(".ro-ribbon");
+      if (!ribbon || window.scrollY > 4) return;
+      window.scrollTo({ top: ribbon.offsetTop, behavior: "instant" });
+    });
+
+    return () => cancelAnimationFrame(raf);
+  }, []);
+}
+
 export function ContactPage() {
+  useOpenOnRibbon();
+
   const f = contactEnquiry.fields;
   const [deckName, setDeckName] = useState("");
 
@@ -73,7 +109,7 @@ export function ContactPage() {
 
       {/* The frame's glass ribbon, spanning the frame under the hero. */}
       <Reveal aria-hidden="true" className="ro-ribbon">
-        <Image
+        <Image suppressHydrationWarning
           src="/images/contact/ribbon.jpg"
           alt=""
           width={2400}
@@ -214,7 +250,7 @@ export function ContactPage() {
                 <article id={office.id} className="ro-office">
                   <span className="ro-office-plate">
                     {art && (
-                      <Image
+                      <Image suppressHydrationWarning
                         src={art.src}
                         alt={art.alt}
                         fill

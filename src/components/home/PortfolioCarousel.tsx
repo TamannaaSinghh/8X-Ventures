@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { CardArrow } from "@/components/ui/CardArrow";
 import { CarouselControls } from "@/components/ui/CarouselControls";
 import { Reveal } from "@/components/ui/Reveal";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
@@ -73,7 +75,8 @@ export function PortfolioCarousel() {
                       "absolute top-1/2 left-1/2 w-[min(86vw,380px)]",
                       "overflow-hidden rounded-[28px] transition-[transform,opacity] duration-700 ease-[var(--ease-out-expo)]",
                       "[will-change:transform,opacity]",
-                      active && "z-30 block opacity-100 shadow-[0_30px_70px_-30px_rgba(0,60,120,0.45)]",
+                      active &&
+                        "z-30 block opacity-100 shadow-[0_30px_70px_-30px_rgba(0,60,120,0.45)]",
                       aside &&
                         "z-20 hidden opacity-100 shadow-[0_18px_44px_-30px_rgba(0,60,120,0.4)] lg:block",
                       /* Slides further out are removed from layout entirely
@@ -86,72 +89,102 @@ export function PortfolioCarousel() {
                         : `translate(calc(-50% + ${offset * 97}%), -50%) scale(0.74)`,
                     }}
                   >
-                    {/* Photo */}
-                    {/* The client supplied logos rather than photography, so
+                    {/* The whole card is the link to the company's page, the
+                        same target the portfolio grid's cards carry. Only the
+                        active slide is reachable: the previews beside it are
+                        already `inert` and `aria-hidden` for the carousel
+                        pattern, so they never become a second tab stop for
+                        the same destination. */}
+                    <Link
+                      href={`/portfolio/${company.id}`}
+                      aria-label={company.name}
+                      data-card-arrow=""
+                      /* The slide clips to its rounded corners, so the global
+                         focus ring's 3px offset would be cut off; drawn inside
+                         the card instead. */
+                      className="relative block focus-visible:rounded-[28px] focus-visible:[outline-offset:-4px]"
+                    >
+                      {/* Active slide only: the previews beside it are inert,
+                          so a badge there would promise a click they cannot
+                          take. Sits on the white logo plate, so the dark tone. */}
+                      {active && <CardArrow tone="dark" />}
+
+                      {/* Photo */}
+                      {/* The client supplied logos rather than photography, so
                         the panel is a white plate with the mark held inside
                         it — same box, same aspect, `contain` not `cover`. */}
-                    {/* White on every card, active or preview: several of the
+                      {/* White on every card, active or preview: several of the
                         supplied logos carry their own white or grey plate, so
                         a tinted panel behind them shows as a pale rectangle.
                         The preview cards are set apart by their shadow and
                         their tinted detail panel instead. */}
-                    <div className="relative aspect-[16/9] w-full bg-white">
-                      <Image
-                        src={company.image}
-                        alt={active ? company.imageAlt : ""}
-                        fill
-                        sizes="(max-width: 640px) 86vw, 380px"
-                        className={cn("object-contain p-[7%]", !active && "opacity-40")}
-                      />
-                    </div>
+                      <div className="relative aspect-[16/9] w-full bg-white">
+                        <Image suppressHydrationWarning
+                          src={company.image}
+                          alt={active ? company.imageAlt : ""}
+                          fill
+                          sizes="(max-width: 640px) 86vw, 380px"
+                          className={cn(
+                            "object-contain p-[7%]",
+                            !active && "opacity-40",
+                          )}
+                        />
+                      </div>
 
-                    {/* Detail panel */}
-                    <div
-                      className={cn(
-                        "px-5 pt-4 pb-5 lg:px-6 lg:pb-6",
-                        active
-                          ? "bg-brand-sky text-white"
-                          : /* Preview only — inert and hidden from assistive tech,
+                      {/* Detail panel */}
+                      <div
+                        className={cn(
+                          "px-5 pt-4 pb-5 lg:px-6 lg:pb-6",
+                          active
+                            ? "bg-brand-sky text-white"
+                            : /* Preview only — inert and hidden from assistive tech,
                                so it is exempt from the contrast minimum. */
-                            "bg-brand-pale text-brand-sky/45",
-                      )}
-                    >
-                      <ul role="list" className="flex flex-wrap gap-2">
-                        {[company.sector, company.vehicle].map((tag) => (
-                          <li
-                            key={tag}
-                            className={cn(
-                              "rounded-full border px-3 py-1 text-[11px] font-medium sm:text-xs",
-                              active ? "border-white/70" : "border-brand-sky/30",
-                            )}
-                          >
-                            {tag}
-                          </li>
-                        ))}
-                      </ul>
+                              "bg-brand-pale text-brand-sky/45",
+                        )}
+                      >
+                        <ul role="list" className="flex flex-wrap gap-2">
+                          {[company.sector, company.vehicle].map((tag) => (
+                            <li
+                              key={tag}
+                              className={cn(
+                                "rounded-full border px-3 py-1 text-[11px] font-medium sm:text-xs",
+                                active
+                                  ? "border-white/70"
+                                  : "border-brand-sky/30",
+                              )}
+                            >
+                              {tag}
+                            </li>
+                          ))}
+                        </ul>
 
-                      <h3 className="mt-3.5 text-[clamp(1.25rem,2vw,1.625rem)] leading-tight font-normal">
-                        {company.name}
-                      </h3>
+                        <h3 className="mt-3.5 text-[clamp(1.25rem,2vw,1.625rem)] leading-tight font-normal">
+                          {company.name}
+                        </h3>
 
-                      <p className="mt-1 text-[clamp(0.9rem,1.15vw,1rem)]">
-                        <span className="font-bold">{company.metric.value}</span>{" "}
-                        <span className="font-normal">{company.metric.label}</span>
-                      </p>
+                        <p className="mt-1 text-[clamp(0.9rem,1.15vw,1rem)]">
+                          <span className="font-bold">
+                            {company.metric.value}
+                          </span>{" "}
+                          <span className="font-normal">
+                            {company.metric.label}
+                          </span>
+                        </p>
 
-                      {company.quote && (
-                        <blockquote className="mt-3 text-[clamp(0.775rem,0.9vw,0.8125rem)] leading-relaxed">
-                          <p>
-                            &ldquo;{company.quote.text}&rdquo;{" "}
-                            <cite className="font-bold not-italic">
-                              — {company.quote.attribution}
-                            </cite>
-                          </p>
-                        </blockquote>
-                      )}
+                        {company.quote && (
+                          <blockquote className="mt-3 text-[clamp(0.775rem,0.9vw,0.8125rem)] leading-relaxed">
+                            <p>
+                              &ldquo;{company.quote.text}&rdquo;{" "}
+                              <cite className="font-bold not-italic">
+                                — {company.quote.attribution}
+                              </cite>
+                            </p>
+                          </blockquote>
+                        )}
 
-                      <p className="sr-only-8x">{company.description}</p>
-                    </div>
+                        <p className="sr-only-8x">{company.description}</p>
+                      </div>
+                    </Link>
                   </div>
                 );
               })}

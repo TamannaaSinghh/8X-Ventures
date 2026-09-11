@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { LpDayGallery } from "@/components/media/LpDayGallery";
 import { LoopList } from "@/components/ui/LoopList";
+import { PointerField } from "@/components/ui/PointerField";
+import { ScrollPin } from "@/components/ui/ScrollPin";
 import { Reveal } from "@/components/ui/Reveal";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import {
@@ -25,7 +27,7 @@ export function LpDayPage() {
     <>
       {/* ================= HERO ================= */}
       <section aria-labelledby="lp-heading" className="lp-hero">
-        <Image
+        <Image suppressHydrationWarning
           src={lpDayHero.image}
           alt={lpDayHero.imageAlt}
           fill
@@ -70,10 +72,19 @@ export function LpDayPage() {
         </Reveal>
       </section>
 
-      {/* ================= WHY ================= */}
-      <section aria-labelledby="lp-why-heading" className="lp-why">
-        <Image src={lpDayWhy.image} alt="" fill sizes="100vw" className="lp-why-img" />
-        <span aria-hidden="true" className="lp-why-scrim" />
+      {/* ================= WHY =================
+          The list here is the same device as the team page's mentor bands, so
+          it is held the same way — see `ScrollPin`. Left unpinned it would
+          have no runway to step through and would sit on its still frame. */}
+      <ScrollPin labelledBy="lp-why-heading" className="lp-why-pin" stageClassName="lp-why">
+        {/* The plate and its scrim in a layer of their own. The stage above
+            them is `position: sticky` now that the section is pinned, and a
+            `fill` image needs a parent that is relative, absolute or fixed —
+            sticky is none of those, and `next/image` says so. */}
+        <div aria-hidden="true" className="lp-why-bg">
+          <Image suppressHydrationWarning src={lpDayWhy.image} alt="" fill sizes="100vw" className="lp-why-img" />
+          <span className="lp-why-scrim" />
+        </div>
 
         <div className="lp-why-copy">
           <Reveal as="p" className="lp-eyebrow">
@@ -97,7 +108,7 @@ export function LpDayPage() {
             {lpDayWhy.close}
           </Reveal>
         </div>
-      </section>
+      </ScrollPin>
 
       {/* ================= PROGRAMME ================= */}
       <section aria-labelledby="lp-prog-heading" className="lp-prog">
@@ -142,7 +153,7 @@ export function LpDayPage() {
 
       {/* ================= QUOTES ================= */}
       <section aria-labelledby="lp-quotes-heading" className="lp-quotes">
-        <Image src={lpDayQuotes.image} alt="" fill sizes="100vw" className="lp-quotes-img" />
+        <Image suppressHydrationWarning src={lpDayQuotes.image} alt="" fill sizes="100vw" className="lp-quotes-img" />
         <span aria-hidden="true" className="lp-quotes-scrim" />
 
         <div className="lp-quotes-inner">
@@ -162,7 +173,8 @@ export function LpDayPage() {
 
       {/* ================= CTA ================= */}
       <section aria-labelledby="lp-cta-heading" className="lp-cta">
-        <Image src={lpDayCta.image} alt="" fill sizes="100vw" className="lp-cta-img" />
+        <Image suppressHydrationWarning src={lpDayCta.image} alt="" fill sizes="100vw" className="lp-cta-img" />
+        <PointerField />
 
         <div className="lp-cta-inner">
           <Reveal as="h2" id="lp-cta-heading" className="lp-cta-head">

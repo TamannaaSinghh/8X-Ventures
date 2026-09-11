@@ -468,6 +468,19 @@
   .stats-stage {
     aspect-ratio: 1920 / 1067;
     padding: 0;
+
+    /* Hoisted so the figure and the label can be placed off it rather than off
+       the stage. This section is cover-fitted to the pinned viewport — its
+       width is `max(100%, 100svh * 1920/1067)` — so its height answers to the
+       window's height while the type on it answers to the window's width, and
+       nothing traced as a percentage of the stage keeps its place when the two
+       disagree. Measured before this: the ghost overlapped the figure by 63px
+       at 1920, as drawn, but cleared it by 32px at 1024 and 6px at 2560, and
+       the label sat anywhere from 40px to 135px under the numeral. */
+    --stats-ghost-size: clamp(2.75rem, 1.979rem + 10.2vw, 14.22rem);
+    /* The traced 46.44%, expressed as the ghost's own top plus 0.8369 of its
+       size — which is that same distance at 1920, and stays that distance. */
+    --stats-figure-top: calc(28.586% + 0.8369 * var(--stats-ghost-size));
   }
 
   /* Centred on the standalone `translate` property. This was written when the
@@ -510,16 +523,25 @@
     /* Nudged right of the ink centre because the trailing letter-space is
        part of the layout box that `translate: -50%` centres. */
     left: 51.302%;
-    font-size: clamp(2.75rem, 1.979rem + 10.2vw, 14.22rem);
+    font-size: var(--stats-ghost-size);
   }
 
   .stats-figure {
-    top: 46.44%;
+    top: var(--stats-figure-top);
     left: 50%;
   }
 
+  /* Tied to the figure rather than placed on its own percentage. `--text-stat`
+     caps at 16.68rem and floors at 3.25rem while the stage's height follows
+     the viewport, so a fixed 74.05% meant 40px under the numeral at 1920, 120
+     at 1024 and 135 on a 2560 screen. The figure is `leading-none`, so its box
+     is exactly one `--text-stat` tall: the label sits that far below the
+     figure's own top, plus the traced 40px, which is 0.15 of the numeral. */
+  /* The figure is `leading-none`, so its box is exactly one `--text-stat`
+     tall: the label sits that far below the figure, plus the traced 40px,
+     which is 0.105 of the numeral. */
   .stats-label {
-    top: 74.05%;
+    top: calc(var(--stats-figure-top) + 1.105 * var(--text-stat));
     left: 49.974%;
   }
 
@@ -632,6 +654,18 @@
   padding: 3.5rem var(--spacing-gutter) 4rem;
 }
 
+/* The intro's own rhythm, set once for every width. Held in vw so it tracks
+   the headline, and clamped at both ends: the type stops growing at 90px
+   (`--text-display`), so an uncapped gap keeps opening on large screens long
+   after the headline has stopped getting bigger. */
+.team-heading {
+  margin-top: clamp(0.5rem, 1.7vw, 2.25rem);
+}
+
+.team-body {
+  margin-top: clamp(0.75rem, 1.15vw, 1.5rem);
+}
+
 .team-strip {
   position: relative;
   margin-top: 2.5rem;
@@ -713,29 +747,34 @@
 @media (width >= 64rem) {
   .team-stage {
     aspect-ratio: 1920 / 1699;
-    padding: 0;
+    /* The eyebrow, headline and body were each pinned to their own percentage
+       of the stage (11.183 / 15.715 / 29.782). The stage grows with the
+       viewport but the headline stops at 90px, so those fixed stops drifted
+       apart: the headline-to-body gap ran from -7px at 1024, where the two
+       overlapped, to 115px at 2560. They are one flow stack now, anchored
+       once at the artboard's eyebrow line and spaced by the rules above.
+       Percentage padding resolves against width, and 11.183% of the
+       1699-tall stage is 9.895% of its 1920 width, so the anchor is the
+       artboard's to within a pixel at every size. */
+    /* The composition is traced at 1920 and only grew taller past that: the
+       cards stay pinned to their percentage of an ever-taller stage while the
+       type stops at 90px, which opened a 235px dead band between the intro
+       and the cards at 2560. Capped at the artboard's own width and centred,
+       so a large screen gets the design at its intended proportions on a
+       full-bleed ground instead of a stretched one. */
+    max-width: 120rem;
+    margin-inline: auto;
+    /* Percentage padding resolves against the containing block's width, which
+       stays the full viewport once the stage is capped — so the cap is
+       expressed here too: 9.895% of 1920 is 190px. */
+    padding: min(9.895%, 11.875rem) 0 0;
   }
 
-  .team-eyebrow {
-    position: absolute;
-    top: 11.183%;
-    left: 0;
-    right: 0;
-    margin: 0;
-  }
-  .team-heading {
-    position: absolute;
-    top: 15.715%;
-    left: 0;
-    right: 0;
-    margin: 0;
-  }
+  .team-eyebrow,
+  .team-heading,
   .team-body {
-    position: absolute;
-    top: 29.782%;
-    left: 0;
-    right: 0;
-    margin: 0;
+    position: static;
+    inset: auto;
   }
   .team-controls {
     position: absolute;
@@ -842,17 +881,37 @@
 .footer-socials {
   display: flex;
   align-items: center;
+  /* Five accounts now, so the row wraps rather than overflowing the gutter
+     on the narrowest phones. */
+  flex-wrap: wrap;
 }
 
 @media (width >= 64rem) {
+  /* The artboard's ratio drives the height, but the link text bottoms out at
+     its 15px clamp floor while the stage keeps shrinking with the viewport,
+     so below ~1294px the columns outgrew the box: the last Legal link fell
+     off the stage entirely at 1152px and under. The floor keeps the stage
+     tall enough to hold the longest column; above ~1294px the ratio is
+     already taller than the floor and the artboard proportions are exact. */
   .footer-stage {
+    /* `width` stays explicit: with a definite height from `min-height`, an
+       auto width would be derived back through the ratio (400px -> 1331px)
+       and push the footer past the viewport. */
+    width: 100%;
     aspect-ratio: 1920 / 577;
+    min-height: 25rem;
+    /* And a ceiling for the same reason there is a floor. Past 1920 the ratio
+       keeps making the footer taller while every measure inside it — the type,
+       the social circles — has already stopped growing, so the band's own
+       whitespace was all that grew: 271px between the blurb and the rule on a
+       2560 screen against the artboard's 135. At the artboard's height the
+       percentages inside resolve to the pixels they were traced as. */
+    max-height: 36.0625rem; /* 577px */
     padding: 0;
   }
 
   .footer-logo,
-  .footer-blurb,
-  .footer-socials,
+  .footer-identity,
   .footer-col,
   .footer-rule,
   .footer-copy {
@@ -870,16 +929,29 @@
      this in Proxima Nova Light; rendered in Regular the copy runs ~6% wider,
      so a container matched to the artboard's 420px ink width would carry an
      extra word up onto line two. */
-  .footer-blurb {
-    left: 6.458%;
+  /* The identity column: traced blurb 37.27%, social row 57.91%, 33px apart at
+     1920. Both measures are kept as shares of the column — the blurb's 22.7%
+     of the stage and the row's 24.84%. */
+  .footer-identity {
+    left: 6.25%;
     top: 37.27%;
-    width: 22.7%;
+    width: 24.84%;
+    --at-tail-gap: 0.4;
+  }
+  .footer-blurb {
+    width: 91.4%;
   }
 
+  /* The artboard traced three 53px circles on a 106px pitch, ending at x 384.
+     Five circles hold that pitch across 477 of 1920 (24.84%), so the span is
+     pinned and distributed instead of gap-driven: below ~1176px the circles
+     hit their 44px floor while a vw gap keeps growing, which walked the row
+     into the Explore column at 35.99%. space-between closes the gaps
+     proportionally instead, and reproduces the artboard's 53px gap at 1920. */
   .footer-socials {
-    left: 6.25%;
-    top: 57.91%;
-    gap: 2.76vw;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 0;
   }
 
   .footer-col {
@@ -896,10 +968,13 @@
   }
 
   /* heading ink 111 -> first link ink 171 is 60px; the heading's own line box
-     accounts for 30 of it */
+     accounts for 30 of it. Held in vw, not px: every other footer measure is
+     a percentage of a stage that scales with the viewport, so fixed pixels
+     here grew the columns relative to the box as the window narrowed. At
+     1920 these resolve to the artboard's 30px and 16px. */
   .footer-links {
-    margin-top: 30px;
-    gap: 16px;
+    margin-top: 1.5625vw;
+    gap: 0.8333vw;
   }
 
   .footer-rule {
@@ -913,6 +988,52 @@
     right: 0;
     top: 90.42%;
   }
+}
+
+/* ==========================================================================
+   PLACED COLUMNS OF COPY  (`.at-col`)
+
+   The artboards stack an eyebrow, a heading and what follows — a paragraph, a
+   row of links, a grid — and every one of those stacks was traced as separate
+   placements, each at its own percentage of a stage whose height scales with
+   the viewport's width. The type does not scale with it. `--ab-*` clamps floor
+   below ~1024 and cap at 1920, so the same percentage means a different number
+   of lines at every width, and the gaps inside a stack drift badly in both
+   directions. Measured across the site before this existed:
+
+     about / cta      title -> links   265 / 59 / 44 / 39 / 32   (2560…1024)
+     portfolio / hero title -> body    296 / 107 / 80 / 71 / 57
+     portfolio / list title -> filters 139 / 79 / 53 / 45 / -33  (overlapping)
+     team / hero      title -> body    123 / 43 / 20 / 12 / 0    (touching)
+
+   On a wide screen the stack falls apart; on a narrow one it collides. So a
+   stack is one column in flow, placed where the artboard puts its first line,
+   and the gaps inside it are set here in `em` of the display size — the type
+   they belong to — rather than as a share of a box that grows without them.
+
+   The three steps are the three kinds of gap in these artboards, and their
+   defaults are the traced 1920 values, which is the width every one of these
+   pages was drawn at. Where a stack was traced with a gap of its own, it says
+   so with `--at-body-gap` / `--at-tail-gap`, in the same unit. The `rem`
+   floors keep the two lower gaps apart on phones, where `--ab-display` bottoms
+   out and a pure ratio would close them.
+
+   `* + ` rather than the class alone: a column's first block sits where the
+   column is placed and never carries a gap of its own.
+   ========================================================================== */
+
+.at-col > * + .at-title {
+  /* `em` is the heading's own size here, which is the point: the gap under an
+     eyebrow belongs to the heading it introduces. */
+  margin-top: var(--at-eyebrow-gap, 0.1em);
+}
+
+.at-col > * + .at-body {
+  margin-top: max(0.75rem, calc(var(--at-body-gap, 0.5) * var(--ab-display)));
+}
+
+.at-col > * + .at-tail {
+  margin-top: max(1.5rem, calc(var(--at-tail-gap, 0.9) * var(--ab-display)));
 }
 
 /* ==========================================================================
@@ -932,6 +1053,22 @@
 .ab-stage {
   position: relative;
   padding: 4rem var(--spacing-gutter) 4rem;
+}
+
+/* The hero copy's vertical rhythm, at every width. Each gap is a fraction of
+   the display size rather than of the stage, so the three steps keep their
+   proportion to the type that sets them: at 1920 they land on the artboard's
+   27 / 26 / 66, and they narrow with the headline instead of against it. The
+   rem floors hold the two lower gaps apart on phones, where `--ab-display`
+   bottoms out at 32.8px and a pure ratio would leave 10px under the headline. */
+.ab-hero-title {
+  margin-top: 0.33em; /* `em` is `--ab-display` here — the title sets it */
+}
+.ab-hero-body {
+  margin-top: max(1rem, calc(0.32 * var(--ab-display)));
+}
+.ab-hero-links {
+  margin-top: max(2rem, calc(0.8 * var(--ab-display)));
 }
 
 @media (width >= 64rem) {
@@ -971,24 +1108,35 @@
 
   /* --- hero (the prototype's 1920 x 701 block, opened up by 72px under the
          header: the artboard clears its own navigation by 133px before the
-         eyebrow, and the block keeps that distance here) --- */
-  .ab-hero-eyebrow {
-    left: 6.25%;
-    top: 25.39%;
+         eyebrow, and the block keeps that distance here) ---
+
+     The copy is one column in flow, not four placed blocks. Its top edge and
+     width are still the artboard's — 196/1920 down, 6.25% in, 49.5% wide, the
+     width that keeps the artboard's break ("…with the power" fits, "to" does
+     not) — but the gaps inside it come from `.ab-hero-copy` below, in `em` of
+     the display size, so they hold as the type outgrows the stage. The stage
+     keeps its 1920 x 773 proportion as a floor via the spacer, and grows past
+     it on the narrow end of this range, where the copy is taller than 773
+     scaled down and used to run into the links and the band below. */
+  .ab-hero {
+    display: grid;
+    aspect-ratio: auto;
   }
-  .ab-hero-title {
-    left: 6.25%;
-    top: 34.15%;
+  /* Sets the stage's minimum height at the artboard's proportion; percentage
+     padding resolves against the width, so this is the aspect-ratio it
+     replaces. Sharing one grid area with the copy makes the row the taller of
+     the two. */
+  .ab-hero::before {
+    content: "";
+    grid-area: 1 / 1;
+    padding-top: 40.26%; /* 773 / 1920 */
   }
-  /* 49.5% keeps the artboard's break — "…with the power" fits, "to" does not */
-  .ab-hero-body {
-    left: 6.25%;
-    top: 66.86%;
+  .ab-hero-copy {
+    grid-area: 1 / 1;
     width: 49.5%;
-  }
-  .ab-hero-links {
-    left: 6.41%;
-    top: 85.54%;
+    margin-left: 6.25%;
+    padding-top: 10.22%; /* 196 / 1920 — the artboard's eyebrow line */
+    padding-bottom: 2.28%; /* the artboard's clearance under the links */
   }
   /* the crown lands level with the eyebrow; the jaw runs on into the band below */
   .ab-hero-head {
@@ -1004,13 +1152,12 @@
   }
 
   /* --- circuit --- */
-  .ab-who-eyebrow {
+  /* Traced 32.9% / 38.3%: 7px between the two at 1920, which is the eyebrow
+     sitting all but on the heading's shoulder. */
+  .ab-who-copy {
     left: 7.81%;
     top: 32.9%;
-  }
-  .ab-who-title {
-    left: 7.81%;
-    top: 38.3%;
+    --at-eyebrow-gap: 0.085em;
   }
 
   /* --- philosophy --- */
@@ -1019,18 +1166,14 @@
     top: -3.15%;
     width: 40%;
   }
-  .ab-phi-eyebrow {
+  /* Traced 22.4% / 26.3% / 47%: the heading on the eyebrow's shoulder, and
+     53px at 1920 between it and the principles. */
+  .ab-phi-copy {
     left: 42.66%;
     top: 22.4%;
-  }
-  .ab-phi-title {
-    left: 42.66%;
-    top: 26.3%;
-  }
-  .ab-phi-list {
-    left: 42.71%;
-    top: 47%;
     width: 54%;
+    --at-eyebrow-gap: 0.05em;
+    --at-tail-gap: 0.65;
   }
 
   /* --- journey (traced from the prototype: band 1920 x 1006) ---
@@ -1050,15 +1193,15 @@
   .ab-jr-group {
     inset: 0;
   }
-  .ab-jr-eyebrow {
+  /* Traced 15.34% / 20.78%, both centred on the page rather than measured
+     from the left, so the column keeps the left/right pair. 15px at 1920.
+     `-head`, not `-copy`: `.ab-jr-copy` is already the timeline's own body
+     block further down this file, at 48.18%. */
+  .ab-jr-head {
     left: 0;
     right: 0;
     top: 15.34%;
-  }
-  .ab-jr-title {
-    left: 0;
-    right: 0;
-    top: 20.78%;
+    --at-eyebrow-gap: 0.18em;
   }
   .ab-jr-year {
     left: 17.72%;
@@ -1106,14 +1249,13 @@
   }
 
   /* --- cta --- */
-  .ab-cta-title {
+  /* Traced 20.8% / 73.4%, which read as 59px apart at 1920 and 265px on a
+     2560 screen, the gap this column was built to answer. */
+  .ab-cta-copy {
     left: 7.71%;
     top: 20.8%;
     width: 48%;
-  }
-  .ab-cta-links {
-    left: 8.23%;
-    top: 73.4%;
+    --at-tail-gap: 0.72;
   }
 }
 
@@ -1169,6 +1311,27 @@
   background: linear-gradient(212deg, #1c8fd6 0%, #0a6cb4 46%, #00457f 100%);
   aspect-ratio: 392 / 544;
   container-type: inline-size;
+  /* The site's card language: a lift and a deeper shadow. This card used to
+     get its whole hover from the pointer lean, so when that went it was the
+     one card left with no response at all. */
+  box-shadow: 0 18px 45px -24px rgba(0, 40, 90, 0.35);
+  /* The lift is on `transform`, not `translate`, and that is deliberate. The
+     scroll reveal animates `translate` and lands `translate: 0 0` on arrival
+     at a specificity no plain card rule can beat, so a lift written there is
+     simply erased on any card that is itself the revealed element — which the
+     portfolio and team cards are. The reveal keeps `translate` for its rise,
+     the lift holds on `transform`, and the two compose. Same reasoning as the
+     stats headline's centring; `transform` is free now that the pointer lean
+     that used to own it is gone. */
+  transition:
+    transform 0.5s var(--ease-out-soft),
+    box-shadow 0.5s var(--ease-out-soft);
+}
+
+.tm-card:hover,
+.tm-card:focus-within {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 60px -26px rgba(0, 40, 90, 0.45);
 }
 
 .tm-card-sm {
@@ -1217,6 +1380,26 @@
      gradient because the card isolates. */
   z-index: -1;
   height: 82%;
+}
+
+/* The other half of the card language: the artwork inside the card grows
+   very slightly while the card is under the pointer, which is what gives the
+   lift something to be a lift *of*. 1.04 over 0.7s, the same figures the home
+   page's edition cards were already using.
+
+   Soft cubic rather than expo, and this is the reason: expo covers most of its
+   distance in the first quarter of its duration, so crossing from one card to
+   its neighbour reads as a snap on both at once. */
+.tm-card:hover .tm-card-photo img,
+.tm-card:focus-within .tm-card-photo img,
+.pf-card:hover .pf-card-photo img,
+.pf-card:focus-within .pf-card-photo img {
+  scale: 1.04;
+}
+
+.tm-card-photo img,
+.pf-card-photo img {
+  transition: scale 0.7s var(--ease-out-soft);
 }
 
 /* The bio panel, on the same terms as the homepage team cards: revealed on
@@ -1301,35 +1484,47 @@
   overflow: hidden;
 }
 
-/* The thumb's own loop. Three blocks, each the full height of the rail with
-   one thumb in it, so the track wraps on an identical frame exactly as the
-   list does — as one thumb leaves the bottom the next arrives at the top.
-
-   `--loop-u` is how far the reader has scrolled through one copy of the list,
-   0 to 1, published by `useLoopScroll`. Offsetting the track by a full rail
-   less that much sends the thumb down as the names travel up, the way a
-   scrollbar does, and keeps it on whichever name is passing the lit centre. */
-.tm-rail-track {
-  position: absolute;
-  top: calc(var(--loop-u, 0) * 100% - 100%);
-  left: 0;
-  width: 100%;
-  height: 300%;
-}
-
-.tm-rail-block {
-  position: relative;
-  display: block;
-  height: calc(100% / 3);
-}
-
 /* The window the names travel through: one line per mentor, so the band keeps
    the footprint the static list had and the rail beside it still divides into
    one thumb-height per name. */
 .tm-mentors-window {
   height: calc(var(--tm-line) * 1.35 * var(--tm-count));
+  overflow: hidden;
 }
 
+/* The blank lines above the first name and below the last, and the travel that
+   carries each one through the lit centre — both belong to the pin and go with
+   it. Half a window less half a line either end is what puts the first name on
+   the centre line at 0 and the last on it at 1; the run between them is one
+   line short of the list, which is one step per name after the first.
+
+   Both belong to the pin and are scoped to it, breakpoint included. Narrower
+   than the traced layout there is no runway to read, so the track keeps
+   neither: every name sits in the window at once with the middle one lit,
+   which is the artboard's composition and the right thing to show a reader
+   who is never going to be handed the scroll that would step through them. */
+@media (width >= 64rem) {
+  [data-pinned] .tm-mentors-track {
+    --tm-step: calc(var(--tm-line) * 1.35);
+    padding-block: calc((var(--tm-count) - 1) / 2 * var(--tm-step));
+    transform: translate3d(
+      0,
+      calc(
+        clamp(0, (var(--pin-u, 0) - 0.06) / 0.88, 1) * (var(--tm-count) - 1) * var(--tm-step) *
+          -1
+      ),
+      0
+    );
+    will-change: transform;
+  }
+}
+
+/* One name's worth of the rail. Unpinned it parks on the artboard's own lit
+   line and eases if that index ever changes; pinned it is driven straight off
+   `--pin-u` instead — travelling the rail less its own height, so it reaches
+   the bottom exactly as the last name reaches the lit centre — and the easing
+   comes off, because a transition on a scroll-driven value reads as the thumb
+   dragging along behind the page. */
 .tm-rail-thumb {
   position: absolute;
   left: 0;
@@ -1339,6 +1534,13 @@
   border-radius: 3px;
   background: #ffffff;
   transition: top 0.5s var(--ease-out-expo);
+}
+
+@media (width >= 64rem) {
+  [data-pinned] .tm-rail-thumb {
+    top: calc(var(--pin-u, 0) * (100% - 100% / var(--rail-count)));
+    transition: none;
+  }
 }
 
 .tm-mentor {
@@ -1435,14 +1637,34 @@
   }
 
   /* --- hero --- */
-  .tm-hero-title {
-    left: 6.25%;
-    top: 43.86%;
+  /* Traced 43.86% / 77.49%: 43px apart at 1920, 123px at 2560, and touching
+     at 1024 — the two boxes met exactly. The body keeps its 36% measure as
+     38.4% of a column that runs to the stage's edge. */
+  /* In flow, not placed, and the stage is a grid whose other cell is a spacer
+     at the artboard's ratio. The copy could not fit the band at 1024 — it
+     overhung it by 16px — because the band's height falls with the viewport
+     while the type inside it stops falling at its clamp floor. The spacer
+     holds the traced proportion as a floor and the band grows past it where
+     the copy needs the room, rather than spilling into the section below. */
+  .tm-hero {
+    aspect-ratio: auto;
+    display: grid;
   }
-  .tm-hero-body {
-    left: 6.25%;
-    top: 77.49%;
-    width: 36%;
+  .tm-hero::before {
+    content: "";
+    grid-area: 1 / 1;
+    padding-top: 37.135%; /* 713 / 1920 */
+  }
+  .tm-hero-copy {
+    grid-area: 1 / 1;
+    margin-inline: 6.25%;
+    padding-top: 16.29%; /* 43.86% of the traced band, as a share of width */
+    padding-bottom: 2%;
+    --at-body-gap: 0.52;
+  }
+  /* 36% of the stage, which is 41.14% of a column inset 6.25% either side */
+  .tm-hero-copy > .at-body {
+    width: 41.14%;
   }
   .tm-hero-engine {
     left: 47.41%;
@@ -1451,68 +1673,85 @@
   }
 
   /* --- partners --- */
-  .tm-pt-eyebrow {
-    left: 0;
-    right: 0;
-    top: 13.9%;
+  /* Traced 13.9% / 16.97% / 27.17%, all centred on the page. The body's own
+     24% inset either side becomes a max-width on the block, so the column can
+     stay full-width for the centred heading above it. */
+  /* Eyebrow, heading, body and the card grid are one stack in flow over a
+     spacer at the traced ratio. The grid was placed too (42.05%), so the space
+     above it was the same drifting measurement as the rest: 9px under the copy
+     at 1024 and 244px at 2560. */
+  .tm-partners {
+    aspect-ratio: auto;
+    display: grid;
   }
-  .tm-pt-title {
-    left: 0;
-    right: 0;
-    top: 16.97%;
+  .tm-partners::before {
+    content: "";
+    grid-area: 1 / 1;
+    padding-top: 70.885%; /* 1361 / 1920 */
   }
-  .tm-pt-body {
-    left: 24%;
-    right: 24%;
-    top: 27.17%;
+  .tm-pt-copy {
+    grid-area: 1 / 1;
+    padding-top: 9.85%; /* 13.9% of the traced band, as a share of width */
+    padding-bottom: 6%;
+    --at-eyebrow-gap: 0.012em;
+    --at-body-gap: 0.49;
+    --at-tail-gap: 1.41;
+  }
+  .tm-pt-copy > .tm-pt-body {
+    width: 52%;
+    margin-inline: auto;
   }
   .tm-pt-grid {
+    margin-inline: 6.25%;
     left: 6.25%;
     right: 6.25%;
     top: 42.05%;
   }
 
   /* --- the team --- */
-  .tm-gp-eyebrow {
-    left: 0;
-    right: 0;
-    top: 9.34%;
+  /* Traced 9.34% / 11.83% / 20.1%, centred. */
+  /* The same, at this band's own ratio and traced tops (9.34% / 26.68%). */
+  .tm-group {
+    aspect-ratio: auto;
+    display: grid;
   }
-  .tm-gp-title {
-    left: 0;
-    right: 0;
-    top: 11.83%;
+  .tm-group::before {
+    content: "";
+    grid-area: 1 / 1;
+    padding-top: 87.448%; /* 1679 / 1920 */
   }
-  .tm-gp-body {
-    left: 0;
-    right: 0;
-    top: 20.1%;
+  .tm-gp-copy {
+    grid-area: 1 / 1;
+    padding-top: 8.17%; /* 9.34% of the traced band, as a share of width */
+    padding-bottom: 6%;
+    --at-eyebrow-gap: 0.024em;
+    --at-body-gap: 0.5;
+    --at-tail-gap: 0.87;
   }
   .tm-gp-grid {
-    left: 6.25%;
-    right: 6.25%;
-    top: 26.68%;
+    margin-inline: 6.25%;
   }
 
   /* --- mentors --- */
-  .tm-mt-eyebrow {
+  /* Traced 14.1% / 18.22% / 41.02% / 79.72%. Four placements, three gaps, and
+     the widest drift on the page: the list sat 5px under the heading at 1024
+     and 135px under it at 2560. The list keeps its 46% measure as 49.1% of a
+     column inset 6.25% either side. */
+  .tm-mt-copy {
     left: 6.25%;
+    right: 6.25%;
     top: 14.1%;
+    --at-eyebrow-gap: 0.06em;
+    --at-body-gap: 0.65;
+    --at-tail-gap: 0.88;
   }
-  .tm-mt-title {
-    left: 6.25%;
-    top: 18.22%;
+  /* 46% of the stage, which is 52.57% of a column inset 6.25% either side */
+  .tm-mt-copy > .tm-mt-list {
+    width: 52.57%;
   }
-  .tm-mt-list {
-    left: 6.25%;
-    top: 41.02%;
-    width: 46%;
-  }
-  .tm-mt-closing {
-    left: 6.25%;
-    top: 79.72%;
-  }
-  /* screen-blended so the plate's black ground drops out against the band */
+  /* screen-blended so the plate's black ground drops out against the band —
+     which means whatever paints behind it has to be inside the same stacking
+     context. See the note on the stage in `TeamPage`. */
   .tm-mentors-art {
     position: absolute;
     left: 47.09%;
@@ -1523,15 +1762,24 @@
   }
 
   /* --- cta --- */
-  .tm-cta-title {
-    left: 0;
-    right: 0;
-    top: 16.55%;
+  /* Traced 16.55% / 68.94%: 81px apart at 1920, 173px at 2560, 20px at 1024.
+     In flow over a spacer at the traced ratio, like the hero: placed, the
+     column cleared the band's bottom edge by 6px at 1024, which is not a
+     margin to leave a block of type sitting on. */
+  .tm-cta {
+    aspect-ratio: auto;
+    display: grid;
   }
-  .tm-cta-link {
-    left: 0;
-    right: 0;
-    top: 68.94%;
+  .tm-cta::before {
+    content: "";
+    grid-area: 1 / 1;
+    padding-top: 27.5%; /* 528 / 1920 */
+  }
+  .tm-cta-copy {
+    grid-area: 1 / 1;
+    padding-top: 4.55%; /* 16.55% of the traced band, as a share of width */
+    padding-bottom: 5%;
+    --at-tail-gap: 0.99;
   }
 
   /* the grids: four columns, 37 apart, as the prototype measures */
@@ -1731,13 +1979,24 @@
   flex: 1;
   overflow: hidden;
   border-radius: 22px;
+  /* Holds the card's outline where its white logo plate meets the white page.
+     Invisible against the blue of the body, which is the rest of the edge. */
+  border: 1px solid rgba(0, 40, 90, 0.09);
   background: var(--color-brand-sky);
   /* This card had no hover of its own while every other card on the site
      lifts. Same language as the LP Day and media cards, on `translate` so the
      pointer lean can sit on top of it. */
   box-shadow: 0 18px 45px -24px rgba(0, 40, 90, 0.35);
+  /* The lift is on `transform`, not `translate`, and that is deliberate. The
+     scroll reveal animates `translate` and lands `translate: 0 0` on arrival
+     at a specificity no plain card rule can beat, so a lift written there is
+     simply erased on any card that is itself the revealed element — which the
+     portfolio and team cards are. The reveal keeps `translate` for its rise,
+     the lift holds on `transform`, and the two compose. Same reasoning as the
+     stats headline's centring; `transform` is free now that the pointer lean
+     that used to own it is gone. */
   transition:
-    translate 0.5s var(--ease-out-soft),
+    transform 0.5s var(--ease-out-soft),
     box-shadow 0.5s var(--ease-out-soft);
   /* so the card's own type can be set against its width rather than the
      viewport, exactly as the team cards are */
@@ -1746,7 +2005,7 @@
 
 .pf-card:hover,
 .pf-card:focus-within {
-  translate: 0 -6px;
+  transform: translateY(-6px);
   box-shadow: 0 28px 60px -26px rgba(0, 40, 90, 0.45);
 }
 
@@ -1754,10 +2013,19 @@
   position: relative;
   /* 536.7 x 331 in the artboard */
   aspect-ratio: 536 / 331;
-  /* The client supplied logos, not photography. The panel keeps the card's
-     own blue and the mark sits inside it on the logo file's own ground, so
-     the card still reads as one object — a white plate here would be
-     indistinguishable from the white page behind the grid. */
+  /* The client supplied logos, not photography, and every file is a square
+     mark on its own white ground. Held on the card's blue, each of those
+     grounds read as a white tile floating in the middle of the panel with
+     blue down either side — the card looked unfinished rather than composed.
+     So the panel takes the white itself and the tile disappears into it: one
+     plate, edge to edge, with the mark centred on it.
+
+     Which leaves the plate the same white as the page behind the grid, and
+     that is what the hairline on `.pf-card` is for — it keeps the card's
+     silhouette where the shadow alone would lose the top edge. */
+  background: #ffffff;
+  /* The files carry their own margin, so the plate adds none: `contain` sizes
+     the mark to the panel's height and the ground fills what is left. */
   /* The plate is drawn to its aspect and nothing else: the extra height a
      levelled card carries belongs to the body below it, not to the mark. */
   flex: none;
@@ -1849,7 +2117,6 @@
      exactly 2244, i.e. the artboard; beyond six the band grows by a row.
      Every measurement is in vw because the stage runs the full width here. */
   .pf-list {
-    padding-top: 27.865vw; /* 535 / 19.2 */
     padding-bottom: 5.938vw; /* 114 / 19.2 */
     padding-inline: 0;
   }
@@ -1863,30 +2130,42 @@
   }
 
   /* --- hero (band-relative ink: title 265, body 808) --- */
-  .pf-hero-title {
+  /* The column runs to the stage's right edge so the headline's own lines have
+     the room they were measured with; the body keeps the artboard's measure by
+     taking 31.15% of the column, which is the traced 29.2% of the stage. 107px
+     between the two at 1920, and 296px at 2560 before this was a column. */
+  .pf-hero-copy {
     left: 6.25%;
+    right: 0;
     top: 19.36%;
+    --at-body-gap: 1.3;
   }
-  /* 29.2% keeps the artboard's break: "…creating new" then "capabilities…" */
-  .pf-hero-body {
-    left: 6.25%;
-    top: 64.47%;
-    width: 29.2%;
+  /* 29.2% of the stage keeps the artboard's break: "…creating new" then
+     "capabilities…" */
+  .pf-hero-copy > .at-body {
+    width: 31.15%;
   }
 
   /* --- list (no eyebrow: the export sets one, the prototype does not) --- */
   /* left, not centred: the prototype's heading holds the export's left edge
      after the type was reduced, so it sits left of the page's middle */
-  /* Tops are vw, not %, because the band no longer has a fixed height for a
-     percentage to resolve against. 195 and 372.7 in the artboard. */
-  .pf-list-title {
-    left: 9.22%;
-    top: 10.156vw;
+  /* Heading, filters and grid are one stack in flow rather than two placements
+     over a reserved gap. The reserve was the trouble: the stage held 27.865vw
+     of padding for a heading whose type stops shrinking at 1024, so the two
+     placements closed up and crossed — the filters sat 33px *above* the
+     heading's baseline box at 1024 — while at 2560 they drifted 139px apart.
+     In flow the stack cannot cross itself, and the grid follows the filters
+     instead of a measurement. Traced: heading 195, filters 372.7, grid 535. */
+  .pf-list {
+    padding-top: 10.156vw; /* 195 / 19.2 — the artboard's heading line */
+    --at-body-gap: 0.96; /* 79px at 1920, heading to filters */
+    --at-tail-gap: 1.44; /* 118px, filters to the first row of cards */
   }
-  .pf-filters {
-    left: 0;
-    right: 0;
-    top: 19.412vw;
+  /* Centred, not on the artboard's 9.22% left edge. The filters under it and
+     the card grid under those are both centred on the page, so the heading was
+     the one thing in this section standing off to one side of its own column. */
+  .pf-list-title {
+    text-align: center;
   }
   /* three columns, 35 apart across the row and 55.7 between rows. This one
      stays in flow so the band's height follows the number of rows. */
@@ -1898,15 +2177,12 @@
   }
 
   /* --- cta (band-relative ink: lines 202, link 547) --- */
-  .pf-cta-title {
+  /* Traced 22.6% / 64.8%: 123px apart at 1920, 252px at 2560. */
+  .pf-cta-copy {
     left: 0;
     right: 0;
     top: 22.6%;
-  }
-  .pf-cta-link {
-    left: 0;
-    right: 0;
-    top: 64.8%;
+    --at-tail-gap: 1.5;
   }
 }
 
@@ -2038,15 +2314,240 @@
     max-width: 100%;
   }
 
-  /* x 905-1875, y 268-800 — it runs 75 past the right gutter, so it is
-     placed against the band rather than the shell. */
+  /* x 905-1875, y 268-800. It runs 75 past the right *gutter*, which is why
+     the frame said "against the band rather than the shell" — but the gutter
+     is not the shell's edge. The shell is 1920 wide with 120 of padding, and
+     an absolutely positioned child measures against its padding box, so 905
+     and 50.521% land on the artboard's own frame with the 75px overhang
+     intact. Against the band they did not: the band has no cap, so past 1920
+     the mark kept growing while everything holding it stopped. The hero's
+     height is capped — its padding and `--md-*` type both top out at 1920 —
+     so by 3440 the mark was 1738 x 1085 where the artboard draws 970 x 605,
+     hanging 542px into THE BOOK below and 44px over the copy beside it.
+
+     The shell is the frame the rest of this page is already drawn on. The
+     mark belongs on it. */
+  .md-hero .md-shell {
+    position: relative;
+  }
+
   .md-hero-art {
     position: absolute;
     margin: 0;
-    top: clamp(0px, 13.958vw, 268px);
+    /* Centred on the copy beside it, and there is no arithmetic in that: the
+       shell holds the copy in flow and this absolutely, so the shell's height
+       *is* the copy block's height, and `top: 50%` is the copy's middle at
+       every width without a single measured number.
+
+       The pull-back is 43%, not 50%, because the box is not the picture. The
+       video's frame carries the loop between 28.4% and 65.6% of its height and
+       empty plate the rest, so the loop's own middle sits at 47% of the box —
+       aligning the box would leave the loop riding high. 47 would centre it
+       exactly; 43 sets it the asked-for touch below, four per cent of the
+       mark's height, which stays proportional rather than drifting as a fixed
+       nudge would. */
+    top: 50%;
+    /* `transform`, not `translate`: this block is a `Reveal`, and the reveal
+       animates `translate` and lands `translate: 0 0` on arrival at a
+       specificity no rule here can beat — written there, the pull-back is
+       simply erased and the mark drops back to its own top edge. Same reason
+       the cards' lift lives on `transform`. */
+    transform: translateY(-43%);
     left: 47.135%;
     width: 50.521%;
   }
+}
+
+/* --- lightboxes: the insights' video and the LP Day photographs -------- */
+
+/* The card is a button now, so it needs the button undone: everything that
+   makes it look like a card is on `.md-ins-card` already. */
+button.md-ins-card {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* `<dialog>` brings its own centring, its own backdrop and `display: none`
+   until it is opened, so this only has to say how it looks. Shared by the two
+   things on this page that open in place — a video and a photograph — so they
+   read as one gesture; each sets its own width beside this. */
+.lightbox {
+  /* `margin: auto` is what centres a modal dialog in its viewport, and
+     Preflight resets it to 0 on every element — without it back the dialog
+     sits in the top-left corner. The third term keeps a 16:9 frame inside a
+     short window: 80vh of height is 142vh of width at that ratio. */
+  margin: auto;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  background: #04122a;
+  box-shadow: 0 40px 90px -40px rgba(3, 10, 34, 0.7);
+  overflow: visible;
+}
+
+.lightbox::backdrop {
+  background: rgba(3, 10, 34, 0.72);
+}
+
+/* 16:9 for the video, 4:3 for the photographs; the last term in each keeps the
+   frame inside a short window — 80vh of height is 142vh of width at 16:9 and
+   107vh at 4:3. */
+.lightbox--video {
+  width: min(92vw, 68rem, 142vh);
+}
+
+.lightbox--photo {
+  width: min(92vw, 60rem, 107vh);
+  background: transparent;
+  box-shadow: none;
+}
+
+.md-video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.md-video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Until a link is filled in, the dialog says so rather than framing nothing. */
+.md-video-pending {
+  display: grid;
+  place-content: center;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  font-size: var(--md-card-title);
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.md-video-pending span {
+  font-size: var(--md-card-kicker);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Outside the frame's top-right corner, so it never sits over the picture. */
+.lightbox-close {
+  position: absolute;
+  top: -3rem;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    background-color 0.35s var(--ease-out-soft),
+    border-color 0.35s var(--ease-out-soft);
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus-visible {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* The photograph is a button now — the whole slide, laid over it, so the
+   slide itself still holds the strip's snap point and ratio. `zoom-in`
+   because that is what the press does. */
+.lp-slide-open {
+  position: absolute;
+  inset: 0;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: zoom-in;
+}
+
+.lp-lightbox-figure {
+  position: relative;
+  margin: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #04122a;
+}
+
+.lp-lightbox-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lp-lightbox-caption {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: var(--md-card-kicker);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* The step buttons, one either side of the photograph and clear of it. */
+.lp-lightbox-step {
+  position: absolute;
+  /* Against the photograph, so measured from the figure rather than the
+     dialog, whose height includes the caption below it. */
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 9999px;
+  /* Darker than the video dialog's, because this one sits over a photograph
+     rather than a flat ground and has to hold its edge against anything. */
+  background: rgba(4, 18, 42, 0.55);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    background-color 0.35s var(--ease-out-soft),
+    border-color 0.35s var(--ease-out-soft);
+}
+
+.lp-lightbox-step:hover,
+.lp-lightbox-step:focus-visible {
+  border-color: #ffffff;
+  background: rgba(4, 18, 42, 0.8);
+}
+
+/* Inside the photograph, not beside it. Outside reads better but there is
+   almost never room: the dialog is 92vw at its widest, so the margin either
+   side is 4vw — under 60px on anything narrower than a 1500px window — and the
+   buttons were being cut in half by the viewport edge. */
+.lp-lightbox-step[data-dir="prev"] {
+  left: 0.75rem;
+}
+
+.lp-lightbox-step[data-dir="next"] {
+  right: 0.75rem;
 }
 
 /* --- book (band 928; art top 61, copy top 131, foot 156) ---------------- */
@@ -2083,8 +2584,14 @@
     width: 63.462%;
   }
 
+  /* The artboard's 70px between the cover's top edge and the heading's ink —
+     art at 61, copy at 131. Capped, because it was the one measure on this
+     page still reading raw `vw` after everything holding it had stopped: the
+     shell caps at 1920 and the type with it, so past that the heading went on
+     drifting down the column on its own — 93px at 2560, 125px at 3440 —
+     while the cover beside it stayed exactly where it was. */
   .md-book-copy {
-    padding-top: 3.63vw;
+    padding-top: min(3.63vw, 4.356rem);
   }
 
   /* 797 of ink on the widest line of the first paragraph, which wants 823 of
@@ -2149,16 +2656,16 @@
   background: #ffffff;
   position: relative;
   box-shadow: 0 18px 45px -24px rgba(0, 40, 90, 0.35);
-  /* `translate` rather than `transform`, which the pointer lean owns — see
-     the DEPTH block. The two then compose instead of overwriting. */
+  /* `transform`, as on every other card — see `.pf-card` for why the lift
+     cannot live on `translate`. */
   transition:
-    translate 0.5s var(--ease-out-soft),
+    transform 0.5s var(--ease-out-soft),
     box-shadow 0.5s var(--ease-out-soft);
 }
 
 .md-lp-card:hover,
 .md-lp-card:focus-visible {
-  translate: 0 -6px;
+  transform: translateY(-6px);
   box-shadow: 0 28px 60px -26px rgba(0, 40, 90, 0.45);
 }
 
@@ -2223,25 +2730,38 @@
   background: #ffffff;
   position: relative;
   box-shadow: 0 18px 45px -24px rgba(0, 40, 90, 0.35);
-  /* `translate` rather than `transform`, which the pointer lean owns — see
-     the DEPTH block. The two then compose instead of overwriting. */
+  /* `transform`, as on every other card — see `.pf-card` for why the lift
+     cannot live on `translate`. */
   transition:
-    translate 0.5s var(--ease-out-soft),
+    transform 0.5s var(--ease-out-soft),
     box-shadow 0.5s var(--ease-out-soft);
 }
 
 .md-ins-card:hover,
 .md-ins-card:focus-visible {
-  translate: 0 -6px;
+  transform: translateY(-6px);
   box-shadow: 0 28px 60px -26px rgba(0, 40, 90, 0.45);
 }
 
 /* The frame fills these with a flat plate rather than a still. Sampled off
    its own corners: #175884 at the top left through #2C88BC at the foot. */
+/* The insight card's face is a video plate rather than a still, so the growth
+   goes on the plate's own contents — the same 1.04 over 0.7s the photographic
+   cards use, so the two read as one gesture. */
+.md-ins-card:hover .md-ins-plate > *,
+.md-ins-card:focus-visible .md-ins-plate > * {
+  scale: 1.04;
+}
+
+.md-ins-plate > * {
+  transition: scale 0.7s var(--ease-out-soft);
+}
+
 .md-ins-plate {
   position: relative;
   display: grid;
   place-items: center;
+  overflow: hidden;
   aspect-ratio: 532 / 267;
   background-image: linear-gradient(
     135deg,
@@ -2412,87 +2932,18 @@ html.js-reveal [data-reveal].is-visible {
   --tilt-py: 50%;
 }
 
-/* This block owns the whole transition for a tilting card, rather than each
-   card declaring its own. It has to: an unlayered rule outranks Tailwind's
-   layered utilities whatever the order, so a `transition-*` class on the card
-   would simply be replaced by whatever is written here.
+/* The pointer lean that used to live here is gone. It leaned a card up to
+   7deg on an 880px perspective and swept a white highlight across it, and it
+   sat on the portfolio, team and media cards while the home page's own cards
+   deliberately did without it — the note on those cards records why: on a card
+   whose face is a photograph the highlight reads as glare, and crossing from
+   one card to its neighbour sweeps it over one still while the other unwinds.
+   The site now has one card language everywhere instead of two: a lift, a
+   deeper shadow, and the artwork inside growing to 1.04. See `.tm-card` and
+   `.tm-card-photo`, and the home page's edition cards, which already had it.
 
-   Owning it also fixes a lift that never animated. Tailwind v4 writes
-   `-translate-y-*` to the `translate` property, and the LP Day card paired it
-   with `transition-[transform,box-shadow]` — a list `translate` is not in. The
-   shadow eased over half a second while the 6px lift jumped. All three names
-   are listed here, so the lift eases on every card that opts in. */
-[data-tilt="card"] {
-  --tilt-deg: 7deg;
-  /* Nearer eye, wider swing, more travel towards the reader than the first
-     pass carried. The vanishing point is what does most of the work: at 1100px
-     the far edge of a card barely shortens, so a 5.5deg turn read as the card
-     sliding rather than turning. Bringing it to 880 makes the same rotation
-     foreshorten visibly, and the degrees and the lift are raised to match. */
-  transform: perspective(880px)
-    rotateX(calc(var(--tilt-y) * -1 * var(--tilt-deg)))
-    rotateY(calc(var(--tilt-x) * var(--tilt-deg)))
-    translateZ(calc(var(--tilt-mag) * 18px));
-  transition:
-    transform 0.75s var(--ease-out-soft),
-    translate 0.5s var(--ease-out-soft),
-    box-shadow 0.5s var(--ease-out-soft);
-}
-
-/* While the pointer is on it the lean has no easing — a transition there reads
-   as the card dragging along behind the cursor. The lift and the shadow keep
-   theirs, so arriving on the card is still a settle rather than a snap, and
-   the lean picks its easing back up on the way out. */
-[data-tilt="card"][data-tilting] {
-  transition:
-    transform 0s,
-    translate 0.5s var(--ease-out-soft),
-    box-shadow 0.5s var(--ease-out-soft);
-}
-
-/* The light the lean is read by. A rotation on a flat fill barely registers
-   as a rotation without a highlight that moves across it. */
-[data-tilt="card"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: calc(var(--tilt-mag) * 0.62);
-  background: radial-gradient(
-    36% 46% at var(--tilt-px) var(--tilt-py),
-    rgba(255, 255, 255, 0.62) 0%,
-    rgba(255, 255, 255, 0) 70%
-  );
-  transition: opacity 0.75s var(--ease-out-soft);
-}
-
-/* And the side that turns away from it. A highlight on its own reads as a flat
-   card catching a light; it takes something falling off opposite the highlight
-   before the face reads as tipped. Anchored to the point opposite the pointer,
-   so the lit side and the shaded side travel across the card together.
-
-   Both are scaled by `--tilt-mag`, which is 0 at the centre — so this is at its
-   strongest only when the pointer is out at an edge, and the shade is at the
-   far edge by then rather than over the middle where a card keeps its words.
-   At its darkest it is about 7% black-blue at the corner, and gone by the time
-   it reaches the centre. */
-[data-tilt="card"]::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: calc(var(--tilt-mag) * 0.5);
-  background: radial-gradient(
-    62% 72% at calc(100% - var(--tilt-px)) calc(100% - var(--tilt-py)),
-    rgba(6, 34, 71, 0.22) 0%,
-    rgba(6, 34, 71, 0) 62%
-  );
-  transition: opacity 0.75s var(--ease-out-soft);
-}
+   `[data-tilt]` itself stays — the base custom properties below are shared,
+   and `[data-tilt="scene"]` still leans the artwork on five sections. */
 
 /* A band that lends its pointer position to the artwork inside it. The band
    itself never moves; the art does. The art is `pointer-events-none`, so the
@@ -2562,16 +3013,24 @@ html.js-reveal [data-reveal].is-visible {
    this applies and every picture renders plainly.
    ========================================================================== */
 
-html.js-img img:not([data-loaded]) {
+html.js-img img:not([data-loaded]):not([data-img-in="none"]) {
   opacity: 0;
 }
+
+/* The brand lockup opts out entirely. Holding it at `opacity: 0` until a
+   script has confirmed the pixels makes the one element that identifies the
+   site the most fragile thing in the header: a background tab has no animation
+   timeline to fade it in with, and a `load` that fires before the listener is
+   attached never marks it. It is small, `priority`, and above the fold, so it
+   is drawn the moment it decodes and never arrives late enough to be worth
+   softening. */
 
 /* Pictures already running an animation of their own are excluded: a keyframed
    arrival would replace it outright and the ribbons would stop drifting. They,
    and anything opting out by hand, get a plain fade — with `filter` kept in the
    list so a picture that transitions its own (the grayscale team cards) still
    does. */
-html.js-img img[data-loaded]:not([class*="animate-"]):not([data-img-in="fade"]) {
+html.js-img img[data-loaded]:not([class*="animate-"]):not([data-img-in="fade"]):not([data-img-in="none"]) {
   animation: img-in 0.9s var(--ease-out-soft);
 }
 
@@ -2736,6 +3195,26 @@ html.js-img img[data-img-in="fade"] {
   animation: float-3d 9s ease-in-out infinite;
   animation-delay: var(--float-phase, 0s);
 }
+
+/* --------------------------------------------------- founder journey ribbon */
+/* The loop is a flat plate with the ribbon drawn on it, not an alpha video, so
+   its frame ends on a hard rectangle a shade off the section behind it
+   (plate #f0f0f1 against the section's ground). The section is now set to the
+   plate's own colour, and the frame's edges are feathered so any remaining
+   drift in the encode dissolves instead of drawing a line.
+
+   The stops hug the artwork, measured across the loop: it spans 13.4%–90.2%
+   horizontally and 8.2%–77.1% vertically, so nothing here clips the ribbon. */
+.journey-ribbon {
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 12%, #000 92%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 6%, #000 80%, transparent 100%);
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 12%, #000 92%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 6%, #000 80%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
 /* The hero mark holds still while a sector popup is open — the panel is
    anchored to a dot on the ribbon, and reading it should not mean tracking a
    moving target. The video is already paused there for the same reason. */
@@ -2790,44 +3269,116 @@ html.js-img img[data-img-in="fade"] {
 .parallax-plate {
   position: absolute;
   /* Taller than the band by more than the plate travels, so the picture never
-     runs out from under its own frame: the plate stands 148% of the band and
-     moves 14% of that, which is 20.7% of the band against 24% of overhang. */
-  inset: -24% 0;
+     runs out from under its own frame: the plate stands 190% of the band and
+     moves 23% of that, which is 43.7% of the band against 45% of overhang.
+
+     The overhang is what buys the travel, and travel is what makes the effect
+     legible — at the 148% / 14% this started from, the picture moved 309px
+     while the band crossed 1967px of scroll, so it tracked the page at 84% of
+     its speed and read as very nearly pinned to it. At 190% / 23% it moves
+     776px, or 61% of scroll speed, which is the difference between a drift
+     that has to be pointed out and one that is simply seen.
+
+     The cost is crop: the picture and the band share an aspect ratio almost
+     exactly (2200x1017 against 1920x887), so there is no spare height to
+     travel through and every pixel of overhang has to come from scaling the
+     plate up. A taller plate therefore shows less of the photograph and
+     upscales what it does show. This particular picture takes that well — it
+     is an out-of-focus texture rather than a composition, with no subject to
+     lose and no detail sharp enough for the upscale to blur. Swapping in a
+     photograph that *is* composed means revisiting these two numbers. */
+  inset: -45% 0;
   /* Scale first, then travel — so the swell adds coverage without touching the
      distance moved. It runs the other way from `--par-mid`: widest as the band
      arrives, back to nothing as it centres, so the picture settles onto the
      artboard's own framing at the moment it is being looked at rather than
      merely sliding through it. */
-  transform: translate3d(0, calc(var(--par, 0) * 14%), 0)
-    scale(calc(1 + (1 - var(--par-mid, 1)) * 0.06));
+  transform: translate3d(0, calc(var(--par, 0) * 23%), 0)
+    scale(calc(1 + (1 - var(--par-mid, 1)) * 0.09));
   will-change: transform;
 }
 
-/* The copy moves against the picture rather than sitting still on it. A
-   seventh of the plate's travel and the other way: enough to read as a nearer
-   layer, small enough that the traced composition still lands where it was
-   measured while the band is the thing being looked at. */
+/* The copy moves against the picture rather than sitting still on it, and the
+   two together are what is actually read as depth: the eye measures the
+   picture's drift against the heading in front of it, not against the band's
+   edges. So the copy earns its keep at a fraction of the plate's travel —
+   a ninth of it, the other way — and adds 137px of separation on top of the
+   plate's 776. Small enough that the traced composition still lands where it
+   was measured while the band is the thing being looked at. */
 .parallax-fore {
   position: relative;
-  transform: translate3d(0, calc(var(--par, 0) * -3%), 0);
+  transform: translate3d(0, calc(var(--par, 0) * -8%), 0);
   will-change: transform;
 }
 
-/* A list the reader scrolls themselves, looping endlessly — see
-   `useLoopScroll`, which does the wrapping. The native scrollbar is hidden
-   because these lists have a rail of their own in the design, and the wrap
-   must land instantly, so no smooth scrolling here. `contain` keeps a flick
-   inside the list from carrying on into the page behind it. */
-.loop-scroll {
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  scroll-behavior: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+/* --------------------------------------------------------------------------
+   PHILOSOPHY — the held section and the list it steps through
+
+   The list has no scroll of its own. It is a three-line window onto a
+   five-line track, and the track is translated by `--pin-u`, the section's
+   progress through its own runway, published each frame by `ScrollPin`.
+   Two lines of travel: the first principle at the lit centre at 0, the last at
+   1, the middle one on the way.
+
+   Without `[data-pinned]` — reduced motion, no JavaScript, or narrower than
+   the artboard layout — none of this applies: the track loses its blank lines
+   and its travel, and all three principles sit in the window at once with the
+   middle lit, which is the artboard's own composition.
+   -------------------------------------------------------------------------- */
+
+.phi-window {
+  overflow: hidden;
+  height: calc(var(--phi-line) * 1.22 * 3);
 }
 
-.loop-scroll::-webkit-scrollbar {
-  display: none;
+@media (width >= 64rem) {
+  /* A screenful to look at, and a runway to spend looking. The runway is what
+     the reader scrolls through while the section stays put, so it is also how
+     long its list takes. `ScrollPin` measures it rather than being told, so
+     each section's own rule below is the only place it is set. */
+  [data-pinned] > .pin-stage {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    display: grid;
+    align-content: center;
+  }
+
+  /* Three principles, two steps: ~40vh each. */
+  [data-pinned].ab-phi-pin {
+    height: calc(100dvh + 80vh);
+  }
+
+  /* The same ~40vh a step, so a name takes as long to read on either page.
+     The count cannot be inherited up from the list that knows it, so each
+     section states its own: five mentor bands are four steps, six LP Day
+     lines are five. */
+  [data-pinned].tm-mt-pin {
+    height: calc(100dvh + 4 * 40vh);
+  }
+
+  [data-pinned].lp-why-pin {
+    height: calc(100dvh + 5 * 40vh);
+  }
+
+  /* The blank lines and the travel belong to the pin and go with it. Narrower
+     than this there is no runway to read, so the track keeps neither: all
+     three principles sit in the window at once with the middle lit, which is
+     the artboard's composition and the right thing to show a reader who is
+     never going to be handed the scroll that would step through them.
+
+     The run is held back a beat at either end — the last principle wants a
+     moment at the centre before the section lets go, and the first the same
+     before it moves off, or the two ends of the list flick past unread. */
+  [data-pinned] .phi-track {
+    padding-block: calc(var(--phi-line) * 1.22);
+    transform: translate3d(
+      0,
+      calc(clamp(0, (var(--pin-u, 0) - 0.08) / 0.84, 1) * var(--phi-line) * 1.22 * -2),
+      0
+    );
+    will-change: transform;
+  }
 }
 
 /* The philosophy list's own scroll. Unlike `marquee-fade`, this does double
@@ -3159,9 +3710,22 @@ html.js-img img[data-img-in="fade"] {
 }
 
 /* With the photograph in place the drawn field is only what shows through the
-   scrim, so it is dropped back to the grade the photograph is lit against. */
-.pd-why[data-photo] {
+   scrim, so it is dropped back to the grade the photograph is lit against.
+
+   A class rather than the `data-photo` attribute it used to be: this rides on
+   the pinned stage now, which is `ScrollPin`'s own element, and a class is
+   what that takes. */
+.pd-why-photo {
   background: #05182f;
+}
+
+/* The photograph and its scrim, in a layer of their own so the `fill` image
+   has a positioned parent — the stage above it is `position: sticky`, which
+   `next/image` will not accept as one. */
+.pd-why-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
 }
 
 .pd-why-bg {
@@ -3300,6 +3864,37 @@ html.js-img img[data-img-in="fade"] {
    `marquee-fade-y` is cut for. */
 .pd-env-window {
   height: calc(var(--pd-env) * 1.62 * 3);
+  overflow: hidden;
+}
+
+@media (width >= 64rem) {
+  /* A screenful to look at, and a runway to spend looking: five environments
+     are four steps, at the ~40vh a step the other held sections use. */
+  [data-pinned].pd-why-pin {
+    height: calc(100dvh + 4 * 40vh);
+  }
+
+  /* The blank line above the first environment and below the last, and the
+     travel that carries each one through the lit centre. Both belong to the
+     pin and are scoped to it, breakpoint included: narrower than this there is
+     no runway to read, so the track keeps neither and the first three sit in
+     the window with the middle one lit, which is the frame's own still.
+
+     Held back a beat at either end, so the first and the last are read rather
+     than flicked past. */
+  [data-pinned] .pd-env-track {
+    --pd-step: calc(var(--pd-env) * 1.62);
+    padding-block: var(--pd-step);
+    transform: translate3d(
+      0,
+      calc(
+        clamp(0, (var(--pin-u, 0) - 0.06) / 0.88, 1) * (var(--pd-count) - 1) * var(--pd-step) *
+          -1
+      ),
+      0
+    );
+    will-change: transform;
+  }
 }
 
 .pd-env-item {
@@ -4567,6 +5162,14 @@ html.js-img img[data-img-in="fade"] {
   isolation: isolate;
   overflow: hidden;
   background: #04122a;
+}
+
+/* Holds the plate and the scrim behind the copy, and gives the `fill` image
+   the positioned parent the sticky stage cannot be. */
+.lp-why-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
 }
 
 .lp-why-img {

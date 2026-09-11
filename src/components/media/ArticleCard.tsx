@@ -16,7 +16,7 @@ export function ArticleCard({ article }: { article: ArticleCardData }) {
   const inner = (
     <>
       <span className="ar-plate">
-        <Image
+        <Image suppressHydrationWarning
           src={article.image}
           alt={article.imageAlt}
           fill

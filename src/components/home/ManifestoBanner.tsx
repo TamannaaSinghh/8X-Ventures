@@ -19,7 +19,7 @@ export function ManifestoBanner() {
       aria-labelledby="manifesto-heading"
       className="on-dark relative isolate overflow-hidden"
     >
-      <Image
+      <Image suppressHydrationWarning
         src="/images/gradient-blue-1.jpg"
         alt=""
         fill

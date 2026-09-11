@@ -27,6 +27,9 @@ type RevealProps = {
 /** Milliseconds between neighbours that come into view together. */
 const STAGGER = 115;
 
+/** Fraction of the viewport bottom the observer holds a block back through. */
+const DEAD_ZONE = 0.04;
+
 /** Where the cascade stops lengthening, so a large batch never crawls in.
  *  Past this every remaining block shares the last step and arrives together,
  *  so it wants to be high enough that a section's blocks each get their own. */
@@ -45,6 +48,41 @@ let observer: IntersectionObserver | null = null;
 const waiting = new Set<Element>();
 let reported = false;
 let guard = 0;
+let bottomWatched = false;
+
+/**
+ * The other way a block can be stranded, which the timeout above does not
+ * cover because the observer is reporting normally.
+ *
+ * `rootMargin` holds a block back until it is 4% clear of the viewport
+ * bottom. A block sitting inside the document's own final 4% can never get
+ * there: the page runs out of scroll first, so the observer never fires for
+ * it and it stays at opacity 0 however far you scroll. The footer copyright
+ * is exactly such a block.
+ *
+ * So rather than watching for "reader is at the bottom" — which a late
+ * layout shift falsifies, and which sub-pixel rounding makes brittle — this
+ * asks whether the block could clear the dead zone at maximum scroll. If it
+ * could not, it is revealed as soon as it is actually on screen.
+ */
+function flushUnreachable() {
+  if (waiting.size === 0) return;
+  const doc = document.documentElement;
+  const maxScroll = Math.max(0, doc.scrollHeight - window.innerHeight);
+  const deadZoneTop = window.innerHeight * (1 - DEAD_ZONE);
+
+  for (const el of [...waiting]) {
+    const box = el.getBoundingClientRect();
+    /* Where this block's top would land once the page is scrolled as far as
+       it goes. At or below the dead-zone line means it can never intersect. */
+    const restingTop = box.top + window.scrollY - maxScroll;
+    const onScreen = box.top < window.innerHeight && box.bottom > 0;
+    if (onScreen && restingTop >= deadZoneTop) {
+      reveal(el, 0);
+      observer?.unobserve(el);
+    }
+  }
+}
 
 function reveal(el: Element, step: number) {
   if (step > 0 && !staged.has(el)) {
@@ -88,7 +126,7 @@ function sharedObserver() {
        the time it is somewhere you would look at it, it has settled. Waiting
        until it is well inside the viewport is what makes a reveal feel like it
        is chasing the scroll. */
-    { rootMargin: "0px 0px -4% 0px", threshold: 0.02 },
+    { rootMargin: `0px 0px -${DEAD_ZONE * 100}% 0px`, threshold: 0.02 },
   );
 
   return observer;
@@ -140,6 +178,16 @@ export function Reveal({
         for (const stranded of waiting) reveal(stranded, 0);
         waiting.clear();
       }, 2500);
+    }
+
+    if (!bottomWatched) {
+      bottomWatched = true;
+      window.addEventListener("scroll", flushUnreachable, { passive: true });
+      window.addEventListener("resize", flushUnreachable, { passive: true });
+      /* Lazy media settling changes the document height after the last
+         scroll event, which moves what "maximum scroll" means. */
+      new ResizeObserver(flushUnreachable).observe(document.documentElement);
+      requestAnimationFrame(flushUnreachable);
     }
 
     return () => {

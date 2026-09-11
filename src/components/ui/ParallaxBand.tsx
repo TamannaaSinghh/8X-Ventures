@@ -103,8 +103,13 @@ export function ParallaxBand({ src, labelledBy, className, children }: ParallaxB
       aria-labelledby={labelledBy}
       className={cn("parallax-band relative isolate overflow-hidden", className)}
     >
+      {/* The plate stands 190% of the band and `object-cover` scales the
+          picture to fill it, so it is laid out about twice the width of the
+          viewport — `100vw` here asked the browser for an image half the size
+          it was about to paint, and the upscale that followed was the whole of
+          the softness in this band. */}
       <div aria-hidden="true" className="parallax-plate -z-10">
-        <Image src={src} alt="" fill sizes="100vw" className="object-cover" />
+        <Image suppressHydrationWarning src={src} alt="" fill sizes="190vw" className="object-cover" />
       </div>
 
       <div className="parallax-fore">{children}</div>

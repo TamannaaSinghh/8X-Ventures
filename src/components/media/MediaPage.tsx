@@ -3,13 +3,12 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { PointerField } from "@/components/ui/PointerField";
 import { ArticleCard } from "@/components/media/ArticleCard";
-import { CardArrow } from "@/components/ui/CardArrow";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import { lpDay } from "@/content/home";
 import { mediaArticles, mediaBook, mediaCta, mediaHero, mediaInsights } from "@/content/media";
 import { articleIndex } from "@/content/perspectives";
 import { MediaHeroMark } from "@/components/media/MediaHeroMark";
-import { InsightPlateVideo } from "@/components/media/InsightPlateVideo";
+import { InsightCards } from "@/components/media/InsightCards";
 
 /* The frame's arrow: a 47 x 32 shaft-and-head at the right of each LP Day
    card's bar. Decorative — the card's own text names the destination. */
@@ -29,14 +28,6 @@ function ArrowRight() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </svg>
-  );
-}
-
-function PlayGlyph() {
-  return (
-    <svg viewBox="0 0 20 22" fill="currentColor" aria-hidden="true" focusable="false">
-      <path d="M19 9.27a1.5 1.5 0 0 1 0 2.6L2.75 21.25A1.5 1.5 0 0 1 .5 19.95V2.19A1.5 1.5 0 0 1 2.75.89Z" />
     </svg>
   );
 }
@@ -71,7 +62,7 @@ export function MediaPage() {
       <section aria-labelledby="book-heading" data-tilt="scene" className="md-book">
         <div className="md-shell md-book-grid">
           <Reveal variant="scale" className="md-book-art">
-            <Image
+            <Image suppressHydrationWarning
               src={mediaBook.cover.src}
               alt={mediaBook.cover.alt}
               width={mediaBook.cover.width}
@@ -115,15 +106,15 @@ export function MediaPage() {
           <ul role="list" className="md-lp-cards">
             {lpDay.editions.map((edition, i) => (
               <Reveal as="li" variant="card" key={edition.year} delay={i * 120}>
-                <Link href={edition.href} data-tilt="card" className="group md-lp-card">
+                <Link href={edition.href} className="group md-lp-card">
                   <div className="md-lp-still">
-                    <Image
+                    <Image suppressHydrationWarning
                       src={edition.image}
                       alt={edition.imageAlt}
                       fill
                       sizes="(max-width: 1024px) 92vw, 41vw"
                       style={{ objectPosition: edition.focus }}
-                      className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
+                      className="object-cover transition-transform duration-700 ease-[var(--ease-out-soft)] group-hover:scale-[1.04] group-focus-visible:scale-[1.04]"
                     />
                     {/* The frame's own wash under the year. Not enough on its
                         own to guarantee 4.5:1 over a bright still — see README. */}
@@ -162,32 +153,7 @@ export function MediaPage() {
             <p className="md-copy md-ins-body text-pretty text-ink-600">{mediaInsights.body}</p>
           </Reveal>
 
-          <ul role="list" className="md-ins-cards">
-            {mediaInsights.items.map((item, i) => (
-              <Reveal as="li" variant="card" key={item.title} delay={i * 120}>
-                <Link
-                  href={item.href}
-                  data-tilt="card"
-                  data-card-arrow=""
-                  className="group md-ins-card"
-                >
-                  <CardArrow tone="dark" />
-
-                  <div aria-hidden="true" className="md-ins-plate">
-                    <InsightPlateVideo />
-                    <span className="md-ins-play relative z-10">
-                      <PlayGlyph />
-                    </span>
-                  </div>
-
-                  <div className="md-ins-text">
-                    <h3 className="md-ins-name">{item.title}</h3>
-                    <span className="md-ins-kicker">{item.kicker}</span>
-                  </div>
-                </Link>
-              </Reveal>
-            ))}
-          </ul>
+          <InsightCards items={mediaInsights.items} />
         </div>
       </section>
 
@@ -217,7 +183,7 @@ export function MediaPage() {
 
       {/* ================= CLOSING ================= */}
       <section aria-labelledby="media-cta-heading" className="on-dark md-cta">
-        <Image
+        <Image suppressHydrationWarning
           src="/images/media-cta-bg.jpg"
           alt=""
           fill

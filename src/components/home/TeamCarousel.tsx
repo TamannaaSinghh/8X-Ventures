@@ -35,7 +35,7 @@ export function TeamCarousel() {
       aria-labelledby="team-heading"
       className="on-dark relative isolate overflow-hidden"
     >
-      <Image src="/images/team-bg.jpg" alt="" fill sizes="100vw" className="-z-10 object-cover" />
+      <Image suppressHydrationWarning src="/images/team-bg.jpg" alt="" fill sizes="100vw" className="-z-10 object-cover" />
 
       <div className="team-stage">
         <Reveal className="team-eyebrow text-center">
@@ -98,7 +98,7 @@ export function TeamCarousel() {
                 </div>
 
                 <div className="relative min-h-0 flex-1">
-                  <Image
+                  <Image suppressHydrationWarning
                     src={member.image}
                     alt=""
                     /* Carries its own grayscale, which a keyframed arrival

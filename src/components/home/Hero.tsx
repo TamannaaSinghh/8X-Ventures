@@ -13,7 +13,7 @@ export function Hero() {
         aria-hidden="true"
         className="pointer-events-none absolute top-0 left-1/2 -z-10 w-[140vw] max-w-[1600px] -translate-x-1/2 opacity-70 sm:w-[110vw]"
       >
-        <Image
+        <Image suppressHydrationWarning
           src="/images/hero-glow.png"
           alt=""
           width={946}

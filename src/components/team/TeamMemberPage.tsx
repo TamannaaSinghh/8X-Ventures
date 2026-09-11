@@ -129,7 +129,7 @@ export function TeamMemberPage({ person }: { person: Person }) {
         </div>
 
         <Reveal variant="scale" className="tmm-portrait">
-          <Image
+          <Image suppressHydrationWarning
             src={person.image}
             alt={person.name}
             fill

@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  copyrightYear,
   footerBlurb,
   footerColumns,
   siteConfig,
@@ -10,11 +9,16 @@ import {
 import { Reveal } from "@/components/ui/Reveal";
 import { cn } from "@/lib/cn";
 
-/* Keyed by `short` in `socialLinks` — X, LinkedIn and YouTube, the three
-   accounts 8X actually runs. */
+/* Keyed by `short` in `socialLinks`. */
 const socialIcons: Record<string, React.ReactNode> = {
   X: (
     <path d="M17.3 3.75h2.82l-6.16 7.04L21.2 20.4h-5.66l-4.44-5.8-5.07 5.8H3.2l6.59-7.53L3 3.75h5.8l4.01 5.3zm-.99 14.97h1.56L7.75 5.34H6.08z" />
+  ),
+  Facebook: (
+    <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.76 8.44-4.92 8.44-9.94" />
+  ),
+  Instagram: (
+    <path d="M12 2c-2.72 0-3.06.01-4.12.06-1.07.05-1.8.22-2.43.47a4.9 4.9 0 0 0-1.78 1.16A4.9 4.9 0 0 0 2.53 5.45c-.25.63-.42 1.36-.47 2.43C2.01 8.94 2 9.28 2 12s.01 3.06.06 4.12c.05 1.07.22 1.8.47 2.43a4.9 4.9 0 0 0 1.16 1.78 4.9 4.9 0 0 0 1.78 1.16c.63.25 1.36.42 2.43.47 1.06.05 1.4.06 4.12.06s3.06-.01 4.12-.06c1.07-.05 1.8-.22 2.43-.47a5.11 5.11 0 0 0 2.94-2.94c.25-.63.42-1.36.47-2.43.05-1.06.06-1.4.06-4.12s-.01-3.06-.06-4.12c-.05-1.07-.22-1.8-.47-2.43a4.9 4.9 0 0 0-1.16-1.78 4.9 4.9 0 0 0-1.78-1.16c-.63-.25-1.36-.42-2.43-.47C15.06 2.01 14.72 2 12 2m0 1.8c2.67 0 2.99.01 4.04.06.98.04 1.5.2 1.86.34.46.18.8.4 1.15.75s.57.69.75 1.15c.14.36.3.88.34 1.86.05 1.05.06 1.37.06 4.04s-.01 2.99-.06 4.04c-.04.98-.2 1.5-.34 1.86-.18.46-.4.8-.75 1.15s-.69.57-1.15.75c-.36.14-.88.3-1.86.34-1.05.05-1.37.06-4.04.06s-2.99-.01-4.04-.06c-.98-.04-1.5-.2-1.86-.34-.46-.18-.8-.4-1.15-.75s-.57-.69-.75-1.15c-.14-.36-.3-.88-.34-1.86-.05-1.05-.06-1.37-.06-4.04s.01-2.99.06-4.04c.04-.98.2-1.5.34-1.86.18-.46.4-.8.75-1.15s.69-.57 1.15-.75c.36-.14.88-.3 1.86-.34C9.01 3.81 9.33 3.8 12 3.8m0 3.06a5.14 5.14 0 1 0 0 10.28 5.14 5.14 0 0 0 0-10.28m0 8.47a3.34 3.34 0 1 1 0-6.67 3.34 3.34 0 0 1 0 6.67m6.54-8.67a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0" />
   ),
   LinkedIn: (
     <path d="M6.94 8.5H4.06V20h2.88zM5.5 3.6a1.67 1.67 0 1 0 0 3.34 1.67 1.67 0 0 0 0-3.34M20 13.44c0-2.9-1.55-4.25-3.62-4.25a3.12 3.12 0 0 0-2.84 1.56h-.04V8.5H10.7V20h2.88v-5.69c0-1.5.29-2.95 2.15-2.95 1.83 0 1.86 1.71 1.86 3.05V20H20z" />
@@ -37,7 +41,7 @@ export function SiteFooter() {
         {/* --- Identity --- */}
         <Reveal className="footer-logo max-lg:w-[15.6rem]">
           <Link href="/" aria-label={`${siteConfig.name} — home`} className="block">
-            <Image
+            <Image suppressHydrationWarning
               src="/images/logo-footer.png"
               alt=""
               width={1000}
@@ -47,23 +51,29 @@ export function SiteFooter() {
           </Link>
         </Reveal>
 
-        <Reveal
-          as="p"
-          delay={80}
-          className={cn(
-            "footer-blurb leading-[1.2] font-light text-ink-300 max-lg:mt-8 max-lg:max-w-[34ch]",
-            BODY_SIZE,
-          )}
-        >
-          {footerBlurb}
-        </Reveal>
+        {/* Blurb and social row are one column: traced 33px apart at 1920, they
+            drifted to 103px on a 2560 screen when each was placed on its own
+            percentage of a stage that keeps growing after the type has
+            stopped. The logo above stays placed — its artwork carries its own
+            whitespace, and flowing it would shift the block by that much. */}
+        <div className="footer-identity at-col max-lg:mt-8">
+          <Reveal
+            as="p"
+            delay={80}
+            className={cn(
+              "footer-blurb leading-[1.2] font-light text-ink-300 max-lg:max-w-[34ch]",
+              BODY_SIZE,
+            )}
+          >
+            {footerBlurb}
+          </Reveal>
 
-        <Reveal
-          as="ul"
-          role="list"
-          delay={160}
-          className="footer-socials max-lg:mt-8 max-lg:gap-5"
-        >
+          <Reveal
+            as="ul"
+            role="list"
+            delay={160}
+            className="footer-socials at-tail max-lg:gap-5"
+          >
           {socialLinks.map((social) => (
             <li key={social.short}>
               <a
@@ -84,9 +94,10 @@ export function SiteFooter() {
                   {social.label} (opens in a new tab)
                 </span>
               </a>
-            </li>
-          ))}
-        </Reveal>
+              </li>
+            ))}
+          </Reveal>
+        </div>
 
         {/* --- Link columns --- */}
         {footerColumns.map((column, i) => (
@@ -150,9 +161,14 @@ export function SiteFooter() {
         <Reveal
           as="p"
           delay={80}
-          className="footer-copy text-center text-[length:clamp(0.75rem,1.125vw,1.35rem)] leading-[1.2] font-light tracking-[0.2em] text-ink-950 uppercase max-lg:mt-8"
+          /* Set in sentence case at normal tracking so the line reads exactly
+             as the notice is specified: "© Copyright <Company Name>". The
+             artboard's uppercase + 0.2em treatment was built for the old
+             "© 8X Ventures 2026" lock-up and rendered this as
+             "© C O P Y R I G H T   8 X   V E N T U R E S". */
+          className="footer-copy text-center text-[length:clamp(0.8125rem,1.125vw,1.35rem)] leading-[1.2] font-light tracking-[0.02em] text-ink-950 max-lg:mt-8"
         >
-          © {siteConfig.name} {copyrightYear}
+          © Copyright {siteConfig.name}
         </Reveal>
       </div>
     </footer>

@@ -81,6 +81,17 @@ export const viewport: Viewport = {
  * does not bubble, hence the capture listeners; `error` marks a broken picture
  * too, so a missing file leaves a gap rather than an invisible one. The sweeps
  * catch anything already decoded from cache before the listeners were attached.
+ *
+ * Which is why every `<Image>` on the site carries `suppressHydrationWarning`.
+ * This runs before React does, so any picture whose pixels land first is
+ * already carrying `data-loaded` by the time React walks the tree, and React
+ * reports the attribute it did not render as a hydration mismatch — on every
+ * page, since the header lockup is `priority` and decodes first. The attribute
+ * is deliberate and React leaves it alone ("this won't be patched up"), so the
+ * warning is noise; but it is noise on every page, and it buries the errors
+ * that matter. Marking after hydration instead would trade the warning for a
+ * worse failure: pictures held at `opacity: 0` until React arrives, which is
+ * exactly the fragility the lockup opts out of `data-img-in` to avoid.
  */
 const BOOTSTRAP = `try{
 var d=document,r=d.documentElement;
@@ -96,9 +107,25 @@ window.addEventListener('load',sweep);
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // suppressHydrationWarning: the bootstrap script below adds `js-reveal`
-    // and `js-img` to <html> before React hydrates, an expected mismatch.
-    <html lang="en-IN" className={sans.variable} suppressHydrationWarning>
+    /* suppressHydrationWarning: the bootstrap script below adds `js-reveal`
+       and `js-img` to <html> before React hydrates, an expected mismatch.
+
+       data-scroll-behavior: Next 16 stopped overriding `scroll-behavior`
+       during a route change, and this attribute is how you ask for the old
+       behaviour back. Without it a client-side navigation landed part-way down
+       the new page: the router calls `scrollIntoView` on each of the new
+       page's sections in turn, bottom to top, and with `scroll-behavior:
+       smooth` set in the base layer every one of those started an animation
+       that the next call interrupted — so the page came to rest wherever the
+       last interruption left it rather than at the top. `/contact` settled
+       494px down, at the ribbon. The rule itself stays: it is what makes the
+       in-page anchors glide. */
+    <html
+      lang="en-IN"
+      className={sans.variable}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: BOOTSTRAP }} />
       </head>

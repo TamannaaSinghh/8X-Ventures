@@ -45,7 +45,7 @@ export function PerspectivePage({ article }: { article: Article }) {
         </Reveal>
 
         <Reveal variant="scale" className="pv-hero">
-          <Image
+          <Image suppressHydrationWarning
             src={article.image}
             alt={article.imageAlt}
             fill

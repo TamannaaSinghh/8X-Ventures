@@ -30,6 +30,18 @@ const COUNT_MS = 1600;
 const CHASE_RATE = 9;
 
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
+
+/**
+ * The value to paint at `e` of the way through the count.
+ *
+ * Floored at 1, because zero is not a figure. At the head of the section the
+ * count has not started, and rounding straight off the progress left the panel
+ * resting on "₹0+Cr" with "0+" ghosted behind it — read as a published number
+ * rather than as a count waiting to begin, which is the one thing this panel
+ * must not say. The run is otherwise untouched: it still starts at the bottom
+ * and lands exactly on the figure.
+ */
+const count = (e: number, value: number) => Math.max(1, Math.round(e * value));
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
 /**
@@ -79,14 +91,14 @@ export function StatsSection() {
       const e = eased ? easeOutCubic(c) : c;
       if (figureRef.current) {
         figureRef.current.textContent = format(
-          Math.round(e * figure.value),
+          count(e, figure.value),
           figure.prefix,
           figure.suffix,
         );
       }
       if (ghostRef.current) {
         ghostRef.current.textContent = format(
-          Math.round(e * ghost.value),
+          count(e, ghost.value),
           ghost.prefix,
           ghost.suffix,
         );
@@ -235,7 +247,7 @@ export function StatsSection() {
             uncropped and keeps its light where the type was graded around
             it — see the pinned scroll stage in `globals.css`. */}
         <div className="stats-stage isolate">
-          <Image
+          <Image suppressHydrationWarning
             src="/images/stats-bg.jpg"
             alt=""
             fill
@@ -274,7 +286,7 @@ export function StatsSection() {
           </p>
 
           <div aria-hidden="true" className="stats-hand pointer-events-none">
-            <Image
+            <Image suppressHydrationWarning
               src="/images/robot-hand.png"
               alt=""
               width={1100}

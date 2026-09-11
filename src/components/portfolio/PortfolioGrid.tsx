@@ -30,7 +30,7 @@ export function PortfolioGrid() {
 
   return (
     <>
-      <Reveal className="pf-at pf-filters" role="group" aria-label="Filter portfolio by fund">
+      <Reveal className="pf-filters at-body" role="group" aria-label="Filter portfolio by fund">
         {portfolioFilters.map((f) => {
           const isActive = f.id === active;
           return (
@@ -52,7 +52,7 @@ export function PortfolioGrid() {
         })}
       </Reveal>
 
-      <div className="pf-at pf-grid">
+      <div className="pf-grid at-tail">
         {cards.map((card, i) => (
           /* The grid's own item, so the card still lays out as a grid child
              rather than being wrapped in one. Stepped across the row and then
@@ -63,22 +63,25 @@ export function PortfolioGrid() {
               as="article"
               variant="card"
               delay={Math.min(i, 5) * 90}
-              data-tilt="card"
               data-card-arrow=""
               className="pf-card"
             >
-            <CardArrow />
+            {/* `dark`, because the corner it sits in is now the white logo
+                plate rather than the card's blue. */}
+            <CardArrow tone="dark" />
 
             {/* The client supplied logos rather than photography, so the
-                panel is a white plate with the mark held inside it — same
-                box, same aspect, `contain` instead of `cover`. */}
+                panel is a white plate running the full width of the card with
+                the mark held inside it — same box, same aspect, `contain`
+                instead of `cover`, and no padding of its own: the logo files
+                carry their own margin already. */}
             <div className="pf-card-photo">
-              <Image
+              <Image suppressHydrationWarning
                 src={card.image}
                 alt=""
                 fill
                 sizes="(max-width: 1024px) 92vw, 28vw"
-                className="object-contain p-[9%]"
+                className="object-contain"
               />
             </div>
 

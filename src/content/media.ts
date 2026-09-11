@@ -34,29 +34,51 @@ export const mediaBook = {
   cta: { label: "Get the Book", href: "/media/moonshots-and-marathons" },
 } as const;
 
-export const mediaInsights = {
+/** One recorded appearance. `video` is the YouTube link — a watch URL, a
+ *  `youtu.be` short link or the bare id, whichever was to hand. The card plays
+ *  it in a dialog; there is no page behind these. */
+export type MediaInsight = {
+  title: string;
+  kicker: string;
+  video?: string;
+};
+
+export const mediaInsights: {
+  eyebrow: string;
+  line1: string;
+  line2: string;
+  body: string;
+  items: readonly MediaInsight[];
+} = {
   eyebrow: "Insights",
   line1: "Coverage, Commentary,",
   line2: "Conversations.",
   body: "8X in the media and the gatherings shaping India’s deep-tech ecosystem.",
   /* The frame sets these three as flat plates with a play button rather than
      stills, so no artwork is named. Add `image` to a row when a real still
-     exists and the plate steps aside for it. */
+     exists and the plate steps aside for it.
+
+     `video` is where the recording actually lives. Set it to the YouTube watch
+     URL and the card opens it there, in a new tab; leave it out and the card
+     falls back to `href`, the article page. All three are waiting for their
+     URL — every one of those article pages is still the "this piece is being
+     prepared" placeholder, so until the links are filled in these cards lead
+     nowhere the reader wants to go. */
   items: [
     {
       title: "8X Ventures - Taking a Giant Leap",
       kicker: "Media Feature",
-      href: "/media/8x-ventures-taking-a-giant-leap",
+      /* video: "https://www.youtube.com/watch?v=…", */
     },
     {
       title: "What does deep-tech investing look like in India?",
       kicker: "Interview",
-      href: "/media/deep-tech-investing-in-india",
+      /* video: "https://www.youtube.com/watch?v=…", */
     },
     {
       title: "Funding Deeptech in India",
       kicker: "Panel Discussion",
-      href: "/media/funding-deeptech-in-india",
+      /* video: "https://www.youtube.com/watch?v=…", */
     },
   ],
 } as const;

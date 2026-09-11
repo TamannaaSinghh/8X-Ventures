@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { PagePlaceholder } from "@/components/layout/PagePlaceholder";
 import { LpDayPage } from "@/components/media/LpDayPage";
 import { PerspectivePage } from "@/components/media/PerspectivePage";
@@ -8,6 +9,16 @@ import { articles, findArticle } from "@/content/perspectives";
  *  always linked at the per-year slugs; the frame is one page covering both
  *  editions, so they all resolve to it rather than to a placeholder. */
 const LP_DAY_SLUGS = ["lp-day", "lp-day-2025", "lp-day-2026"];
+
+/** The three video features. They had no page — only the "being prepared"
+ *  placeholder — and now they have no need of one: the Insights cards on
+ *  `/media` play the recording in a dialog rather than linking away. Listed so
+ *  the URLs answer honestly instead of serving thin copy nothing links to. */
+const RETIRED_SLUGS = [
+  "8x-ventures-taking-a-giant-leap",
+  "deep-tech-investing-in-india",
+  "funding-deeptech-in-india",
+];
 
 export function generateStaticParams() {
   return [
@@ -45,6 +56,7 @@ export default async function MediaDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (RETIRED_SLUGS.includes(slug)) notFound();
   if (LP_DAY_SLUGS.includes(slug)) return <LpDayPage />;
 
   const article = findArticle(slug);

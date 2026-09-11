@@ -67,6 +67,49 @@ export function LpDayGallery({ edition }: { edition: LpDayEdition }) {
 
   const labels = edition.images.map((_, i) => `Photograph ${i + 1}`);
 
+  /* --- the enlarged view ------------------------------------------------
+     A photograph on a strip is small by necessity; opening it is the only way
+     to actually look at one. `showModal` carries the focus trap, the Escape
+     key and the inert page behind it, so the only things left to add are the
+     step buttons and the arrow keys, which a gallery is expected to answer to.
+     Stepping here also moves the strip underneath, so closing leaves the
+     reader where the photograph they were looking at actually is. */
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [zoomed, setZoomed] = useState<number | null>(null);
+
+  const openAt = useCallback((i: number) => {
+    setZoomed(i);
+    dialogRef.current?.showModal();
+  }, []);
+
+  const step = useCallback(
+    (delta: number) => {
+      setZoomed((current) =>
+        current === null
+          ? current
+          : (current + delta + edition.images.length) % edition.images.length,
+      );
+    },
+    [edition.images.length],
+  );
+
+  /* The strip follows the enlarged view rather than the updater above moving
+     it: a state updater has to be free of side effects — React is entitled to
+     call it twice, or not at all — and one written there simply did not run. */
+  useEffect(() => {
+    if (zoomed !== null) scrollTo(zoomed);
+  }, [zoomed, scrollTo]);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const onClose = () => setZoomed(null);
+    el.addEventListener("close", onClose);
+    return () => el.removeEventListener("close", onClose);
+  }, []);
+
+  const shown = zoomed === null ? null : edition.images[zoomed];
+
   return (
     <div className="lp-edition">
       <div className="lp-edition-head">
@@ -77,15 +120,25 @@ export function LpDayGallery({ edition }: { edition: LpDayEdition }) {
       </div>
 
       <ul role="list" ref={stripRef} className="lp-strip">
-        {edition.images.map((img) => (
+        {edition.images.map((img, i) => (
+          /* The slide keeps its own class: it is the strip's grid child and
+             carries the snap point, the ratio and the corner radius. The
+             button is the whole of it, laid over the top. */
           <li key={img.src} className="lp-slide">
-            <Image
-              src={img.src}
-              alt={img.alt}
-              fill
-              sizes="(max-width: 640px) 88vw, (max-width: 1024px) 44vw, 21vw"
-              className="lp-slide-img"
-            />
+            <button
+              type="button"
+              onClick={() => openAt(i)}
+              className="lp-slide-open"
+              aria-label={`${img.alt} — view larger`}
+            >
+              <Image suppressHydrationWarning
+                src={img.src}
+                alt=""
+                fill
+                sizes="(max-width: 640px) 88vw, (max-width: 1024px) 44vw, 21vw"
+                className="lp-slide-img"
+              />
+            </button>
           </li>
         ))}
       </ul>
@@ -99,6 +152,69 @@ export function LpDayGallery({ edition }: { edition: LpDayEdition }) {
         subject={`LP Day ${edition.year} photographs`}
         className="lp-controls"
       />
+
+      <dialog
+        ref={dialogRef}
+        aria-label={`LP Day ${edition.year} photographs, enlarged`}
+        className="lightbox lightbox--photo"
+        onClick={(e) => {
+          if (e.target === dialogRef.current) dialogRef.current?.close();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft") step(-1);
+          if (e.key === "ArrowRight") step(1);
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => dialogRef.current?.close()}
+          className="lightbox-close"
+        >
+          <span aria-hidden="true">×</span>
+          <span className="sr-only-8x">Close</span>
+        </button>
+
+        {shown && (
+          <figure className="lp-lightbox-figure">
+            <Image suppressHydrationWarning
+              src={shown.src}
+              alt={shown.alt}
+              width={992}
+              height={744}
+              sizes="(max-width: 1024px) 92vw, 60rem"
+            />
+
+            {edition.images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  data-dir="prev"
+                  onClick={() => step(-1)}
+                  className="lp-lightbox-step"
+                >
+                  <span aria-hidden="true">‹</span>
+                  <span className="sr-only-8x">Previous photograph</span>
+                </button>
+                <button
+                  type="button"
+                  data-dir="next"
+                  onClick={() => step(1)}
+                  className="lp-lightbox-step"
+                >
+                  <span aria-hidden="true">›</span>
+                  <span className="sr-only-8x">Next photograph</span>
+                </button>
+              </>
+            )}
+          </figure>
+        )}
+        {shown && (
+          <p className="lp-lightbox-caption">
+            {shown.alt}
+            <span className="sr-only-8x">{` (${(zoomed ?? 0) + 1} of ${edition.images.length})`}</span>
+          </p>
+        )}
+      </dialog>
     </div>
   );
 }

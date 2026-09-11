@@ -71,7 +71,7 @@ export function VisionSection() {
             delay={120}
             className="vision-render pointer-events-none z-20"
           >
-            <Image
+            <Image suppressHydrationWarning
               src="/images/render-battery.png"
               alt=""
               width={1200}

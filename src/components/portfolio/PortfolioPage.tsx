@@ -17,7 +17,7 @@ export function PortfolioPage() {
         aria-labelledby="portfolio-heading"
         className="pf-hero-section on-dark relative isolate overflow-hidden"
       >
-        <Image
+        <Image suppressHydrationWarning
           src="/images/portfolio-hero.jpg"
           alt=""
           fill
@@ -28,33 +28,38 @@ export function PortfolioPage() {
         />
         <div aria-hidden="true" className="pf-hero-scrim" />
         <div className="pf-stage pf-hero">
-          <Reveal
-            as="h1"
-            id="portfolio-heading"
-            className="pf-at pf-hero-title font-bold tracking-normal text-white"
-          >
-            {portfolioHero.lines.map((line) => (
-              <span key={line} className="block">
-                {line}
-              </span>
-            ))}
-          </Reveal>
+          <div className="pf-at pf-hero-copy at-col">
+            <Reveal
+              as="h1"
+              id="portfolio-heading"
+              className="pf-hero-title font-bold tracking-normal text-white"
+            >
+              {portfolioHero.lines.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+            </Reveal>
 
-          <Reveal className="pf-at pf-hero-body max-lg:mt-8">
-            <p className={cn("leading-[1.2] font-light text-pretty text-white", BODY)}>
-              {portfolioHero.body}
-            </p>
-          </Reveal>
+            <Reveal className="at-body">
+              <p className={cn("leading-[1.2] font-light text-pretty text-white", BODY)}>
+                {portfolioHero.body}
+              </p>
+            </Reveal>
+          </div>
         </div>
       </section>
 
       {/* ================= THE GRID ================= */}
       <section aria-labelledby="companies-heading" className="relative bg-white">
-        <div className="pf-stage pf-list">
+        {/* The stage is the column: its three blocks — heading, filters, grid —
+            are a single stack in flow, and the filters come from
+            `PortfolioGrid`, so there is nowhere else to put the wrapper. */}
+        <div className="pf-stage pf-list at-col">
           <Reveal
             as="h2"
             id="companies-heading"
-            className="pf-at pf-list-title text-[length:var(--ab-display)] leading-[1.2] font-bold tracking-normal text-ink-950 max-lg:mt-3"
+            className="pf-list-title text-[length:var(--ab-display)] leading-[1.2] font-bold tracking-normal text-ink-950"
           >
             {portfolioIntro.line1}{" "}
             <span className="text-brand-sky">{portfolioIntro.line2}</span>
@@ -71,25 +76,23 @@ export function PortfolioPage() {
             source file (R x0.429, G x0.541, B x0.640). The wrapper carries that
             colour and the photograph multiplies into it. */}
         <div aria-hidden="true" className="pf-cta-photo">
-          <Image src="/images/portfolio-cta.jpg" alt="" fill sizes="100vw" className="object-cover mix-blend-multiply" />
+          <Image suppressHydrationWarning src="/images/portfolio-cta.jpg" alt="" fill sizes="100vw" className="object-cover mix-blend-multiply" />
         </div>
         <PointerField />
         <div className="pf-stage pf-cta">
-          <Reveal
-            as="h2"
-            id="portfolio-cta-heading"
-            className="pf-at pf-cta-title text-center text-white"
-          >
-            <span className="block font-light">{portfolioCta.lead}</span>
-            <span className="block font-bold">{portfolioCta.line1}</span>
-            <span className="block font-bold">{portfolioCta.line2}</span>
-          </Reveal>
+          <div className="pf-at pf-cta-copy at-col text-center">
+            <Reveal as="h2" id="portfolio-cta-heading" className="pf-cta-title text-white">
+              <span className="block font-light">{portfolioCta.lead}</span>
+              <span className="block font-bold">{portfolioCta.line1}</span>
+              <span className="block font-bold">{portfolioCta.line2}</span>
+            </Reveal>
 
-          <Reveal className="pf-at pf-cta-link flex justify-center max-lg:mt-10">
-            <UnderlineLink href={portfolioCta.link.href} tone="light">
-              {portfolioCta.link.label}
-            </UnderlineLink>
-          </Reveal>
+            <Reveal className="at-tail flex justify-center">
+              <UnderlineLink href={portfolioCta.link.href} tone="light">
+                {portfolioCta.link.label}
+              </UnderlineLink>
+            </Reveal>
+          </div>
         </div>
       </section>
     </>

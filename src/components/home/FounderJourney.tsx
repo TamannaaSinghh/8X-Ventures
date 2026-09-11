@@ -141,9 +141,14 @@ export function FounderJourney() {
   const step = ringOffset(previousIndex, index, journey.length);
 
   return (
-    <section aria-labelledby="journey-heading" className="relative overflow-hidden bg-[#F0EEF0]">
+    /* Ground set to the loop's own plate colour (#F0F0F1, measured off the
+       rendered frame) so the video does not read as a panel laid on the
+       section. */
+    <section aria-labelledby="journey-heading" className="relative overflow-hidden bg-[#F0F0F1]">
       <div className="container-8x pt-20 pb-16 lg:pt-32 lg:pb-24">
-        <Reveal className="text-center">
+        {/* Above the ribbon: `float-3d` lifts the loop by up to 1.75rem, which
+            is enough to carry its plate over the headline's last line. */}
+        <Reveal className="relative z-10 text-center">
           <Eyebrow>{journeyIntro.eyebrow}</Eyebrow>
           <h2
             id="journey-heading"
@@ -166,7 +171,7 @@ export function FounderJourney() {
             disableRemotePlayback
             preload="auto"
             aria-hidden="true"
-            className="animate-float-3d h-auto w-full"
+            className="journey-ribbon animate-float-3d h-auto w-full"
           >
             <source src="/videos/loop-02.mp4" type="video/mp4" />
           </video>

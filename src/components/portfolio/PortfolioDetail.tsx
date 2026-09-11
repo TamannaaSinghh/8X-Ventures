@@ -2,8 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EnvironmentList } from "@/components/portfolio/EnvironmentList";
+import { PointerField } from "@/components/ui/PointerField";
+import { ScrollPin } from "@/components/ui/ScrollPin";
 import { Reveal } from "@/components/ui/Reveal";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
+import { cn } from "@/lib/cn";
 import { portfolioCards } from "@/content/portfolio";
 import {
   detailArt,
@@ -140,7 +143,7 @@ export function PortfolioDetail({ id }: { id: string }) {
             same bloom. */}
         {detail.art?.hero ? (
           <Reveal variant="scale" className="pd-hero-art">
-            <Image
+            <Image suppressHydrationWarning
               src={detail.art.hero}
               alt=""
               width={1200}
@@ -149,7 +152,7 @@ export function PortfolioDetail({ id }: { id: string }) {
               priority
             />
             {detail.art.lockup && (
-              <Image
+              <Image suppressHydrationWarning
                 src={detail.art.lockup}
                 alt={`${company.name} logo`}
                 width={1400}
@@ -161,7 +164,7 @@ export function PortfolioDetail({ id }: { id: string }) {
           </Reveal>
         ) : (
           <Reveal variant="scale" className="pd-hero-mark">
-            <Image
+            <Image suppressHydrationWarning
               src={company.image}
               alt={company.imageAlt || `${company.name} logo`}
               width={640}
@@ -204,7 +207,7 @@ export function PortfolioDetail({ id }: { id: string }) {
 
       {/* ======================================================== FIGURE */}
       <Reveal as="figure" variant="scale" className="pd-band pd-figure">
-        <Image
+        <Image suppressHydrationWarning
           src={detailArt.team}
           alt=""
           fill
@@ -214,14 +217,22 @@ export function PortfolioDetail({ id }: { id: string }) {
       </Reveal>
 
       {/* ================================================ WHY WE INVESTED */}
-      <section
-        aria-labelledby="why-heading"
-        className="pd-band-full pd-why"
-        data-photo={detail.art?.why ? "" : undefined}
+      {/* Held while its five environments are read, the same way the philosophy
+          band on `/about` is. `pd-why-photo` rather than a `data-photo`
+          attribute: the class has to ride on the pinned stage, which is
+          `ScrollPin`'s own element. */}
+      <ScrollPin
+        labelledBy="why-heading"
+        className="pd-why-pin"
+        stageClassName={cn("pd-band-full pd-why", detail.art?.why && "pd-why-photo")}
       >
         {detail.art?.why && (
-          <>
-            <Image
+          /* The photograph and its scrim in a layer of their own: the stage
+             above them is `position: sticky` now that the band is pinned, and
+             a `fill` image needs a parent that is relative, absolute or fixed
+             — sticky is none of those, and `next/image` says so. */
+          <div aria-hidden="true" className="pd-why-bg-layer">
+            <Image suppressHydrationWarning
               src={detail.art.why}
               alt=""
               fill
@@ -231,8 +242,8 @@ export function PortfolioDetail({ id }: { id: string }) {
             {/* The photograph is dark on the left and opens out to the right;
                 the scrim follows it so the copy keeps 4.5:1 without flattening
                 the landscape the frame is showing (WCAG 1.4.3). */}
-            <span aria-hidden="true" className="pd-why-scrim" />
-          </>
+            <span className="pd-why-scrim" />
+          </div>
         )}
 
         <div className="pd-why-inner">
@@ -260,7 +271,7 @@ export function PortfolioDetail({ id }: { id: string }) {
             {detail.why.close}
           </Reveal>
         </div>
-      </section>
+      </ScrollPin>
 
       {/* ====================================================== SNAPSHOT */}
       <section aria-labelledby="snapshot-heading" className="pd-band pd-snapshot">
@@ -273,7 +284,7 @@ export function PortfolioDetail({ id }: { id: string }) {
           className="pd-snapshot-mark"
           data-photo={detail.art?.snapshot ? "" : undefined}
         >
-          <Image
+          <Image suppressHydrationWarning
             src={detail.art?.snapshot ?? company.image}
             alt=""
             width={detail.art?.snapshot ? 1392 : 640}
@@ -304,7 +315,7 @@ export function PortfolioDetail({ id }: { id: string }) {
 
       {/* ======================================================= 8X VIEW */}
       <section aria-labelledby="view-heading" className="pd-band-full pd-view">
-        <Image
+        <Image suppressHydrationWarning
           src={detailArt.circuit}
           alt=""
           fill
@@ -334,6 +345,8 @@ export function PortfolioDetail({ id }: { id: string }) {
 
       {/* =========================================================== CTA */}
       <section aria-labelledby="detail-cta-heading" className="pd-band-full pd-cta">
+        <PointerField />
+
         <Reveal as="h2" id="detail-cta-heading" className="pd-cta-head">
           <span className="pd-cta-lead">{detailCta.lead}</span>
           <span className="pd-cta-line">{detailCta.line1}</span>

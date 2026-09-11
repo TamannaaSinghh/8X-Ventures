@@ -1,32 +1,37 @@
-"use client";
-
-import { useLoopScroll } from "@/hooks/useLoopScroll";
-
 /**
- * Copies of the list laid end to end down the track. `useLoopScroll` parks on
- * the second, leaving a copy of runway either way before it wraps.
- */
-const COPIES = 4;
-
-/** Blocks in the rail — enough to keep a thumb in view across the wrap. */
-const RAIL_BLOCKS = 3;
-
-/**
- * A list of bands on a scroll of its own, with a rail beside it.
+ * A list of bands stepped through by its section's own scroll, with a rail
+ * beside it.
  *
  * The design uses this device twice — the team page's mentor bands and LP
  * Day's "deep-tech needs more than capital" — so it lives here rather than in
  * either page. The window is one line per item, so the band keeps the
- * footprint a static list would have, and the reader moves it themselves,
- * looping without end in either direction.
+ * footprint a static list would have.
+ *
+ * It used to be a scroller of its own, looping without end: four copies of the
+ * list laid end to end, each wrapping into the next. That read well on its own
+ * and behaved badly on the page. A list with no end can never hand the scroll
+ * back to what is below it — `overscroll-behavior: contain` is not an
+ * ornament there, it is the only thing keeping a flick from running away — so
+ * a reader who put the pointer over it drove the names round and round and
+ * never reached the section beyond. It also only ever moved for a reader who
+ * found it with the pointer.
+ *
+ * Now the section holds still and the list steps through on the page's own
+ * scroll — see `ScrollPin`, which publishes `--pin-u` — one line at a time,
+ * from the first name to the last, and then the page carries on. The blank
+ * lines above the first and below the last are what let those two reach the
+ * lit centre; without them the list would start with its first line already
+ * at the middle and end with a last that could never get there.
  *
  * The emphasis comes from `marquee-fade-y`, a mask that floors at 0.28 rather
  * than at transparent: whichever line is passing the centre is lit and the
- * rest fall away either side. The rail's thumb follows the same scroll through
- * `--loop-u`, travelling down as the lines travel up.
+ * rest fall away either side. The rail's thumb reads the same `--pin-u`,
+ * travelling down as the lines travel up, the way a scrollbar does.
  *
- * Nothing is hidden — every line is one turn away — and nothing moves unless
- * the reader moves it, so there is no motion to opt out of.
+ * Unpinned — reduced motion, no JavaScript, or narrower than the traced
+ * layout — the track keeps neither its blank lines nor its travel, so every
+ * name sits in the window at once with the middle one lit and the thumb parked
+ * on it. That is the artboard's own still frame.
  */
 export function LoopList({
   items,
@@ -34,55 +39,36 @@ export function LoopList({
   label,
 }: {
   items: readonly string[];
-  /** Where the frame's still frame sits, and where the rail's thumb starts. */
+  /** Where the still frame sits, and where the rail's thumb parks unpinned. */
   activeIndex: number;
-  /** Names the scrollable group, e.g. "Our journey". */
+  /** Names the list, e.g. "Our journey". */
   label: string;
 }) {
-  const { viewportRef, progressRef } = useLoopScroll(COPIES);
-
-  const thumbVars = {
-    "--rail-index": activeIndex,
-    "--rail-count": items.length,
-  } as React.CSSProperties;
-
   return (
     <div
-      ref={progressRef}
       className="tm-rail-wrap"
-      style={{ "--tm-count": items.length } as React.CSSProperties}
+      style={
+        {
+          "--tm-count": items.length,
+          "--rail-index": activeIndex,
+          "--rail-count": items.length,
+        } as React.CSSProperties
+      }
     >
       <span aria-hidden="true" className="tm-rail">
-        <span className="tm-rail-track">
-          {Array.from({ length: RAIL_BLOCKS }, (_, block) => (
-            <span key={block} className="tm-rail-block">
-              <span className="tm-rail-thumb" style={thumbVars} />
-            </span>
-          ))}
-        </span>
+        <span className="tm-rail-thumb" />
       </span>
 
-      <div
-        ref={viewportRef}
-        tabIndex={0}
-        role="group"
-        aria-label={`${label} — scroll through the list`}
-        className="tm-mentors-window loop-scroll marquee-fade-y"
-      >
-        {Array.from({ length: COPIES }, (_, copy) => (
-          <ol
-            key={copy}
-            /* One copy carries the meaning; the rest are scenery. */
-            aria-hidden={copy > 0 ? "true" : undefined}
-            className="tm-mentors text-white"
-          >
-            {items.map((item) => (
-              <li key={item} className="tm-mentor">
-                {item}
-              </li>
-            ))}
-          </ol>
-        ))}
+      {/* Not a scroller and no longer focusable: there is nothing here for a
+          keyboard to scroll, and the list moves with the page for everyone. */}
+      <div role="group" aria-label={label} className="tm-mentors-window marquee-fade-y">
+        <ol className="tm-mentors tm-mentors-track text-white">
+          {items.map((item) => (
+            <li key={item} className="tm-mentor">
+              {item}
+            </li>
+          ))}
+        </ol>
       </div>
     </div>
   );

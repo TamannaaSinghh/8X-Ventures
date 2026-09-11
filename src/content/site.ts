@@ -33,25 +33,32 @@ export const primaryNav: NavItem[] = [
   { label: "Reach Out", href: "/contact", emphasis: true },
 ];
 
+/**
+ * The legal column carries the six links the launch compliance checklist
+ * requires in the footer: About Us, Contact, Disclaimer, Privacy Policy,
+ * Terms & Conditions and Refund Policy. About Us sits in `Explore`; the
+ * remaining five sit together under `Legal`.
+ */
 export const footerColumns: { heading: string; links: NavItem[] }[] = [
   {
     heading: "Explore",
     links: [
       { label: "Home", href: "/" },
-      { label: "About", href: "/about" },
+      { label: "About Us", href: "/about" },
       { label: "Portfolio", href: "/portfolio" },
       { label: "Team", href: "/team" },
       { label: "Media", href: "/media" },
     ],
   },
   {
-    heading: "Connect",
+    heading: "Legal",
     links: [
-      { label: "Share Your Vision", href: "/contact" },
       { label: "Contact", href: "/contact" },
-      { label: "Disclosures", href: "/disclosures" },
+      { label: "Disclaimer", href: "/disclaimer" },
       { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Use", href: "/terms" },
+      { label: "Terms & Conditions", href: "/terms" },
+      { label: "Refund Policy", href: "/refund-policy" },
+      { label: "Disclosures", href: "/disclosures" },
     ],
   },
   {
@@ -93,15 +100,28 @@ export const offices = [
 ] as const;
 
 /**
- * 8X's actual accounts, taken from the footer of 8xventures.co: X (still
- * posting as @8xVentures), LinkedIn and YouTube. The build previously linked
- * Facebook and Instagram profiles that 8X does not run.
+ * The accounts linked from the site footer. X, LinkedIn and YouTube are 8X's
+ * live accounts, taken from the footer of 8xventures.co.
+ *
+ * TODO(8X): confirm the Facebook and Instagram profile URLs below. They are
+ * required by the launch compliance checklist; these are best-guess handles
+ * and must be replaced with the real profiles before going live.
  */
 export const socialLinks = [
   {
-    label: "8X Ventures on X",
+    label: "8X Ventures on X (Twitter)",
     short: "X",
     href: "https://twitter.com/8xVentures",
+  },
+  {
+    label: "8X Ventures on Facebook",
+    short: "Facebook",
+    href: "https://www.facebook.com/8xventures",
+  },
+  {
+    label: "8X Ventures on Instagram",
+    short: "Instagram",
+    href: "https://www.instagram.com/8xventures",
   },
   {
     label: "8X Ventures on LinkedIn",

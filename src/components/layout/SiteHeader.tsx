@@ -102,12 +102,18 @@ export function SiteHeader() {
           className="shrink-0 transition-transform duration-500 hover:scale-[1.03] active:scale-[0.99]"
           aria-label={`${siteConfig.name} — home`}
         >
-          <Image
+          {/* A real `alt` rather than the usual empty one for a lockup beside a
+              labelled link: this is the only thing on the page that names the
+              firm, so if the file ever fails to arrive the name still shows
+              instead of a blank gap. The link keeps its own `aria-label`, so
+              assistive tech reads the destination once, not twice. */}
+          <Image suppressHydrationWarning
             src="/images/logo-mark.png"
-            alt=""
+            alt={siteConfig.name}
             width={600}
             height={300}
             priority
+            data-img-in="none"
             className="h-9 w-auto sm:h-12 lg:h-14 xl:h-[70px]"
           />
         </Link>
