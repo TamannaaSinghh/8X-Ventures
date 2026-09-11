@@ -96,11 +96,11 @@ export function SiteHeader() {
           : "bg-transparent",
       )}
     >
-      {/* The bar's height is the logo plus this padding, and `--header-h` is
-          written to match — so the padding gives back exactly what the logo
-          takes: 44/56/64/78 inside 12, 12, 16, 16. The lockup grew by 8px at
-          every step and the bar did not move. */}
-      <div className="container-8x flex items-center justify-between gap-6 py-3 lg:py-4">
+      {/* The bar's height is its tallest child plus this padding, and
+          `--header-h` is written to match, so the padding is whatever holds
+          68/80/96/110: the lockup at 30/40/52/64, or the 44px menu toggle
+          where it is the taller of the two, inside 12/18/22/23. */}
+      <div className="container-8x flex items-center justify-between gap-6 py-3 sm:py-[18px] lg:py-[22px] xl:py-[23px]">
         <Link
           href="/"
           className="shrink-0 transition-transform duration-500 hover:scale-[1.03] active:scale-[0.99]"
@@ -114,13 +114,19 @@ export function SiteHeader() {
           <Image suppressHydrationWarning
             src="/images/logo-mark.png"
             alt={siteConfig.name}
-            width={600}
-            height={300}
+            width={703}
+            height={259}
             priority
             data-img-in="none"
-            /* 44 at the smallest, which is the menu toggle's own height — any
-               larger there and the lockup, not the toggle, would set the bar. */
-            className="h-11 w-auto sm:h-14 lg:h-16 xl:h-[78px]"
+            /* These are the mark itself now, not a box mostly made of nothing:
+               the file used to carry 191px of transparent padding down its 450,
+               so 58% of any height set here was the only part you could see —
+               a 78px lockup was 45px of ink. Cropped to its own bounds, the
+               number is what you get.
+
+               64 at `xl` is the artboard's own: it draws the lockup 174 x 64 on
+               its 1920 frame, which is this file's aspect exactly. */
+            className="h-[30px] w-auto sm:h-10 lg:h-[52px] xl:h-16"
           />
         </Link>
 
