@@ -1259,8 +1259,10 @@
   }
 }
 
-/* The bar grows with the logo: h-9 / h-12 / h-14 / h-[70px] inside py-4 (py-5
-   from lg), so its height steps at the same breakpoints. */
+/* The bar grows with the logo: h-11 / h-14 / h-16 / h-[78px] inside py-3
+   (py-4 from lg), so its height steps at the same breakpoints. These four
+   numbers are the sum of those two and have to stay that way — anything that
+   starts below the bar rather than behind it is positioned from them. */
 @media (width >= 40rem) {
   :root {
     --header-h: 80px;

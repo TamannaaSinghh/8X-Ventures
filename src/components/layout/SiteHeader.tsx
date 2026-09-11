@@ -96,7 +96,11 @@ export function SiteHeader() {
           : "bg-transparent",
       )}
     >
-      <div className="container-8x flex items-center justify-between gap-6 py-4 lg:py-5">
+      {/* The bar's height is the logo plus this padding, and `--header-h` is
+          written to match — so the padding gives back exactly what the logo
+          takes: 44/56/64/78 inside 12, 12, 16, 16. The lockup grew by 8px at
+          every step and the bar did not move. */}
+      <div className="container-8x flex items-center justify-between gap-6 py-3 lg:py-4">
         <Link
           href="/"
           className="shrink-0 transition-transform duration-500 hover:scale-[1.03] active:scale-[0.99]"
@@ -114,7 +118,9 @@ export function SiteHeader() {
             height={300}
             priority
             data-img-in="none"
-            className="h-9 w-auto sm:h-12 lg:h-14 xl:h-[70px]"
+            /* 44 at the smallest, which is the menu toggle's own height — any
+               larger there and the lockup, not the toggle, would set the bar. */
+            className="h-11 w-auto sm:h-14 lg:h-16 xl:h-[78px]"
           />
         </Link>
 
