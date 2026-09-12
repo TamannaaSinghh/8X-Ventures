@@ -431,6 +431,12 @@
   position: relative;
   padding: 4.5rem var(--spacing-gutter) 8rem;
   text-align: center;
+  /* The band's whole colour is the photograph, and every word on it is white,
+     so until the photograph arrives the section reads as a blank white gap —
+     the headline, the figure and the label are all there, all invisible. This
+     is the photograph's own mean colour, sampled off the file, and it is
+     covered the moment the picture paints. */
+  background-color: #1c72b4;
 }
 
 .stats-headline,
@@ -450,6 +456,12 @@
 .stats-figure {
   margin-top: -0.22em;
   white-space: nowrap;
+  /* `--text-stat` grows at 12vw, which outruns the column it sits in once the
+     gutters are taken off: "₹400+Cr" is about 3.9 times the type size wide, so
+     below ~340px it was broader than the stage's content box and spilled into
+     both gutters. The cap is only ever the smaller term under that width —
+     from 360 up `--text-stat` wins and nothing moves. */
+  font-size: min(var(--text-stat), 22vw);
 }
 
 .stats-label {
@@ -577,9 +589,17 @@
   display: none;
 }
 
-@media (prefers-reduced-motion: no-preference) and (width >= 64rem) {
+/* The pin itself, on the same height gate the other held sections use — see
+   "Where the pin applies". What is held still here is whichever composition
+   the width has already chosen: the artboard's below, the stacked one above.
+   Neither needs the screen to be wide, only tall enough to hold a screenful,
+   so counting ₹400+Cr against the reader's own scroll is no longer something
+   only a desktop gets. `svh` for the same reason as the others: a runway
+   measured in `vh` grows and shrinks as a phone's address bar comes and goes,
+   and the count would drift with it. */
+@media (prefers-reduced-motion: no-preference) and (height >= 40rem) {
   html.js-reveal .stats-scroll {
-    height: var(--stats-run, 260vh);
+    height: var(--stats-run, 260svh);
   }
 
   html.js-reveal .stats-pin {
@@ -592,6 +612,27 @@
     overflow: hidden;
   }
 
+  /* How much of the run is left. Pinning without this reads as a stuck page;
+     with it, the section visibly has a length. */
+  html.js-reveal .stats-progress {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: block;
+    height: 3px;
+    background: #ffffff;
+    opacity: 0.5;
+    transform-origin: left center;
+    scale: var(--p, 1) 1;
+  }
+}
+
+/* The flourishes stay on the artboard's own breakpoint, because each is
+   written in the traced composition's terms: the two `-50%` translates are
+   what centre an absolutely placed line, and above this width those lines are
+   in ordinary centred flow, where the same translate would shove them half
+   their own width off to the left. */
+@media (prefers-reduced-motion: no-preference) and (width >= 64rem) {
   /* The field is cut to the stage's exact 1920x1067 ratio, so the stage is
      what gets cover-fitted to the pinned viewport — never the background on
      its own. Sizing the two independently is what stretches the gradient and
@@ -617,20 +658,6 @@
 
   html.js-reveal .stats-label {
     translate: -50% calc((1 - var(--p, 1)) * 0.6em);
-  }
-
-  /* How much of the run is left. Pinning without this reads as a stuck page;
-     with it, the section visibly has a length. */
-  html.js-reveal .stats-progress {
-    position: absolute;
-    inset-inline: 0;
-    bottom: 0;
-    display: block;
-    height: 3px;
-    background: #ffffff;
-    opacity: 0.5;
-    transform-origin: left center;
-    scale: var(--p, 1) 1;
   }
 }
 
@@ -1279,6 +1306,23 @@
   }
 }
 
+/* The open mobile menu, held to the space it actually has.
+   The panel hangs below the bar inside a `position: fixed` header, and opening
+   it locks the page behind it, so anything the panel pushes past the bottom of
+   the screen had nowhere left to go and no scroll to reach it with. On a
+   landscape phone — 740 x 360 — that was the last two destinations of five:
+   "Media" and "Reach Out" were simply unreachable while the menu was open.
+   Capping it at the room below the bar and letting it scroll gives those rows
+   somewhere to be. On a portrait phone the list is far shorter than the cap,
+   so nothing here changes what the menu does; `svh` keeps the cap honest while
+   a phone's address bar comes and goes. `contain` so a flick that reaches the
+   end of the list does not then start dragging the locked page behind it. */
+#mobile-menu {
+  max-height: calc(100svh - var(--header-h));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 /* ==========================================================================
    TEAM PAGE — traced from artboard page 4 (1920 x 5947) and the Figma
    prototype of the same frame.
@@ -1349,8 +1393,14 @@
   padding: 5.2cqw 7cqw 0;
 }
 
+/* Floored, the way the bio below already is. These sizes are a share of the
+   card's own width, and the card is a quarter of the row once the grid has
+   four across — 209px at 1024 against the 392 they were drawn on — so the type
+   halved with it: the role bottomed out at 8.6px, and it was under 12px from
+   640 all the way to 1280. The ceiling is the traced size, so nothing moves at
+   the width this was drawn at; the floor only catches the sizes in between. */
 .tm-card-name {
-  font-size: 8.27cqw; /* 32.4px on a 392 card */
+  font-size: clamp(1.125rem, 8.27cqw, 2.025rem); /* 32.4px on a 392 card */
   line-height: 1.2;
   font-weight: 700;
   color: #ffffff;
@@ -1358,7 +1408,7 @@
 
 .tm-card-role {
   margin-top: 0.35em;
-  font-size: 4.13cqw; /* 16.2px */
+  font-size: clamp(0.75rem, 4.13cqw, 1.0125rem); /* 16.2px */
   line-height: 1.2;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -1367,12 +1417,12 @@
 }
 
 .tm-card-sm .tm-card-name {
-  font-size: 6.89cqw; /* 27px */
+  font-size: clamp(1.0625rem, 6.89cqw, 1.6875rem); /* 27px */
   font-weight: 400;
 }
 
 .tm-card-sm .tm-card-role {
-  font-size: 3.67cqw; /* 14.4px */
+  font-size: clamp(0.75rem, 3.67cqw, 0.9rem); /* 14.4px */
 }
 
 .tm-card-photo {
@@ -1500,12 +1550,12 @@
    the centre line at 0 and the last on it at 1; the run between them is one
    line short of the list, which is one step per name after the first.
 
-   Both belong to the pin and are scoped to it, breakpoint included. Narrower
-   than the traced layout there is no runway to read, so the track keeps
+   Both belong to the pin and are scoped to it, its height gate included — see
+   "Where the pin applies". Where there is no runway to read, the track keeps
    neither: every name sits in the window at once with the middle one lit,
    which is the artboard's composition and the right thing to show a reader
    who is never going to be handed the scroll that would step through them. */
-@media (width >= 64rem) {
+@media (height >= 40rem) {
   [data-pinned] .tm-mentors-track {
     --tm-step: calc(var(--tm-line) * 1.35);
     padding-block: calc((var(--tm-count) - 1) / 2 * var(--tm-step));
@@ -1538,7 +1588,7 @@
   transition: top 0.5s var(--ease-out-expo);
 }
 
-@media (width >= 64rem) {
+@media (height >= 40rem) {
   [data-pinned] .tm-rail-thumb {
     top: calc(var(--pin-u, 0) * (100% - 100% / var(--rail-count)));
     transition: none;
@@ -1584,14 +1634,24 @@
   isolation: isolate;
 }
 
-.tm-partners-bg img {
+/* Below the traced layout the band has no artboard ratio to be cropped
+   against — it is as tall as the stacked content makes it — so the placement
+   below cannot apply here. Sized to the artboard's percentages against a box
+   six times taller than the one they were measured on, the plate was drawn at
+   a seventh of its own aspect: the gradient's diagonal collapsed into vertical
+   streaks. Plain `cover` instead, which is what a full-bleed plate wants at
+   any ratio the content happens to produce. */
+.tm-partners-bg img,
+.tm-cta-bg img {
   position: absolute;
-  left: -2.88%;
-  top: -1.1%;
-  width: 134.9%;
-  height: 101.6%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   max-width: none;
-  object-fit: fill;
+  object-fit: cover;
+}
+
+.tm-partners-bg img {
   mix-blend-mode: multiply;
 }
 
@@ -1603,17 +1663,29 @@
   mix-blend-mode: plus-lighter;
 }
 
-.tm-cta-bg img {
-  position: absolute;
-  left: -56.73%;
-  top: -266.7%;
-  width: 176.09%;
-  height: 426.9%;
-  max-width: none;
-  object-fit: fill;
-}
-
 @media (width >= 64rem) {
+  /* The artboard's own crops, which only mean anything once the bands below
+     carry their traced aspect ratios. The artboard stretches the plate rather
+     than fitting it — 2590 x 1383 out of a 3:2 source on the partners band —
+     so here the image is sized rather than covered. */
+  .tm-partners-bg img {
+    inset: auto;
+    left: -2.88%;
+    top: -1.1%;
+    width: 134.9%;
+    height: 101.6%;
+    object-fit: fill;
+  }
+
+  .tm-cta-bg img {
+    inset: auto;
+    left: -56.73%;
+    top: -266.7%;
+    width: 176.09%;
+    height: 426.9%;
+    object-fit: fill;
+  }
+
   .tm-stage {
     padding: 0;
   }
@@ -2450,6 +2522,10 @@ button.md-ins-card {
   position: absolute;
   top: -3rem;
   right: 0;
+  /* The frame follows the button in the dialog, so it paints over it once the
+     two overlap — which they do on a short window, where the button has to
+     move inside. Same reason `.lp-lightbox-step` carries one. */
+  z-index: 3;
   display: grid;
   place-items: center;
   width: 2.5rem;
@@ -2470,6 +2546,19 @@ button.md-ins-card {
 .lightbox-close:focus-visible {
   border-color: #ffffff;
   background: rgba(255, 255, 255, 0.24);
+}
+
+/* A short window has no room above the frame: at 740 x 360 the dialog is
+   nearly the height of the viewport and half the button sat off the top of
+   the screen. Below this height it tucks into the frame's own corner, which
+   is the only place left for it. */
+@media (height < 34rem) {
+  .lightbox-close {
+    top: 0.5rem;
+    right: 0.5rem;
+    border-color: rgba(255, 255, 255, 0.55);
+    background: rgba(4, 18, 42, 0.6);
+  }
 }
 
 /* The photograph is a button now — the whole slide, laid over it, so the
@@ -3322,10 +3411,10 @@ html.js-img img[data-img-in="fade"] {
    Two lines of travel: the first principle at the lit centre at 0, the last at
    1, the middle one on the way.
 
-   Without `[data-pinned]` — reduced motion, no JavaScript, or narrower than
-   the artboard layout — none of this applies: the track loses its blank lines
-   and its travel, and all three principles sit in the window at once with the
-   middle lit, which is the artboard's own composition.
+   Without the pin — reduced motion, no JavaScript, or a viewport too short to
+   hold a screenful still — none of this applies: the track loses its blank
+   lines and its travel, and all three principles sit in the window at once
+   with the middle lit, which is the artboard's own composition.
    -------------------------------------------------------------------------- */
 
 .phi-window {
@@ -3333,7 +3422,27 @@ html.js-img img[data-img-in="fade"] {
   height: calc(var(--phi-line) * 1.22 * 3);
 }
 
-@media (width >= 64rem) {
+/* --- Where the pin applies ------------------------------------------------
+   The question a pinned section asks is not how wide the screen is but whether
+   a screenful of it can be held still and read: the stage is exactly one
+   viewport tall, and anything the stage cannot fit is simply unreachable while
+   it is parked. So the gate is height, not width. This was `width >= 64rem`,
+   which handed every phone the still fallback — the one case where a list
+   stepped through by the page's own scroll is most worth having, because a
+   phone has no pointer to put on a scroller of its own.
+
+   40rem is the shortest viewport every one of these stages fits inside with
+   room to spare (the tallest, a portfolio page's environment list, measures
+   ~600px at phone widths). Below it — a landscape phone, a short window — the
+   runway is dropped and the still frame shows instead, which is what reduced
+   motion and a JavaScript-less page already get.
+
+   `svh` throughout rather than `dvh`: the small-viewport unit is the one that
+   does not change as a phone's address bar retracts. On `dvh` the stage and
+   its runway both resized mid-scroll, which walks the section under the
+   reader; `svh` is a constant, and the stage stays inside the visible area at
+   the address bar's largest. Desktop is unaffected — there the two are equal. */
+@media (height >= 40rem) {
   /* A screenful to look at, and a runway to spend looking. The runway is what
      the reader scrolls through while the section stays put, so it is also how
      long its list takes. `ScrollPin` measures it rather than being told, so
@@ -3341,33 +3450,33 @@ html.js-img img[data-img-in="fade"] {
   [data-pinned] > .pin-stage {
     position: sticky;
     top: 0;
-    height: 100dvh;
+    height: 100svh;
     display: grid;
     align-content: center;
   }
 
-  /* Three principles, two steps: ~40vh each. */
+  /* Three principles, two steps: ~40svh each. */
   [data-pinned].ab-phi-pin {
-    height: calc(100dvh + 80vh);
+    height: calc(100svh + 2 * 40svh);
   }
 
-  /* The same ~40vh a step, so a name takes as long to read on either page.
+  /* The same ~40svh a step, so a name takes as long to read on either page.
      The count cannot be inherited up from the list that knows it, so each
      section states its own: five mentor bands are four steps, six LP Day
      lines are five. */
   [data-pinned].tm-mt-pin {
-    height: calc(100dvh + 4 * 40vh);
+    height: calc(100svh + 4 * 40svh);
   }
 
   [data-pinned].lp-why-pin {
-    height: calc(100dvh + 5 * 40vh);
+    height: calc(100svh + 5 * 40svh);
   }
 
-  /* The blank lines and the travel belong to the pin and go with it. Narrower
-     than this there is no runway to read, so the track keeps neither: all
-     three principles sit in the window at once with the middle lit, which is
-     the artboard's composition and the right thing to show a reader who is
-     never going to be handed the scroll that would step through them.
+  /* The blank lines and the travel belong to the pin and go with it. Where
+     there is no runway to read, the track keeps neither: all three principles
+     sit in the window at once with the middle lit, which is the artboard's
+     composition and the right thing to show a reader who is never going to be
+     handed the scroll that would step through them.
 
      The run is held back a beat at either end — the last principle wants a
      moment at the centre before the section lets go, and the first the same
@@ -3869,18 +3978,18 @@ html.js-img img[data-img-in="fade"] {
   overflow: hidden;
 }
 
-@media (width >= 64rem) {
+@media (height >= 40rem) {
   /* A screenful to look at, and a runway to spend looking: five environments
-     are four steps, at the ~40vh a step the other held sections use. */
+     are four steps, at the ~40svh a step the other held sections use. */
   [data-pinned].pd-why-pin {
-    height: calc(100dvh + 4 * 40vh);
+    height: calc(100svh + 4 * 40svh);
   }
 
   /* The blank line above the first environment and below the last, and the
      travel that carries each one through the lit centre. Both belong to the
-     pin and are scoped to it, breakpoint included: narrower than this there is
-     no runway to read, so the track keeps neither and the first three sit in
-     the window with the middle one lit, which is the frame's own still.
+     pin and are scoped to it, its height gate included: where there is no
+     runway to read, the track keeps neither and the first three sit in the
+     window with the middle one lit, which is the frame's own still.
 
      Held back a beat at either end, so the first and the last are read rather
      than flicked past. */

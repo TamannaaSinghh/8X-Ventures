@@ -215,9 +215,12 @@ export function StatsSection() {
       };
     };
 
-    /* The pin only exists at the width the traced composition applies to, so
-       the driver has to follow the same breakpoint. */
-    const pinned = window.matchMedia("(min-width: 64rem)");
+    /* The driver has to follow the pin exactly, so this is the same condition
+       the stylesheet gates it on — a viewport tall enough to hold a screenful
+       still, whatever its width. Read the query rather than a copy of the
+       number: if the two ever disagree, the figure either counts against a
+       scroll that is not being held or sits frozen while the section is. */
+    const pinned = window.matchMedia("(min-height: 40rem)");
     let stop = () => {};
     const attach = () => {
       stop();

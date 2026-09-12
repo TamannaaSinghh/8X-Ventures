@@ -28,10 +28,10 @@
  * rest fall away either side. The rail's thumb reads the same `--pin-u`,
  * travelling down as the lines travel up, the way a scrollbar does.
  *
- * Unpinned — reduced motion, no JavaScript, or narrower than the traced
- * layout — the track keeps neither its blank lines nor its travel, so every
- * name sits in the window at once with the middle one lit and the thumb parked
- * on it. That is the artboard's own still frame.
+ * Unpinned — reduced motion, no JavaScript, or a viewport too short to hold a
+ * screenful still — the track keeps neither its blank lines nor its travel, so
+ * every name sits in the window at once with the middle one lit and the thumb
+ * parked on it. That is the artboard's own still frame.
  */
 export function LoopList({
   items,

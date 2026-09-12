@@ -24,9 +24,9 @@
  * whichever line is passing the centre is lit and its neighbours are dimmed,
  * with no per-line state to keep in step.
  *
- * Unpinned — reduced motion, no JavaScript, or narrower than the traced layout
- * — the track keeps neither its blank lines nor its travel, so the first three
- * environments sit in the window with the middle one lit. That is the frame's
+ * Unpinned — reduced motion, no JavaScript, or a viewport too short to hold a
+ * screenful still — the track keeps neither its blank lines nor its travel, so
+ * the first three environments sit in the window with the middle one lit. That is the frame's
  * own still, which draws the list at rest with its centre line emphasised.
  */
 export function EnvironmentList({
